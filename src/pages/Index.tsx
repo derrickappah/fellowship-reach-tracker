@@ -15,6 +15,11 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import { Reports } from '@/components/reports/Reports';
+import { ManageGroups } from '@/components/groups/ManageGroups';
+import { ManageMembers } from '@/components/members/ManageMembers';
+import { ManageFellowships } from '@/components/fellowships/ManageFellowships';
+import { ManageCells } from '@/components/cells/ManageCells';
 
 const AppContent = () => {
   const [currentSection, setCurrentSection] = useState('dashboard');
@@ -52,45 +57,15 @@ const AppContent = () => {
       case 'invitees':
         return <InviteeForm />;
       case 'reports':
-        return (
-          <div className="text-center py-12">
-            <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Reports Coming Soon</h2>
-            <p className="text-gray-600">Detailed analytics and reports will be available here.</p>
-          </div>
-        );
+        return <Reports />;
       case 'groups':
-        return (
-          <div className="text-center py-12">
-            <Group className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Group Management</h2>
-            <p className="text-gray-600">Create and manage outreach groups here.</p>
-          </div>
-        );
+        return <ManageGroups />;
       case 'members':
-        return (
-          <div className="text-center py-12">
-            <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Member Management</h2>
-            <p className="text-gray-600">View and manage church members here.</p>
-          </div>
-        );
+        return <ManageMembers />;
       case 'fellowships':
-        return (
-          <div className="text-center py-12">
-            <Church className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Fellowship Management</h2>
-            <p className="text-gray-600">Create and manage fellowships here.</p>
-          </div>
-        );
+        return <ManageFellowships />;
       case 'cells':
-        return (
-          <div className="text-center py-12">
-            <Group className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Cell Management</h2>
-            <p className="text-gray-600">Create and manage cell groups here.</p>
-          </div>
-        );
+        return <ManageCells />;
       default:
         return <Dashboard onNavigate={setCurrentSection} />;
     }
