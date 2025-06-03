@@ -1,16 +1,17 @@
+
 import React, { useState } from 'react';
 import { ChurchProvider, useChurch } from '@/context/ChurchContext';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { InviteeForm } from '@/components/invitees/InviteeForm';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { 
   Church, 
   Users, 
   Group, 
   User, 
   BarChart3, 
-  FileText, 
   LogOut,
   Menu,
   X
@@ -72,7 +73,7 @@ const AppContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -82,11 +83,11 @@ const AppContent = () => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="flex items-center justify-between h-16 px-6 border-b">
-          <h1 className="text-xl font-bold text-gray-900">Church Management</h1>
+        <div className="flex items-center justify-between h-16 px-6 border-b dark:border-gray-700">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Church Management</h1>
           <Button
             variant="ghost"
             size="icon"
@@ -109,8 +110,8 @@ const AppContent = () => {
                 }}
                 className={`w-full flex items-center px-3 py-2 mb-1 text-sm font-medium rounded-md transition-colors ${
                   isActive
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
                 }`}
               >
                 <item.icon className="mr-3 h-5 w-5" />
@@ -120,29 +121,32 @@ const AppContent = () => {
           })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t dark:border-gray-700">
           <div className="mb-3">
-            <p className="text-sm font-medium text-gray-900">{currentUser.name}</p>
-            <p className="text-xs text-gray-500 capitalize">
+            <p className="text-sm font-medium text-gray-900 dark:text-white">{currentUser.name}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
               {currentUser.role.replace('_', ' ')}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={handleLogout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+            <ThemeToggle />
+          </div>
         </div>
       </div>
 
       {/* Main content */}
       <div className="lg:ml-64">
         {/* Top bar */}
-        <div className="bg-white shadow-sm border-b lg:hidden">
+        <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 lg:hidden">
           <div className="flex items-center justify-between h-16 px-4">
             <Button
               variant="ghost"
@@ -151,10 +155,10 @@ const AppContent = () => {
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <h1 className="text-lg font-semibold">
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
               {availableNavigation.find(item => item.id === currentSection)?.name || 'Dashboard'}
             </h1>
-            <div className="w-10" /> {/* Spacer for centering */}
+            <ThemeToggle />
           </div>
         </div>
 
