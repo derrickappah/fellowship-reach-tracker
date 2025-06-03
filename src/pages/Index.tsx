@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ChurchProvider, useChurch } from '@/context/ChurchContext';
 import { LoginForm } from '@/components/auth/LoginForm';
@@ -10,7 +9,7 @@ import {
   Users, 
   Group, 
   User, 
-  FileChart, 
+  BarChart3, 
   FileText, 
   LogOut,
   Menu,
@@ -29,7 +28,7 @@ const AppContent = () => {
   const navigation = [
     { name: 'Dashboard', icon: Church, id: 'dashboard', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Register Invitee', icon: User, id: 'invitees', roles: ['admin', 'fellowship_leader', 'member'] },
-    { name: 'Reports', icon: FileChart, id: 'reports', roles: ['admin', 'fellowship_leader', 'member'] },
+    { name: 'Reports', icon: BarChart3, id: 'reports', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Manage Groups', icon: Group, id: 'groups', roles: ['admin', 'fellowship_leader'] },
     { name: 'Manage Members', icon: Users, id: 'members', roles: ['admin', 'fellowship_leader'] },
     { name: 'Manage Fellowships', icon: Church, id: 'fellowships', roles: ['admin'] },
@@ -55,7 +54,7 @@ const AppContent = () => {
       case 'reports':
         return (
           <div className="text-center py-12">
-            <FileChart className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+            <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
             <h2 className="text-2xl font-bold mb-2">Reports Coming Soon</h2>
             <p className="text-gray-600">Detailed analytics and reports will be available here.</p>
           </div>
