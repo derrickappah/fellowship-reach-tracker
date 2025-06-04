@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChurchProvider, useChurch } from '@/context/ChurchContext';
-import { LoginForm } from '@/components/auth/LoginForm';
+import { useAuth } from '@/contexts/AuthContext';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { InviteeForm } from '@/components/invitees/InviteeForm';
 import { Button } from '@/components/ui/button';
@@ -21,14 +20,30 @@ import { ManageGroups } from '@/components/groups/ManageGroups';
 import { ManageMembers } from '@/components/members/ManageMembers';
 import { ManageFellowships } from '@/components/fellowships/ManageFellowships';
 import { ManageCells } from '@/components/cells/ManageCells';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
-const AppContent = () => {
+const Index = () => {
   const [currentSection, setCurrentSection] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { currentUser, logout } = useChurch();
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  if (!currentUser) {
-    return <LoginForm onLogin={() => setCurrentSection('dashboard')} />;
+  // Show loading spinner while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  // Redirect to auth if not logged in
+  if (!user) {
+    navigate('/auth');
+    return null;
   }
 
   const navigation = [
@@ -42,12 +57,24 @@ const AppContent = () => {
   ];
 
   const availableNavigation = navigation.filter(item => 
-    item.roles.includes(currentUser.role)
+    item.roles.includes(user.role)
   );
 
-  const handleLogout = () => {
-    logout();
-    setCurrentSection('dashboard');
+  const handleLogout = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({
+        title: "Sign out failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+      navigate('/auth');
+    }
     setSidebarOpen(false);
   };
 
@@ -123,9 +150,9 @@ const AppContent = () => {
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t dark:border-gray-700">
           <div className="mb-3">
-            <p className="text-sm font-medium text-gray-900 dark:text-white">{currentUser.name}</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-              {currentUser.role.replace('_', ' ')}
+              {user.role.replace('_', ' ')}
             </p>
           </div>
           <div className="flex gap-2">
@@ -168,14 +195,6 @@ const AppContent = () => {
         </main>
       </div>
     </div>
-  );
-};
-
-const Index = () => {
-  return (
-    <ChurchProvider>
-      <AppContent />
-    </ChurchProvider>
   );
 };
 
