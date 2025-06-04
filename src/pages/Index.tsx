@@ -100,7 +100,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -110,10 +110,10 @@ const Index = () => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:flex lg:flex-col ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
-        <div className="flex items-center justify-between h-16 px-6 border-b dark:border-gray-700">
+        <div className="flex items-center justify-between h-16 px-6 border-b dark:border-gray-700 flex-shrink-0">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Church Management</h1>
           <Button
             variant="ghost"
@@ -125,7 +125,7 @@ const Index = () => {
           </Button>
         </div>
 
-        <nav className="mt-6 px-3">
+        <nav className="flex-1 mt-6 px-3 overflow-y-auto">
           {availableNavigation.map((item) => {
             const isActive = currentSection === item.id;
             return (
@@ -141,16 +141,16 @@ const Index = () => {
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
                 }`}
               >
-                <item.icon className="mr-3 h-5 w-5" />
+                <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
                 {item.name}
               </button>
             );
           })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t dark:border-gray-700">
+        <div className="flex-shrink-0 p-4 border-t dark:border-gray-700">
           <div className="mb-3">
-            <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.name}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
               {user.role.replace('_', ' ')}
             </p>
@@ -170,10 +170,10 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="lg:ml-64">
-        {/* Top bar */}
-        <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 lg:hidden">
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top bar for mobile */}
+        <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 lg:hidden flex-shrink-0">
           <div className="flex items-center justify-between h-16 px-4">
             <Button
               variant="ghost"
@@ -190,7 +190,7 @@ const Index = () => {
         </div>
 
         {/* Page content */}
-        <main className="p-6">
+        <main className="flex-1 p-6 overflow-auto">
           {renderContent()}
         </main>
       </div>
