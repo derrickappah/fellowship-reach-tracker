@@ -1,110 +1,181 @@
 
 import React, { useState } from 'react';
-import { useChurch } from '@/context/ChurchContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Group, Trash2, Users } from 'lucide-react';
-import { CreateCellForm } from './CreateCellForm';
+import { Input } from '@/components/ui/input';
+import { Plus, Search, Group, Users, Church } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const ManageCells = () => {
-  const { cells, members, fellowships, currentUser, deleteCell } = useChurch();
+  const { user } = useAuth();
+  const [searchTerm, setSearchTerm] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-  const userCells = currentUser?.role === 'admin'
-    ? cells
-    : cells.filter(c => c.fellowshipId === currentUser?.fellowshipId);
+  // Only admins can access this component
+  if (user?.role !== 'admin') {
+    return (
+      <div className="text-center py-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
+        <p className="text-gray-600">You don't have permission to manage cells.</p>
+      </div>
+    );
+  }
 
-  const getLeaderName = (leaderId?: string) => {
-    if (!leaderId) return 'No Leader';
-    return members.find(m => m.id === leaderId)?.name || 'Unknown Leader';
-  };
-
-  const getFellowshipName = (fellowshipId: string) => {
-    return fellowships.find(f => f.id === fellowshipId)?.name || 'Unknown Fellowship';
-  };
-
-  const handleDeleteCell = (cellId: string) => {
-    if (confirm('Are you sure you want to delete this cell? This will affect all its members.')) {
-      deleteCell(cellId);
+  // Mock data - replace with real Supabase queries later
+  const mockCells = [
+    {
+      id: '1',
+      name: 'Cell Alpha',
+      fellowshipId: '1',
+      fellowshipName: 'Victory Fellowship',
+      leaderId: '3',
+      leaderName: 'Leader Alice',
+      memberCount: 4,
+      createdAt: new Date('2024-01-05')
+    },
+    {
+      id: '2',
+      name: 'Cell Beta',
+      fellowshipId: '1',
+      fellowshipName: 'Victory Fellowship',
+      leaderId: '4',
+      leaderName: 'Leader Bob',
+      memberCount: 4,
+      createdAt: new Date('2024-01-10')
+    },
+    {
+      id: '3',
+      name: 'Cell Gamma',
+      fellowshipId: '1',
+      fellowshipName: 'Victory Fellowship',
+      leaderId: '5',
+      leaderName: 'Leader Charlie',
+      memberCount: 4,
+      createdAt: new Date('2024-01-12')
+    },
+    {
+      id: '4',
+      name: 'Cell Delta',
+      fellowshipId: '2',
+      fellowshipName: 'Grace Fellowship',
+      leaderId: '6',
+      leaderName: 'Leader Diana',
+      memberCount: 3,
+      createdAt: new Date('2024-01-20')
     }
-  };
+  ];
 
-  const canManageCells = currentUser?.role === 'admin' || currentUser?.role === 'fellowship_leader';
+  const filteredCells = mockCells.filter(cell =>
+    cell.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cell.fellowshipName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cell.leaderName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Manage Cells</h1>
-        {canManageCells && (
-          <Button onClick={() => setShowCreateForm(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Cell
-          </Button>
-        )}
+        <div>
+          <h1 className="text-3xl font-bold">Manage Cells</h1>
+          <p className="text-gray-600">Manage all church cells</p>
+        </div>
+        <Button onClick={() => setShowCreateForm(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Cell
+        </Button>
       </div>
 
-      {showCreateForm && (
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        <Input
+          placeholder="Search cells by name, fellowship, or leader..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      {/* Cells Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredCells.map((cell) => (
+          <Card key={cell.id}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center">
+                  <Group className="mr-2 h-5 w-5" />
+                  {cell.name}
+                </CardTitle>
+                <Badge variant="default">Active</Badge>
+              </div>
+              <CardDescription>
+                {cell.fellowshipName} • Led by {cell.leaderName}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center text-sm text-gray-600">
+                  <Users className="mr-2 h-4 w-4" />
+                  {cell.memberCount} members
+                </div>
+                
+                <div className="flex items-center text-sm text-gray-600">
+                  <Church className="mr-2 h-4 w-4" />
+                  {cell.fellowshipName}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" className="flex-1">
+                    Edit Cell
+                  </Button>
+                  <Button size="sm" variant="outline" className="flex-1">
+                    View Members
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {filteredCells.length === 0 && (
         <Card>
-          <CardHeader>
-            <CardTitle>Create New Cell</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CreateCellForm onSuccess={() => setShowCreateForm(false)} />
+          <CardContent className="text-center py-8">
+            <Group className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No cells found</h3>
+            <p className="text-gray-600 mb-4">
+              {searchTerm ? 'Try adjusting your search terms.' : 'Get started by creating your first cell.'}
+            </p>
+            {!searchTerm && (
+              <Button onClick={() => setShowCreateForm(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Your First Cell
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
 
-      <div className="grid gap-4">
-        {userCells.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-12">
-              <Group className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <h2 className="text-xl font-semibold mb-2">No Cells Found</h2>
-              <p className="text-gray-600 mb-4">
-                {canManageCells 
-                  ? 'Create your first cell to organize members.'
-                  : 'No cells are available for your fellowship.'}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          userCells.map((cell) => (
-            <Card key={cell.id}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{cell.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {getFellowshipName(cell.fellowshipId)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Led by {getLeaderName(cell.leaderId)}
-                    </p>
-                  </div>
-                  {canManageCells && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteCell(cell.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">
-                    {cell.memberCount} {cell.memberCount === 1 ? 'Member' : 'Members'}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+      {/* Create Form Modal/Dialog would go here */}
+      {showCreateForm && (
+        <Card className="max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle>Create New Cell</CardTitle>
+            <CardDescription>Set up a new cell group</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-4 text-gray-500">
+              Create cell form will be implemented
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => setShowCreateForm(false)} variant="outline" className="flex-1">
+                Cancel
+              </Button>
+              <Button className="flex-1">Create Cell</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
