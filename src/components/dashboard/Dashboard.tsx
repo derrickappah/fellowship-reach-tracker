@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useChurch } from '@/context/ChurchContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Users, Church, Group, User } from 'lucide-react';
 
 interface DashboardProps {
@@ -10,31 +10,27 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
-  const { fellowships, cells, members, groups, invitees, currentUser } = useChurch();
+  const { user } = useAuth();
 
-  const weeklyInvitees = invitees.filter(i => {
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return i.inviteDate >= weekAgo;
-  });
-
-  const attendanceRate = invitees.length > 0 ? 
-    (invitees.filter(i => i.attendedService).length / invitees.length * 100).toFixed(1) : 0;
-
-  const conversionRate = invitees.length > 0 ? 
-    (invitees.filter(i => i.cellId).length / invitees.length * 100).toFixed(1) : 0;
-
-  const userFellowship = currentUser?.fellowshipId ? 
-    fellowships.find(f => f.id === currentUser.fellowshipId) : null;
+  // Mock data for now - will be replaced with real Supabase queries later
+  const mockStats = {
+    fellowships: 2,
+    cells: 3,
+    members: 12,
+    groups: 1,
+    weeklyInvitees: 5,
+    attendanceRate: 75,
+    conversionRate: 60
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Welcome, {currentUser?.name}</h1>
+          <h1 className="text-3xl font-bold">Welcome, {user?.name}</h1>
           <p className="text-gray-600">
-            {currentUser?.role === 'admin' ? 'System Administrator' : 
-             currentUser?.role === 'fellowship_leader' ? `${userFellowship?.name} Leader` : 
+            {user?.role === 'admin' ? 'System Administrator' : 
+             user?.role === 'fellowship_leader' ? 'Fellowship Leader' : 
              'Church Member'}
           </p>
         </div>
@@ -51,7 +47,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <Church className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{fellowships.length}</div>
+            <div className="text-2xl font-bold">{mockStats.fellowships}</div>
           </CardContent>
         </Card>
 
@@ -61,7 +57,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <Group className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{cells.length}</div>
+            <div className="text-2xl font-bold">{mockStats.cells}</div>
           </CardContent>
         </Card>
 
@@ -71,7 +67,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{members.length}</div>
+            <div className="text-2xl font-bold">{mockStats.members}</div>
           </CardContent>
         </Card>
 
@@ -81,7 +77,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{groups.filter(g => g.isActive).length}</div>
+            <div className="text-2xl font-bold">{mockStats.groups}</div>
           </CardContent>
         </Card>
       </div>
@@ -94,7 +90,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <CardDescription>New people reached through outreach</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-600">{weeklyInvitees.length}</div>
+            <div className="text-3xl font-bold text-blue-600">{mockStats.weeklyInvitees}</div>
           </CardContent>
         </Card>
 
@@ -104,7 +100,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <CardDescription>Invitees who attended service</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">{attendanceRate}%</div>
+            <div className="text-3xl font-bold text-green-600">{mockStats.attendanceRate}%</div>
           </CardContent>
         </Card>
 
@@ -114,7 +110,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <CardDescription>Invitees who joined a cell</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-purple-600">{conversionRate}%</div>
+            <div className="text-3xl font-bold text-purple-600">{mockStats.conversionRate}%</div>
           </CardContent>
         </Card>
       </div>
@@ -133,7 +129,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <Button onClick={() => onNavigate('reports')} variant="outline">
               View Reports
             </Button>
-            {(currentUser?.role === 'admin' || currentUser?.role === 'fellowship_leader') && (
+            {(user?.role === 'admin' || user?.role === 'fellowship_leader') && (
               <>
                 <Button onClick={() => onNavigate('groups')} variant="outline">
                   Manage Groups
@@ -143,7 +139,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 </Button>
               </>
             )}
-            {currentUser?.role === 'admin' && (
+            {user?.role === 'admin' && (
               <>
                 <Button onClick={() => onNavigate('fellowships')} variant="outline">
                   Manage Fellowships
