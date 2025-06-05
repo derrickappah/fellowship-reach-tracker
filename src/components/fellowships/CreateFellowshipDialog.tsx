@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useFellowships } from '@/hooks/useFellowships';
+import { FellowshipInsert } from '@/types/supabase';
 
 interface CreateFellowshipDialogProps {
   open: boolean;
@@ -14,7 +15,7 @@ interface CreateFellowshipDialogProps {
 
 export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipDialogProps) => {
   const { createFellowship } = useFellowships();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FellowshipInsert>({
     name: '',
     description: '',
   });
@@ -59,7 +60,7 @@ export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipD
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                value={formData.description}
+                value={formData.description || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Describe the fellowship"
                 rows={3}

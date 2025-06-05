@@ -25,6 +25,8 @@ export interface Fellowship {
   cell_count: number;
   member_count: number;
   created_at: string;
+  // Joined data from queries
+  leader?: { name: string };
 }
 
 export interface Cell {
@@ -34,6 +36,9 @@ export interface Cell {
   leader_id?: string;
   member_count: number;
   created_at: string;
+  // Joined data from queries
+  fellowship?: { name: string };
+  leader?: { name: string };
 }
 
 export interface Group {
@@ -43,6 +48,9 @@ export interface Group {
   leader_id?: string;
   is_active: boolean;
   created_at: string;
+  // Joined data from queries
+  fellowship?: { name: string };
+  leader?: { name: string };
 }
 
 export interface GroupMember {
@@ -74,4 +82,24 @@ export interface AuthUser {
   role: 'admin' | 'fellowship_leader' | 'member';
   fellowship_id?: string;
   cell_id?: string;
+}
+
+// Create specific types for inserts that only include required fields
+export interface FellowshipInsert {
+  name: string;
+  description?: string;
+  leader_id?: string;
+}
+
+export interface CellInsert {
+  name: string;
+  fellowship_id?: string;
+  leader_id?: string;
+}
+
+export interface GroupInsert {
+  name: string;
+  fellowship_id?: string;
+  leader_id?: string;
+  is_active?: boolean;
 }

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Cell } from '@/types/supabase';
+import { Cell, CellInsert } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 export const useCells = () => {
@@ -34,7 +34,7 @@ export const useCells = () => {
     }
   };
 
-  const createCell = async (cellData: Partial<Cell>) => {
+  const createCell = async (cellData: CellInsert) => {
     try {
       const { data, error } = await supabase
         .from('cells')

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Group } from '@/types/supabase';
+import { Group, GroupInsert } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 export const useGroups = () => {
@@ -34,7 +34,7 @@ export const useGroups = () => {
     }
   };
 
-  const createGroup = async (groupData: Partial<Group>) => {
+  const createGroup = async (groupData: GroupInsert) => {
     try {
       const { data, error } = await supabase
         .from('groups')

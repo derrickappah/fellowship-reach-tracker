@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Fellowship } from '@/types/supabase';
+import { Fellowship, FellowshipInsert } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 export const useFellowships = () => {
@@ -33,7 +33,7 @@ export const useFellowships = () => {
     }
   };
 
-  const createFellowship = async (fellowshipData: Partial<Fellowship>) => {
+  const createFellowship = async (fellowshipData: FellowshipInsert) => {
     try {
       const { data, error } = await supabase
         .from('fellowships')
