@@ -9,6 +9,7 @@ import { useGroups } from '@/hooks/useGroups';
 import { CreateGroupDialog } from './CreateGroupDialog';
 import { EditGroupDialog } from './EditGroupDialog';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import { MemberListDialog } from '@/components/members/MemberListDialog';
 
 export const ManageGroups = () => {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ export const ManageGroups = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingGroup, setEditingGroup] = useState<any>(null);
   const [deletingGroup, setDeletingGroup] = useState<any>(null);
+  const [memberDialog, setMemberDialog] = useState<{ open: boolean; group: any } | null>(null);
 
   const filteredGroups = user?.role === 'admin' 
     ? groups 
@@ -85,6 +87,14 @@ export const ManageGroups = () => {
                   <Button 
                     size="sm" 
                     variant="outline"
+                    onClick={() => setMemberDialog({ open: true, group })}
+                  >
+                    <UserPlus className="mr-2 h-3 w-3" />
+                    Members
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
                     onClick={() => setDeletingGroup(group)}
                     className="text-red-600 hover:text-red-700"
                   >
@@ -131,6 +141,17 @@ export const ManageGroups = () => {
         title="Delete Group"
         description={`Are you sure you want to delete "${deletingGroup?.name}"? This action cannot be undone.`}
       />
+
+      {memberDialog && (
+        <MemberListDialog
+          open={memberDialog.open}
+          onOpenChange={(open) => !open && setMemberDialog(null)}
+          title="Manage Group Members"
+          type="group"
+          entityId={memberDialog.group.id}
+          entityName={memberDialog.group.name}
+        />
+      )}
     </div>
   );
 };

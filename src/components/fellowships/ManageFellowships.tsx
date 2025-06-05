@@ -4,12 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Church, Users, Group, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Church, Users, Group, Edit, Trash2, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFellowships } from '@/hooks/useFellowships';
 import { CreateFellowshipDialog } from './CreateFellowshipDialog';
 import { EditFellowshipDialog } from './EditFellowshipDialog';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import { MemberListDialog } from '@/components/members/MemberListDialog';
 
 export const ManageFellowships = () => {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ export const ManageFellowships = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingFellowship, setEditingFellowship] = useState<any>(null);
   const [deletingFellowship, setDeletingFellowship] = useState<any>(null);
+  const [memberDialog, setMemberDialog] = useState<{ open: boolean; fellowship: any } | null>(null);
 
   // Only admins can access this component
   if (user?.role !== 'admin') {
@@ -108,11 +110,18 @@ export const ManageFellowships = () => {
                   <Button 
                     size="sm" 
                     variant="outline" 
-                    className="flex-1"
                     onClick={() => setEditingFellowship(fellowship)}
                   >
                     <Edit className="mr-2 h-3 w-3" />
                     Edit
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setMemberDialog({ open: true, fellowship })}
+                  >
+                    <UserPlus className="mr-2 h-3 w-3" />
+                    Members
                   </Button>
                   <Button 
                     size="sm" 
@@ -165,6 +174,17 @@ export const ManageFellowships = () => {
         title="Delete Fellowship"
         description={`Are you sure you want to delete "${deletingFellowship?.name}"? This action cannot be undone.`}
       />
+
+      {memberDialog && (
+        <MemberListDialog
+          open={memberDialog.open}
+          onOpenChange={(open) => !open && setMemberDialog(null)}
+          title="Manage Fellowship Members"
+          type="fellowship"
+          entityId={memberDialog.fellowship.id}
+          entityName={memberDialog.fellowship.name}
+        />
+      )}
     </div>
   );
 };

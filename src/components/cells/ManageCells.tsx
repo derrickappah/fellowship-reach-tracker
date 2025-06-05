@@ -4,13 +4,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Group, Users, Church } from 'lucide-react';
+import { Plus, Search, Group, Users, Church, Edit, Trash2, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCells } from '@/hooks/useCells';
+import { CreateCellDialog } from './CreateCellDialog';
+import { EditCellDialog } from './EditCellDialog';
+import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import { MemberListDialog } from '@/components/members/MemberListDialog';
 
 export const ManageCells = () => {
   const { user } = useAuth();
+  const { cells, loading, deleteCell } = useCells();
   const [searchTerm, setSearchTerm] = useState('');
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingCell, setEditingCell] = useState<any>(null);
+  const [deletingCell, setDeletingCell] = useState<any>(null);
+  const [memberDialog, setMemberDialog] = useState<{ open: boolean; cell: any } | null>(null);
 
   // Only admins can access this component
   if (user?.role !== 'admin') {
@@ -22,55 +31,24 @@ export const ManageCells = () => {
     );
   }
 
-  // Mock data - replace with real Supabase queries later
-  const mockCells = [
-    {
-      id: '1',
-      name: 'Cell Alpha',
-      fellowshipId: '1',
-      fellowshipName: 'Victory Fellowship',
-      leaderId: '3',
-      leaderName: 'Leader Alice',
-      memberCount: 4,
-      createdAt: new Date('2024-01-05')
-    },
-    {
-      id: '2',
-      name: 'Cell Beta',
-      fellowshipId: '1',
-      fellowshipName: 'Victory Fellowship',
-      leaderId: '4',
-      leaderName: 'Leader Bob',
-      memberCount: 4,
-      createdAt: new Date('2024-01-10')
-    },
-    {
-      id: '3',
-      name: 'Cell Gamma',
-      fellowshipId: '1',
-      fellowshipName: 'Victory Fellowship',
-      leaderId: '5',
-      leaderName: 'Leader Charlie',
-      memberCount: 4,
-      createdAt: new Date('2024-01-12')
-    },
-    {
-      id: '4',
-      name: 'Cell Delta',
-      fellowshipId: '2',
-      fellowshipName: 'Grace Fellowship',
-      leaderId: '6',
-      leaderName: 'Leader Diana',
-      memberCount: 3,
-      createdAt: new Date('2024-01-20')
-    }
-  ];
-
-  const filteredCells = mockCells.filter(cell =>
-    cell.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cell.fellowshipName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cell.leaderName.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCells = cells.filter(cell =>
+    cell.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDelete = async () => {
+    if (deletingCell) {
+      await deleteCell(deletingCell.id);
+      setDeletingCell(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -79,7 +57,7 @@ export const ManageCells = () => {
           <h1 className="text-3xl font-bold">Manage Cells</h1>
           <p className="text-gray-600">Manage all church cells</p>
         </div>
-        <Button onClick={() => setShowCreateForm(true)}>
+        <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Create Cell
         </Button>
@@ -89,7 +67,7 @@ export const ManageCells = () => {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
         <Input
-          placeholder="Search cells by name, fellowship, or leader..."
+          placeholder="Search cells by name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
@@ -109,27 +87,40 @@ export const ManageCells = () => {
                 <Badge variant="default">Active</Badge>
               </div>
               <CardDescription>
-                {cell.fellowshipName} • Led by {cell.leaderName}
+                {cell.fellowship?.name || 'No fellowship'} • Led by {cell.leader?.name || 'No leader assigned'}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center text-sm text-gray-600">
                   <Users className="mr-2 h-4 w-4" />
-                  {cell.memberCount} members
-                </div>
-                
-                <div className="flex items-center text-sm text-gray-600">
-                  <Church className="mr-2 h-4 w-4" />
-                  {cell.fellowshipName}
+                  {cell.member_count || 0} members
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1">
-                    Edit Cell
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setEditingCell(cell)}
+                  >
+                    <Edit className="mr-2 h-3 w-3" />
+                    Edit
                   </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
-                    View Members
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setMemberDialog({ open: true, cell })}
+                  >
+                    <UserPlus className="mr-2 h-3 w-3" />
+                    Members
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setDeletingCell(cell)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
@@ -147,7 +138,7 @@ export const ManageCells = () => {
               {searchTerm ? 'Try adjusting your search terms.' : 'Get started by creating your first cell.'}
             </p>
             {!searchTerm && (
-              <Button onClick={() => setShowCreateForm(true)}>
+              <Button onClick={() => setShowCreateDialog(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Cell
               </Button>
@@ -156,25 +147,34 @@ export const ManageCells = () => {
         </Card>
       )}
 
-      {/* Create Form Modal/Dialog would go here */}
-      {showCreateForm && (
-        <Card className="max-w-md mx-auto">
-          <CardHeader>
-            <CardTitle>Create New Cell</CardTitle>
-            <CardDescription>Set up a new cell group</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-4 text-gray-500">
-              Create cell form will be implemented
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={() => setShowCreateForm(false)} variant="outline" className="flex-1">
-                Cancel
-              </Button>
-              <Button className="flex-1">Create Cell</Button>
-            </div>
-          </CardContent>
-        </Card>
+      <CreateCellDialog 
+        open={showCreateDialog} 
+        onOpenChange={setShowCreateDialog} 
+      />
+
+      <EditCellDialog 
+        cell={editingCell}
+        open={!!editingCell} 
+        onOpenChange={(open) => !open && setEditingCell(null)} 
+      />
+
+      <DeleteConfirmDialog
+        open={!!deletingCell}
+        onOpenChange={(open) => !open && setDeletingCell(null)}
+        onConfirm={handleDelete}
+        title="Delete Cell"
+        description={`Are you sure you want to delete "${deletingCell?.name}"? This action cannot be undone.`}
+      />
+
+      {memberDialog && (
+        <MemberListDialog
+          open={memberDialog.open}
+          onOpenChange={(open) => !open && setMemberDialog(null)}
+          title="Manage Cell Members"
+          type="cell"
+          entityId={memberDialog.cell.id}
+          entityName={memberDialog.cell.name}
+        />
       )}
     </div>
   );
