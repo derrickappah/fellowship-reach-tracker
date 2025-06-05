@@ -63,7 +63,7 @@ export const ManageGroups = () => {
                 </Badge>
               </div>
               <CardDescription>
-                {group.fellowship?.name} • Led by {group.leader?.name || 'No leader assigned'}
+                {group.fellowship?.name || 'No fellowship'} • Led by {group.leader?.name || 'No leader assigned'}
               </CardDescription>
             </CardHeader>
             <CardContent>

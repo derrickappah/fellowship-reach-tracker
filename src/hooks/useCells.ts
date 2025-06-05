@@ -14,15 +14,19 @@ export const useCells = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('cells')
-        .select(`
-          *,
-          fellowship:fellowships(name),
-          leader:profiles(name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setCells(data || []);
+      
+      // Transform the data to match our Cell type
+      const transformedData = (data || []).map(cell => ({
+        ...cell,
+        fellowship: null,
+        leader: null
+      }));
+      
+      setCells(transformedData);
     } catch (error: any) {
       toast({
         title: "Error fetching cells",

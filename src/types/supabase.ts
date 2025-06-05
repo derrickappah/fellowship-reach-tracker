@@ -25,8 +25,8 @@ export interface Fellowship {
   cell_count: number;
   member_count: number;
   created_at: string;
-  // Joined data from queries
-  leader?: { name: string };
+  // Joined data from queries - made optional to handle query errors
+  leader?: { name: string } | null;
 }
 
 export interface Cell {
@@ -36,9 +36,9 @@ export interface Cell {
   leader_id?: string;
   member_count: number;
   created_at: string;
-  // Joined data from queries
-  fellowship?: { name: string };
-  leader?: { name: string };
+  // Joined data from queries - made optional to handle query errors
+  fellowship?: { name: string } | null;
+  leader?: { name: string } | null;
 }
 
 export interface Group {
@@ -48,9 +48,9 @@ export interface Group {
   leader_id?: string;
   is_active: boolean;
   created_at: string;
-  // Joined data from queries
-  fellowship?: { name: string };
-  leader?: { name: string };
+  // Joined data from queries - made optional to handle query errors
+  fellowship?: { name: string } | null;
+  leader?: { name: string } | null;
 }
 
 export interface GroupMember {

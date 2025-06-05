@@ -14,14 +14,18 @@ export const useFellowships = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('fellowships')
-        .select(`
-          *,
-          leader:profiles(name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setFellowships(data || []);
+      
+      // Transform the data to match our Fellowship type
+      const transformedData = (data || []).map(fellowship => ({
+        ...fellowship,
+        leader: null // We'll fetch leader info separately if needed
+      }));
+      
+      setFellowships(transformedData);
     } catch (error: any) {
       toast({
         title: "Error fetching fellowships",

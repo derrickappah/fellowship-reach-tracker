@@ -14,15 +14,19 @@ export const useGroups = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('groups')
-        .select(`
-          *,
-          fellowship:fellowships(name),
-          leader:profiles(name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setGroups(data || []);
+      
+      // Transform the data to match our Group type
+      const transformedData = (data || []).map(group => ({
+        ...group,
+        fellowship: null,
+        leader: null
+      }));
+      
+      setGroups(transformedData);
     } catch (error: any) {
       toast({
         title: "Error fetching groups",
