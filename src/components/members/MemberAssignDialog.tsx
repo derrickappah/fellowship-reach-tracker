@@ -33,7 +33,7 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
       setAssignments({
         fellowship_id: member.fellowship_id || '',
         cell_id: member.cell_id || '',
-        group_id: '', // We'll need to fetch this from group_members
+        group_id: '', // We'll need to fetch this from group_members table
       });
     }
   }, [member]);
