@@ -4,13 +4,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Church, Users, Group } from 'lucide-react';
+import { Plus, Search, Church, Users, Group, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFellowships } from '@/hooks/useFellowships';
+import { CreateFellowshipDialog } from './CreateFellowshipDialog';
+import { EditFellowshipDialog } from './EditFellowshipDialog';
+import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 
 export const ManageFellowships = () => {
   const { user } = useAuth();
+  const { fellowships, loading, deleteFellowship } = useFellowships();
   const [searchTerm, setSearchTerm] = useState('');
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingFellowship, setEditingFellowship] = useState<any>(null);
+  const [deletingFellowship, setDeletingFellowship] = useState<any>(null);
 
   // Only admins can access this component
   if (user?.role !== 'admin') {
@@ -22,34 +29,25 @@ export const ManageFellowships = () => {
     );
   }
 
-  // Mock data - replace with real Supabase queries later
-  const mockFellowships = [
-    {
-      id: '1',
-      name: 'Victory Fellowship',
-      leaderId: '1',
-      leaderName: 'Pastor John',
-      description: 'Main fellowship for young adults',
-      cellCount: 3,
-      memberCount: 12,
-      createdAt: new Date('2024-01-01')
-    },
-    {
-      id: '2',
-      name: 'Grace Fellowship',
-      leaderId: '2',
-      leaderName: 'Leader Mary',
-      description: 'Family-oriented fellowship',
-      cellCount: 2,
-      memberCount: 8,
-      createdAt: new Date('2024-01-15')
-    }
-  ];
-
-  const filteredFellowships = mockFellowships.filter(fellowship =>
+  const filteredFellowships = fellowships.filter(fellowship =>
     fellowship.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     fellowship.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDelete = async () => {
+    if (deletingFellowship) {
+      await deleteFellowship(deletingFellowship.id);
+      setDeletingFellowship(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -58,7 +56,7 @@ export const ManageFellowships = () => {
           <h1 className="text-3xl font-bold">Manage Fellowships</h1>
           <p className="text-gray-600">Manage all church fellowships</p>
         </div>
-        <Button onClick={() => setShowCreateForm(true)}>
+        <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Create Fellowship
         </Button>
@@ -88,7 +86,7 @@ export const ManageFellowships = () => {
                 <Badge variant="default">Active</Badge>
               </div>
               <CardDescription>
-                Led by {fellowship.leaderName}
+                Led by {fellowship.leader?.name || 'No leader assigned'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -98,20 +96,31 @@ export const ManageFellowships = () => {
                 <div className="flex justify-between text-sm">
                   <div className="flex items-center">
                     <Group className="mr-1 h-4 w-4 text-gray-400" />
-                    {fellowship.cellCount} cells
+                    {fellowship.cell_count || 0} cells
                   </div>
                   <div className="flex items-center">
                     <Users className="mr-1 h-4 w-4 text-gray-400" />
-                    {fellowship.memberCount} members
+                    {fellowship.member_count || 0} members
                   </div>
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1">
-                    Edit Fellowship
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => setEditingFellowship(fellowship)}
+                  >
+                    <Edit className="mr-2 h-3 w-3" />
+                    Edit
                   </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
-                    View Details
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => setDeletingFellowship(fellowship)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
@@ -129,7 +138,7 @@ export const ManageFellowships = () => {
               {searchTerm ? 'Try adjusting your search terms.' : 'Get started by creating your first fellowship.'}
             </p>
             {!searchTerm && (
-              <Button onClick={() => setShowCreateForm(true)}>
+              <Button onClick={() => setShowCreateDialog(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Fellowship
               </Button>
@@ -138,26 +147,24 @@ export const ManageFellowships = () => {
         </Card>
       )}
 
-      {/* Create Form Modal/Dialog would go here */}
-      {showCreateForm && (
-        <Card className="max-w-md mx-auto">
-          <CardHeader>
-            <CardTitle>Create New Fellowship</CardTitle>
-            <CardDescription>Set up a new fellowship</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-4 text-gray-500">
-              Create fellowship form will be implemented
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={() => setShowCreateForm(false)} variant="outline" className="flex-1">
-                Cancel
-              </Button>
-              <Button className="flex-1">Create Fellowship</Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <CreateFellowshipDialog 
+        open={showCreateDialog} 
+        onOpenChange={setShowCreateDialog} 
+      />
+
+      <EditFellowshipDialog 
+        fellowship={editingFellowship}
+        open={!!editingFellowship} 
+        onOpenChange={(open) => !open && setEditingFellowship(null)} 
+      />
+
+      <DeleteConfirmDialog
+        open={!!deletingFellowship}
+        onOpenChange={(open) => !open && setDeletingFellowship(null)}
+        onConfirm={handleDelete}
+        title="Delete Fellowship"
+        description={`Are you sure you want to delete "${deletingFellowship?.name}"? This action cannot be undone.`}
+      />
     </div>
   );
 };
