@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Invitee } from '@/types/supabase';
@@ -21,7 +22,7 @@ export const useInvitees = () => {
         .from('invitees')
         .select(`
           *,
-          inviter:profiles!invited_by(name),
+          inviter:profiles!invitees_invited_by_fkey(name),
           group:groups(name),
           cell:cells(name)
         `)
