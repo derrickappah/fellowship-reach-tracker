@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dashboard } from '@/components/dashboard/Dashboard';
@@ -81,7 +80,7 @@ const Index = () => {
   const renderContent = () => {
     switch (currentSection) {
       case 'dashboard':
-        return <Dashboard onNavigate={setCurrentSection} />;
+        return <Dashboard />;
       case 'invitees':
         return <InviteeForm />;
       case 'reports':
@@ -95,7 +94,7 @@ const Index = () => {
       case 'cells':
         return <ManageCells />;
       default:
-        return <Dashboard onNavigate={setCurrentSection} />;
+        return <Dashboard />;
     }
   };
 

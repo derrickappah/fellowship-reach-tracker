@@ -22,7 +22,7 @@ export const useInvitees = () => {
         .from('invitees')
         .select(`
           *,
-          inviter:profiles!invited_by(name),
+          inviter:profiles!invitees_invited_by_fkey(name),
           group:groups(name),
           cell:cells(name)
         `)
@@ -31,6 +31,7 @@ export const useInvitees = () => {
       if (error) throw error;
       setInvitees(data || []);
     } catch (error: any) {
+      console.log('Error fetching invitees:', error);
       toast({
         title: "Error fetching invitees",
         description: error.message,
