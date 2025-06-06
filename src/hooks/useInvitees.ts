@@ -21,7 +21,7 @@ export const useInvitees = () => {
         .from('invitees')
         .select(`
           *,
-          inviter:profiles(name),
+          inviter:profiles!invited_by(name),
           group:groups(name),
           cell:cells(name)
         `)
@@ -29,9 +29,7 @@ export const useInvitees = () => {
 
       if (error) throw error;
       
-      // Type assertion to ensure the data matches our interface
-      const typedData = (data || []) as InviteeWithInviter[];
-      setInvitees(typedData);
+      setInvitees(data || []);
     } catch (error: any) {
       console.log('Error fetching invitees:', error);
       toast({
