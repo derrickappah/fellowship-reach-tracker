@@ -29,13 +29,26 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
 
   useEffect(() => {
     const fetchLeaders = async () => {
+      // Fetch all profiles that could be cell leaders
       const { data } = await supabase
         .from('profiles')
-        .select('id, name');
-      setLeaders(data || []);
+        .select('id, name, fellowship_id');
+      
+      // Filter leaders based on selected fellowship if any
+      let filteredLeaders = data || [];
+      if (formData.fellowship_id) {
+        filteredLeaders = filteredLeaders.filter(leader => 
+          leader.fellowship_id === formData.fellowship_id || !leader.fellowship_id
+        );
+      }
+      
+      setLeaders(filteredLeaders);
     };
-    fetchLeaders();
-  }, []);
+    
+    if (open) {
+      fetchLeaders();
+    }
+  }, [open, formData.fellowship_id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +67,10 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
     
     setIsSubmitting(false);
   };
+
+  const availableFellowships = user?.role === 'admin' 
+    ? fellowships 
+    : fellowships.filter(f => f.id === user?.fellowship_id);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -80,13 +97,17 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
               <Label htmlFor="fellowship">Fellowship</Label>
               <Select 
                 value={formData.fellowship_id} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, fellowship_id: value }))}
+                onValueChange={(value) => setFormData(prev => ({ 
+                  ...prev, 
+                  fellowship_id: value,
+                  leader_id: '' // Reset leader when fellowship changes
+                }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select fellowship" />
                 </SelectTrigger>
                 <SelectContent>
-                  {fellowships.map((fellowship) => (
+                  {availableFellowships.map((fellowship) => (
                     <SelectItem key={fellowship.id} value={fellowship.id}>
                       {fellowship.name}
                     </SelectItem>
