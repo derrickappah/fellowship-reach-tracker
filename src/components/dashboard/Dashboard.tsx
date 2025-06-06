@@ -1,19 +1,15 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ManageFellowships } from '@/components/fellowships/ManageFellowships';
 import { ManageCells } from '@/components/cells/ManageCells';
 import { ManageGroups } from '@/components/groups/ManageGroups';
 import { ManageMembers } from '@/components/members/ManageMembers';
 import { Reports } from '@/components/reports/Reports';
-import { Users, Building, Users2, UserPlus, BarChart3, UserCheck } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Users, Building, Users2, UserPlus, BarChart3 } from 'lucide-react';
 
 export const Dashboard = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -23,13 +19,6 @@ export const Dashboard = () => {
             Manage your church community, fellowships, cells, and members
           </p>
         </div>
-        <Button 
-          onClick={() => navigate('/invitees')}
-          className="flex items-center gap-2"
-        >
-          <UserCheck className="h-4 w-4" />
-          Manage Invitees
-        </Button>
       </div>
 
       <Tabs defaultValue="fellowships" className="space-y-6">

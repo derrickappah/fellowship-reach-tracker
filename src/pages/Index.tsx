@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { InviteeForm } from '@/components/invitees/InviteeForm';
+import { InviteeList } from '@/components/invitees/InviteeList';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { 
@@ -12,7 +14,9 @@ import {
   BarChart3, 
   LogOut,
   Menu,
-  X
+  X,
+  UserPlus,
+  UserCheck
 } from 'lucide-react';
 import { Reports } from '@/components/reports/Reports';
 import { ManageGroups } from '@/components/groups/ManageGroups';
@@ -47,7 +51,8 @@ const Index = () => {
 
   const navigation = [
     { name: 'Dashboard', icon: Church, id: 'dashboard', roles: ['admin', 'fellowship_leader', 'member'] },
-    { name: 'Register Invitee', icon: User, id: 'invitees', roles: ['admin', 'fellowship_leader', 'member'] },
+    { name: 'Register Invitee', icon: UserPlus, id: 'register-invitee', roles: ['admin', 'fellowship_leader', 'member'] },
+    { name: 'Manage Invitees', icon: UserCheck, id: 'manage-invitees', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Reports', icon: BarChart3, id: 'reports', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Manage Groups', icon: Group, id: 'groups', roles: ['admin', 'fellowship_leader'] },
     { name: 'Manage Members', icon: Users, id: 'members', roles: ['admin', 'fellowship_leader'] },
@@ -81,8 +86,10 @@ const Index = () => {
     switch (currentSection) {
       case 'dashboard':
         return <Dashboard />;
-      case 'invitees':
+      case 'register-invitee':
         return <InviteeForm />;
+      case 'manage-invitees':
+        return <InviteeList />;
       case 'reports':
         return <Reports />;
       case 'groups':
