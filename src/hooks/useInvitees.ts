@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Invitee } from '@/types/supabase';
@@ -22,14 +21,17 @@ export const useInvitees = () => {
         .from('invitees')
         .select(`
           *,
-          inviter:profiles!invited_by(name),
+          inviter:profiles(name),
           group:groups(name),
           cell:cells(name)
         `)
         .order('invite_date', { ascending: false });
 
       if (error) throw error;
-      setInvitees(data || []);
+      
+      // Type assertion to ensure the data matches our interface
+      const typedData = (data || []) as InviteeWithInviter[];
+      setInvitees(typedData);
     } catch (error: any) {
       console.log('Error fetching invitees:', error);
       toast({
