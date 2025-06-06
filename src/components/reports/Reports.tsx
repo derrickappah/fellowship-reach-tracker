@@ -3,31 +3,28 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
+import { useReports } from '@/hooks/useReports';
 
 export const Reports = () => {
   const { user } = useAuth();
+  const { reportsData, loading } = useReports();
 
-  // Mock data - replace with real Supabase queries later
-  const weeklyData = [
-    { week: 'Week 1', invitees: 4, attendees: 3, conversions: 1 },
-    { week: 'Week 2', invitees: 6, attendees: 4, conversions: 2 },
-    { week: 'Week 3', invitees: 3, attendees: 2, conversions: 1 },
-    { week: 'Week 4', invitees: 5, attendees: 4, conversions: 3 },
-  ];
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
-  const statusData = [
-    { name: 'Invited', value: 8, color: '#8884d8' },
-    { name: 'Attended', value: 6, color: '#82ca9d' },
-    { name: 'Joined Cell', value: 4, color: '#ffc658' },
-    { name: 'No Show', value: 2, color: '#ff7c7c' },
-  ];
-
-  const stats = {
-    totalInvitees: 20,
-    totalAttendees: 13,
-    conversionRate: 65,
-    averageWeeklyInvites: 4.5
-  };
+  if (!reportsData) {
+    return (
+      <div className="text-center py-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">No data available</h2>
+        <p className="text-gray-600">Unable to load reports data.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -49,7 +46,7 @@ export const Reports = () => {
             <CardTitle className="text-sm font-medium">Total Invitees</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.totalInvitees}</div>
+            <div className="text-2xl font-bold text-blue-600">{reportsData.totalInvitees}</div>
           </CardContent>
         </Card>
 
@@ -58,7 +55,7 @@ export const Reports = () => {
             <CardTitle className="text-sm font-medium">Total Attendees</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.totalAttendees}</div>
+            <div className="text-2xl font-bold text-green-600">{reportsData.totalAttendees}</div>
           </CardContent>
         </Card>
 
@@ -67,7 +64,7 @@ export const Reports = () => {
             <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stats.conversionRate}%</div>
+            <div className="text-2xl font-bold text-purple-600">{reportsData.conversionRate}%</div>
           </CardContent>
         </Card>
 
@@ -76,7 +73,7 @@ export const Reports = () => {
             <CardTitle className="text-sm font-medium">Avg Weekly Invites</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.averageWeeklyInvites}</div>
+            <div className="text-2xl font-bold text-orange-600">{reportsData.averageWeeklyInvites}</div>
           </CardContent>
         </Card>
       </div>
@@ -90,7 +87,7 @@ export const Reports = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={weeklyData}>
+              <BarChart data={reportsData.weeklyData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="week" />
                 <YAxis />
@@ -112,14 +109,14 @@ export const Reports = () => {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={statusData}
+                  data={reportsData.statusData}
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}`}
                 >
-                  {statusData.map((entry, index) => (
+                  {reportsData.statusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -130,17 +127,25 @@ export const Reports = () => {
         </Card>
       </div>
 
-      {/* Additional insights for admins */}
-      {user?.role === 'admin' && (
+      {/* Fellowship Performance for admins */}
+      {user?.role === 'admin' && reportsData.fellowshipData && (
         <Card>
           <CardHeader>
             <CardTitle>Fellowship Performance</CardTitle>
             <CardDescription>Comparative performance across fellowships</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-gray-500">
-              Fellowship comparison charts will be implemented with real data
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={reportsData.fellowshipData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="invitees" fill="#8884d8" name="Invitees" />
+                <Bar dataKey="attendees" fill="#82ca9d" name="Attendees" />
+                <Bar dataKey="conversions" fill="#ffc658" name="Conversions" />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       )}

@@ -4,62 +4,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Mail, Phone, Users } from 'lucide-react';
+import { Plus, Search, Mail, Phone, Users, Edit } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMembers } from '@/hooks/useMembers';
+import { MemberAssignDialog } from './MemberAssignDialog';
 
 export const ManageMembers = () => {
   const { user } = useAuth();
+  const { members, loading } = useMembers();
   const [searchTerm, setSearchTerm] = useState('');
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<any>(null);
 
-  // Mock data - replace with real Supabase queries later
-  const mockMembers = [
-    {
-      id: '1',
-      name: 'Pastor John',
-      email: 'john@church.com',
-      phone: '+1234567890',
-      role: 'admin',
-      fellowshipId: '1',
-      fellowshipName: 'Victory Fellowship',
-      cellId: '1',
-      cellName: 'Cell Alpha',
-      createdAt: new Date('2024-01-01')
-    },
-    {
-      id: '2',
-      name: 'Leader Mary',
-      email: 'mary@church.com',
-      phone: '+1234567891',
-      role: 'fellowship_leader',
-      fellowshipId: '2',
-      fellowshipName: 'Grace Fellowship',
-      cellId: '2',
-      cellName: 'Cell Beta',
-      createdAt: new Date('2024-01-01')
-    },
-    {
-      id: '3',
-      name: 'Member Sarah',
-      email: 'sarah@church.com',
-      phone: '+1234567892',
-      role: 'member',
-      fellowshipId: '1',
-      fellowshipName: 'Victory Fellowship',
-      cellId: '1',
-      cellName: 'Cell Alpha',
-      createdAt: new Date('2024-01-15')
-    }
-  ];
-
-  const filteredMembers = mockMembers.filter(member => {
+  const filteredMembers = members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          member.email.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (user?.role === 'admin') {
       return matchesSearch;
     } else if (user?.role === 'fellowship_leader') {
-      return matchesSearch && member.fellowshipId === user.fellowship_id;
+      // Fellowship leaders can only see members in their fellowship
+      const isInSameFellowship = member.fellowship_memberships?.some(
+        fm => fm.fellowship && user.fellowship_id
+      );
+      return matchesSearch && isInSameFellowship;
     }
     return false;
   });
@@ -77,6 +44,22 @@ export const ManageMembers = () => {
     return role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
+  const getFellowshipName = (member: any) => {
+    return member.fellowship_memberships?.[0]?.fellowship?.name || 'No fellowship';
+  };
+
+  const getCellName = (member: any) => {
+    return member.cell_memberships?.[0]?.cell?.name || 'No cell';
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -86,12 +69,6 @@ export const ManageMembers = () => {
             {user?.role === 'admin' ? 'Manage all church members' : 'Manage your fellowship members'}
           </p>
         </div>
-        {user?.role === 'admin' && (
-          <Button onClick={() => setShowCreateForm(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Member
-          </Button>
-        )}
       </div>
 
       {/* Search */}
@@ -112,12 +89,12 @@ export const ManageMembers = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{member.name}</CardTitle>
-                <Badge variant={getRoleBadgeColor(member.role)}>
-                  {formatRole(member.role)}
+                <Badge variant={getRoleBadgeColor(member.user_role?.role || 'member')}>
+                  {formatRole(member.user_role?.role || 'member')}
                 </Badge>
               </div>
               <CardDescription>
-                {member.fellowshipName} • {member.cellName}
+                {getFellowshipName(member)} • {getCellName(member)}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -134,10 +111,16 @@ export const ManageMembers = () => {
                   </div>
                 )}
                 
-                {user?.role === 'admin' && (
+                {(user?.role === 'admin' || user?.role === 'fellowship_leader') && (
                   <div className="pt-2">
-                    <Button size="sm" variant="outline" className="w-full">
-                      Edit Member
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => setSelectedMember(member)}
+                    >
+                      <Edit className="mr-2 h-3 w-3" />
+                      Edit Assignments
                     </Button>
                   </div>
                 )}
@@ -159,26 +142,11 @@ export const ManageMembers = () => {
         </Card>
       )}
 
-      {/* Create Form Modal/Dialog would go here */}
-      {showCreateForm && (
-        <Card className="max-w-md mx-auto">
-          <CardHeader>
-            <CardTitle>Add New Member</CardTitle>
-            <CardDescription>Add a new church member</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-4 text-gray-500">
-              Add member form will be implemented
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={() => setShowCreateForm(false)} variant="outline" className="flex-1">
-                Cancel
-              </Button>
-              <Button className="flex-1">Add Member</Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <MemberAssignDialog
+        open={!!selectedMember}
+        onOpenChange={(open) => !open && setSelectedMember(null)}
+        member={selectedMember}
+      />
     </div>
   );
 };

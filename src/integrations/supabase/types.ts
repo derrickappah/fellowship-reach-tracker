@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      cell_members: {
+        Row: {
+          cell_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          cell_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          cell_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cell_members_cell_id_fkey"
+            columns: ["cell_id"]
+            isOneToOne: false
+            referencedRelation: "cells"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cell_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cells: {
         Row: {
           created_at: string
@@ -40,6 +76,42 @@ export type Database = {
             columns: ["fellowship_id"]
             isOneToOne: false
             referencedRelation: "fellowships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fellowship_members: {
+        Row: {
+          fellowship_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          fellowship_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          fellowship_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fellowship_members_fellowship_id_fkey"
+            columns: ["fellowship_id"]
+            isOneToOne: false
+            referencedRelation: "fellowships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fellowship_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
