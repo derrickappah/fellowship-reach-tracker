@@ -22,7 +22,7 @@ export const useInvitees = () => {
         .from('invitees')
         .select(`
           *,
-          inviter:profiles!invitees_invited_by_fkey(name),
+          inviter:profiles!invited_by(name),
           group:groups(name),
           cell:cells(name)
         `)
