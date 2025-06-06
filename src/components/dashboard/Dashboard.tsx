@@ -2,156 +2,80 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { Users, Church, Group, User } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ManageFellowships } from '@/components/fellowships/ManageFellowships';
+import { ManageCells } from '@/components/cells/ManageCells';
+import { ManageGroups } from '@/components/groups/ManageGroups';
+import { ManageMembers } from '@/components/members/ManageMembers';
+import { Reports } from '@/components/reports/Reports';
+import { Users, Building, Users2, UserPlus, BarChart3, UserCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-interface DashboardProps {
-  onNavigate: (section: string) => void;
-}
-
-export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
-  const { user } = useAuth();
-
-  // Mock data for now - will be replaced with real Supabase queries later
-  const mockStats = {
-    fellowships: 2,
-    cells: 3,
-    members: 12,
-    groups: 1,
-    weeklyInvitees: 5,
-    attendanceRate: 75,
-    conversionRate: 60
-  };
+export const Dashboard = () => {
+  const navigate = useNavigate();
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Welcome, {user?.name}</h1>
-          <p className="text-gray-600">
-            {user?.role === 'admin' ? 'System Administrator' : 
-             user?.role === 'fellowship_leader' ? 'Fellowship Leader' : 
-             'Church Member'}
+          <h1 className="text-3xl font-bold tracking-tight">Church Management Dashboard</h1>
+          <p className="text-muted-foreground">
+            Manage your church community, fellowships, cells, and members
           </p>
         </div>
-        <Button onClick={() => onNavigate('invitees')}>
-          Register New Invitee
+        <Button 
+          onClick={() => navigate('/invitees')}
+          className="flex items-center gap-2"
+        >
+          <UserCheck className="h-4 w-4" />
+          Manage Invitees
         </Button>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Fellowships</CardTitle>
-            <Church className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{mockStats.fellowships}</div>
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="fellowships" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="fellowships" className="flex items-center gap-2">
+            <Building className="h-4 w-4" />
+            Fellowships
+          </TabsTrigger>
+          <TabsTrigger value="cells" className="flex items-center gap-2">
+            <Users2 className="h-4 w-4" />
+            Cells
+          </TabsTrigger>
+          <TabsTrigger value="groups" className="flex items-center gap-2">
+            <UserPlus className="h-4 w-4" />
+            Groups
+          </TabsTrigger>
+          <TabsTrigger value="members" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Members
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Reports
+          </TabsTrigger>
+        </TabsList>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Cells</CardTitle>
-            <Group className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{mockStats.cells}</div>
-          </CardContent>
-        </Card>
+        <TabsContent value="fellowships" className="space-y-6">
+          <ManageFellowships />
+        </TabsContent>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Members</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{mockStats.members}</div>
-          </CardContent>
-        </Card>
+        <TabsContent value="cells" className="space-y-6">
+          <ManageCells />
+        </TabsContent>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Outreach Groups</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{mockStats.groups}</div>
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="groups" className="space-y-6">
+          <ManageGroups />
+        </TabsContent>
 
-      {/* Weekly Performance */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>This Week's Invitees</CardTitle>
-            <CardDescription>New people reached through outreach</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-600">{mockStats.weeklyInvitees}</div>
-          </CardContent>
-        </Card>
+        <TabsContent value="members" className="space-y-6">
+          <ManageMembers />
+        </TabsContent>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Attendance Rate</CardTitle>
-            <CardDescription>Invitees who attended service</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-600">{mockStats.attendanceRate}%</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Conversion Rate</CardTitle>
-            <CardDescription>Invitees who joined a cell</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-purple-600">{mockStats.conversionRate}%</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks for your role</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button onClick={() => onNavigate('invitees')} variant="outline">
-              Register Invitee
-            </Button>
-            <Button onClick={() => onNavigate('reports')} variant="outline">
-              View Reports
-            </Button>
-            {(user?.role === 'admin' || user?.role === 'fellowship_leader') && (
-              <>
-                <Button onClick={() => onNavigate('groups')} variant="outline">
-                  Manage Groups
-                </Button>
-                <Button onClick={() => onNavigate('members')} variant="outline">
-                  View Members
-                </Button>
-              </>
-            )}
-            {user?.role === 'admin' && (
-              <>
-                <Button onClick={() => onNavigate('fellowships')} variant="outline">
-                  Manage Fellowships
-                </Button>
-                <Button onClick={() => onNavigate('cells')} variant="outline">
-                  Manage Cells
-                </Button>
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+        <TabsContent value="reports" className="space-y-6">
+          <Reports />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

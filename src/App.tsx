@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import { Auth } from "./pages/Auth";
+import Invitees from "./pages/Invitees";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/invitees" element={<Invitees />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
