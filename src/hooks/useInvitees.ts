@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Invitee } from '@/types/supabase';
@@ -18,19 +17,55 @@ export const useInvitees = () => {
   const fetchInvitees = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // First get invitees
+      const { data: inviteesData, error: inviteesError } = await supabase
         .from('invitees')
-        .select(`
-          *,
-          inviter:profiles(name),
-          group:groups(name),
-          cell:cells(name)
-        `)
+        .select('*')
         .order('invite_date', { ascending: false });
 
-      if (error) throw error;
+      if (inviteesError) throw inviteesError;
+
+      // Then get related data separately
+      const inviteesWithRelatedData = await Promise.all(
+        (inviteesData || []).map(async (invitee) => {
+          const relatedData: any = { ...invitee };
+
+          // Get inviter info
+          if (invitee.invited_by) {
+            const { data: inviterData } = await supabase
+              .from('profiles')
+              .select('name')
+              .eq('id', invitee.invited_by)
+              .single();
+            relatedData.inviter = inviterData;
+          }
+
+          // Get group info
+          if (invitee.group_id) {
+            const { data: groupData } = await supabase
+              .from('groups')
+              .select('name')
+              .eq('id', invitee.group_id)
+              .single();
+            relatedData.group = groupData;
+          }
+
+          // Get cell info
+          if (invitee.cell_id) {
+            const { data: cellData } = await supabase
+              .from('cells')
+              .select('name')
+              .eq('id', invitee.cell_id)
+              .single();
+            relatedData.cell = cellData;
+          }
+
+          return relatedData;
+        })
+      );
       
-      setInvitees(data || []);
+      setInvitees(inviteesWithRelatedData);
     } catch (error: any) {
       console.log('Error fetching invitees:', error);
       toast({
