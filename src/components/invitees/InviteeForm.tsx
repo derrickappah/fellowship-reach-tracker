@@ -208,6 +208,7 @@ export const InviteeForm = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="invited">Invited</SelectItem>
+                  <SelectItem value="confirmed">Attended</SelectItem>
                   <SelectItem value="attended">Attended</SelectItem>
                   <SelectItem value="joined_cell">Joined Cell</SelectItem>
                   <SelectItem value="no_show">No Show</SelectItem>
