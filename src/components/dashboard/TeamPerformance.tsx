@@ -3,8 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useTeamPerformance } from '@/hooks/useTeamPerformance';
-import { Users, Target, TrendingUp, Award } from 'lucide-react';
-import { format } from 'date-fns';
+import { Users, Target, TrendingUp, Award, Calendar } from 'lucide-react';
+import { format, startOfWeek, endOfWeek } from 'date-fns';
 
 interface TeamPerformanceProps {
   selectedDate: Date;
@@ -12,6 +12,9 @@ interface TeamPerformanceProps {
 
 export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
   const { teamPerformance, loading } = useTeamPerformance(selectedDate);
+
+  const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
 
   if (loading) {
     return (
@@ -33,9 +36,10 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Team Performance Overview</h2>
-        <Badge variant="outline">
-          {format(selectedDate, "MMMM yyyy")}
+        <h2 className="text-2xl font-bold">Weekly Team Performance</h2>
+        <Badge variant="outline" className="flex items-center gap-2">
+          <Calendar className="h-3 w-3" />
+          {format(weekStart, "MMM d")} - {format(weekEnd, "MMM d, yyyy")}
         </Badge>
       </div>
 
@@ -51,7 +55,7 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
               {teamPerformance?.totalTeams || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              Active teams
+              Active teams this week
             </p>
           </CardContent>
         </Card>
@@ -66,7 +70,7 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
               {teamPerformance?.totalInvitees || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              People invited this month
+              People invited this week
             </p>
           </CardContent>
         </Card>
@@ -105,51 +109,77 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
       {/* Team Details */}
       <Card>
         <CardHeader>
-          <CardTitle>Team Performance Details</CardTitle>
+          <CardTitle>Weekly Team Performance Breakdown</CardTitle>
           <CardDescription>
-            Performance breakdown by team for {format(selectedDate, "MMMM yyyy")}
+            Performance by team for the week of {format(weekStart, "MMM d")} - {format(weekEnd, "MMM d, yyyy")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {teamPerformance?.teams?.map((team) => (
-              <div key={team.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Users className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{team.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {team.members} members
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right space-y-1">
+              <div key={team.id} className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-4">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-green-600">{team.invitees}</div>
-                      <div className="text-xs text-muted-foreground">Invitees</div>
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Users className="h-5 w-5 text-blue-600" />
                     </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">{team.attendees}</div>
-                      <div className="text-xs text-muted-foreground">Attended</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-purple-600">{team.conversions}</div>
-                      <div className="text-xs text-muted-foreground">Joined</div>
+                    <div>
+                      <h3 className="font-medium">{team.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {team.members} members
+                      </p>
                     </div>
                   </div>
-                  <Badge variant={team.invitees > 5 ? "default" : "secondary"}>
-                    {team.invitees > 5 ? "High Performer" : "Getting Started"}
+                  <Badge variant={team.totalInvitees > 5 ? "default" : "secondary"}>
+                    {team.totalInvitees > 5 ? "High Performer" : "Getting Started"}
                   </Badge>
+                </div>
+
+                {/* Service breakdown */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Wednesday Service */}
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <h4 className="font-medium text-blue-800 mb-2">Wednesday Midweek</h4>
+                    <div className="flex justify-between text-sm">
+                      <span>Invited: <span className="font-bold">{team.wednesdayInvitees}</span></span>
+                      <span>Attended: <span className="font-bold text-blue-600">{team.wednesdayAttendees}</span></span>
+                    </div>
+                  </div>
+
+                  {/* Sunday Service */}
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <h4 className="font-medium text-green-800 mb-2">Sunday Service</h4>
+                    <div className="flex justify-between text-sm">
+                      <span>Invited: <span className="font-bold">{team.sundayInvitees}</span></span>
+                      <span>Attended: <span className="font-bold text-green-600">{team.sundayAttendees}</span></span>
+                    </div>
+                  </div>
+
+                  {/* Total Performance */}
+                  <div className="bg-purple-50 p-3 rounded-lg">
+                    <h4 className="font-medium text-purple-800 mb-2">Weekly Total</h4>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span>Total Invited:</span>
+                        <span className="font-bold">{team.totalInvitees}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Total Attended:</span>
+                        <span className="font-bold text-purple-600">{team.totalAttendees}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Joined Cell:</span>
+                        <span className="font-bold text-orange-600">{team.conversions}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
             
             {(!teamPerformance?.teams || teamPerformance.teams.length === 0) && (
               <div className="text-center py-8 text-muted-foreground">
-                No team performance data available for this period.
+                No team performance data available for this week.
               </div>
             )}
           </div>
