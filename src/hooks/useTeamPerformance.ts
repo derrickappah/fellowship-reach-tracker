@@ -40,6 +40,8 @@ export const useTeamPerformance = (selectedDate: Date) => {
       const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Monday start
       const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 }); // Sunday end
 
+      console.log('Fetching team performance for week:', weekStart, 'to', weekEnd);
+
       // Get teams based on user role
       let teamsQuery = supabase.from('teams').select('*');
       
@@ -61,6 +63,8 @@ export const useTeamPerformance = (selectedDate: Date) => {
         return;
       }
 
+      console.log('Found teams:', teams);
+
       // Get team performance data
       const teamPerformanceData = await Promise.all(
         teams.map(async (team) => {
@@ -71,24 +75,31 @@ export const useTeamPerformance = (selectedDate: Date) => {
             .eq('team_id', team.id);
 
           // Get all invitees for this team in the selected week
-          const { data: invitees } = await supabase
+          const { data: invitees, error: inviteesError } = await supabase
             .from('invitees')
             .select('*')
             .eq('team_id', team.id)
             .gte('invite_date', weekStart.toISOString())
             .lte('invite_date', weekEnd.toISOString());
 
-          // Separate Wednesday and Sunday invitations based on service_date
+          if (inviteesError) {
+            console.error('Error fetching invitees for team', team.name, inviteesError);
+          }
+
+          console.log(`Invitees for team ${team.name}:`, invitees);
+
+          // If service_date is null, we'll categorize based on invite_date
+          // Wednesday = day 3, Sunday = day 0
           const wednesdayInvitees = invitees?.filter(i => {
-            if (!i.service_date) return false;
-            const serviceDate = new Date(i.service_date);
-            return serviceDate.getDay() === 3; // Wednesday
+            const dateToCheck = i.service_date ? new Date(i.service_date) : new Date(i.invite_date);
+            const dayOfWeek = dateToCheck.getDay();
+            return dayOfWeek === 3; // Wednesday
           }) || [];
 
           const sundayInvitees = invitees?.filter(i => {
-            if (!i.service_date) return false;
-            const serviceDate = new Date(i.service_date);
-            return serviceDate.getDay() === 0; // Sunday
+            const dateToCheck = i.service_date ? new Date(i.service_date) : new Date(i.invite_date);
+            const dayOfWeek = dateToCheck.getDay();
+            return dayOfWeek === 0; // Sunday
           }) || [];
 
           const wednesdayAttendees = wednesdayInvitees.filter(i => i.attended_service);
@@ -97,6 +108,14 @@ export const useTeamPerformance = (selectedDate: Date) => {
           const totalInvitees = invitees?.length || 0;
           const totalAttendees = invitees?.filter(i => i.attended_service).length || 0;
           const conversions = invitees?.filter(i => i.status === 'joined_cell').length || 0;
+
+          console.log(`Team ${team.name} stats:`, {
+            totalInvitees,
+            wednesdayInvitees: wednesdayInvitees.length,
+            sundayInvitees: sundayInvitees.length,
+            totalAttendees,
+            conversions
+          });
 
           return {
             id: team.id,
@@ -113,6 +132,8 @@ export const useTeamPerformance = (selectedDate: Date) => {
         })
       );
 
+      console.log('Team performance data:', teamPerformanceData);
+
       // Calculate totals and top performer
       const totalInvitees = teamPerformanceData.reduce((sum, team) => sum + team.totalInvitees, 0);
       const totalAttendees = teamPerformanceData.reduce((sum, team) => sum + team.totalAttendees, 0);
@@ -122,13 +143,16 @@ export const useTeamPerformance = (selectedDate: Date) => {
         return team.totalInvitees > (top?.totalInvitees || 0) ? team : top;
       }, teamPerformanceData[0] || null);
 
-      setTeamPerformance({
+      const finalData = {
         totalTeams: teams.length,
         totalInvitees,
         attendanceRate,
         topTeam: topTeam ? { name: topTeam.name, invitees: topTeam.totalInvitees } : null,
         teams: teamPerformanceData.sort((a, b) => b.totalInvitees - a.totalInvitees),
-      });
+      };
+
+      console.log('Final team performance data:', finalData);
+      setTeamPerformance(finalData);
 
     } catch (error: any) {
       console.log('Error fetching team performance:', error);
