@@ -63,6 +63,7 @@ export const InviteeList = () => {
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="invited">Invited</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
                   <SelectItem value="attended">Attended</SelectItem>
                   <SelectItem value="joined_cell">Joined Cell</SelectItem>
                   <SelectItem value="no_show">No Show</SelectItem>
@@ -136,6 +137,9 @@ export const InviteeList = () => {
                           <SelectItem value="invited">
                             <Badge className={statusColors.invited}>Invited</Badge>
                           </SelectItem>
+                           <SelectItem value="confirmed">
+                            <Badge className={statusColors.confirmed}>Confirmed</Badge>
+                          </SelectItem>
                           <SelectItem value="attended">
                             <Badge className={statusColors.attended}>Attended</Badge>
                           </SelectItem>
@@ -176,6 +180,9 @@ export const InviteeList = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <span className="font-medium">Invited:</span> {invitees.filter(i => i.status === 'invited').length}
+                </div>
+                 <div>
+                  <span className="font-medium">Confirmed:</span> {invitees.filter(i => i.status === 'confirmed').length}
                 </div>
                 <div>
                   <span className="font-medium">Attended:</span> {invitees.filter(i => i.status === 'attended').length}
