@@ -81,7 +81,7 @@ export const InviteeList = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Invited By</TableHead>
-                  <TableHead>Group/Cell</TableHead>
+                  <TableHead>Team/Cell</TableHead>
                   <TableHead>Invite Date</TableHead>
                   <TableHead>Service Date</TableHead>
                   <TableHead>Status</TableHead>
@@ -107,8 +107,8 @@ export const InviteeList = () => {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        {invitee.group?.name && (
-                          <div className="text-sm">Group: {invitee.group.name}</div>
+                        {invitee.team?.name && (
+                          <div className="text-sm">Team: {invitee.team.name}</div>
                         )}
                         {invitee.cell?.name && (
                           <div className="text-sm">Cell: {invitee.cell.name}</div>
