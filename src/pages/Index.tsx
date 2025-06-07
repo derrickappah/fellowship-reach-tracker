@@ -19,7 +19,7 @@ import {
   UserCheck
 } from 'lucide-react';
 import { Reports } from '@/components/reports/Reports';
-import { ManageGroups } from '@/components/groups/ManageGroups';
+import { ManageTeams } from '@/components/teams/ManageTeams';
 import { ManageMembers } from '@/components/members/ManageMembers';
 import { ManageFellowships } from '@/components/fellowships/ManageFellowships';
 import { ManageCells } from '@/components/cells/ManageCells';
@@ -54,7 +54,7 @@ const Index = () => {
     { name: 'Register Invitee', icon: UserPlus, id: 'register-invitee', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Manage Invitees', icon: UserCheck, id: 'manage-invitees', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Reports', icon: BarChart3, id: 'reports', roles: ['admin', 'fellowship_leader', 'member'] },
-    { name: 'Manage Groups', icon: Group, id: 'groups', roles: ['admin', 'fellowship_leader'] },
+    { name: 'Manage Teams', icon: Group, id: 'teams', roles: ['admin', 'fellowship_leader'] },
     { name: 'Manage Members', icon: Users, id: 'members', roles: ['admin', 'fellowship_leader'] },
     { name: 'Manage Fellowships', icon: Church, id: 'fellowships', roles: ['admin'] },
     { name: 'Manage Cells', icon: Group, id: 'cells', roles: ['admin'] },
@@ -92,8 +92,8 @@ const Index = () => {
         return <InviteeList />;
       case 'reports':
         return <Reports />;
-      case 'groups':
-        return <ManageGroups />;
+      case 'teams':
+        return <ManageTeams />;
       case 'members':
         return <ManageMembers />;
       case 'fellowships':

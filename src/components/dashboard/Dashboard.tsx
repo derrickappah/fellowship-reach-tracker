@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ManageFellowships } from '@/components/fellowships/ManageFellowships';
 import { ManageCells } from '@/components/cells/ManageCells';
-import { ManageGroups } from '@/components/groups/ManageGroups';
+import { ManageTeams } from '@/components/teams/ManageTeams';
 import { ManageMembers } from '@/components/members/ManageMembers';
 import { Reports } from '@/components/reports/Reports';
 import { Users, Building, Users2, UserPlus, BarChart3 } from 'lucide-react';
@@ -31,9 +31,9 @@ export const Dashboard = () => {
             <Users2 className="h-4 w-4" />
             Cells
           </TabsTrigger>
-          <TabsTrigger value="groups" className="flex items-center gap-2">
+          <TabsTrigger value="teams" className="flex items-center gap-2">
             <UserPlus className="h-4 w-4" />
-            Groups
+            Teams
           </TabsTrigger>
           <TabsTrigger value="members" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -53,8 +53,8 @@ export const Dashboard = () => {
           <ManageCells />
         </TabsContent>
 
-        <TabsContent value="groups" className="space-y-6">
-          <ManageGroups />
+        <TabsContent value="teams" className="space-y-6">
+          <ManageTeams />
         </TabsContent>
 
         <TabsContent value="members" className="space-y-6">

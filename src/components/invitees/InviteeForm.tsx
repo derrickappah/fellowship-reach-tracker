@@ -13,13 +13,13 @@ import { supabase } from '@/integrations/supabase/client';
 export const InviteeForm = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [groups, setGroups] = useState<any[]>([]);
+  const [teams, setTeams] = useState<any[]>([]);
   const [cells, setCells] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    groupId: '',
+    teamId: '',
     cellId: '',
     notes: '',
     serviceDate: '',
@@ -28,12 +28,12 @@ export const InviteeForm = () => {
   });
 
   useEffect(() => {
-    const fetchGroups = async () => {
+    const fetchTeams = async () => {
       const { data } = await supabase
-        .from('groups')
+        .from('teams')
         .select('id, name, fellowship:fellowships(name)')
         .eq('is_active', true);
-      setGroups(data || []);
+      setTeams(data || []);
     };
 
     const fetchCells = async () => {
@@ -43,7 +43,7 @@ export const InviteeForm = () => {
       setCells(data || []);
     };
 
-    fetchGroups();
+    fetchTeams();
     fetchCells();
   }, []);
 
@@ -66,7 +66,7 @@ export const InviteeForm = () => {
           name: formData.name,
           email: formData.email || null,
           phone: formData.phone || null,
-          group_id: formData.groupId || null,
+          team_id: formData.teamId || null,
           cell_id: formData.cellId || null,
           invited_by: user.id,
           attended_service: formData.attendedService,
@@ -89,7 +89,7 @@ export const InviteeForm = () => {
         name: '',
         email: '',
         phone: '',
-        groupId: '',
+        teamId: '',
         cellId: '',
         notes: '',
         serviceDate: '',
@@ -156,15 +156,15 @@ export const InviteeForm = () => {
               </div>
               
               <div>
-                <Label htmlFor="group">Outreach Group</Label>
-                <Select value={formData.groupId} onValueChange={(value) => handleInputChange('groupId', value)}>
+                <Label htmlFor="team">Outreach Team</Label>
+                <Select value={formData.teamId} onValueChange={(value) => handleInputChange('teamId', value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select outreach group" />
+                    <SelectValue placeholder="Select outreach team" />
                   </SelectTrigger>
                   <SelectContent>
-                    {groups.map((group) => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name} {group.fellowship?.name && `(${group.fellowship.name})`}
+                    {teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name} {team.fellowship?.name && `(${team.fellowship.name})`}
                       </SelectItem>
                     ))}
                   </SelectContent>

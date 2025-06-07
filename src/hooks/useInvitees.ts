@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Invitee } from '@/types/supabase';
@@ -5,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface InviteeWithInviter extends Invitee {
   inviter?: { name: string } | null;
-  group?: { name: string } | null;
+  team?: { name: string } | null;
   cell?: { name: string } | null;
 }
 
@@ -41,14 +42,14 @@ export const useInvitees = () => {
             relatedData.inviter = inviterData;
           }
 
-          // Get group info
-          if (invitee.group_id) {
-            const { data: groupData } = await supabase
-              .from('groups')
+          // Get team info
+          if (invitee.team_id) {
+            const { data: teamData } = await supabase
+              .from('teams')
               .select('name')
-              .eq('id', invitee.group_id)
+              .eq('id', invitee.team_id)
               .single();
-            relatedData.group = groupData;
+            relatedData.team = teamData;
           }
 
           // Get cell info

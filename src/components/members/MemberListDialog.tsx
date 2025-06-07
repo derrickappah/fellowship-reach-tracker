@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,13 +12,13 @@ interface MemberListDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  type: 'fellowship' | 'cell' | 'group';
+  type: 'fellowship' | 'cell' | 'team';
   entityId: string;
   entityName: string;
 }
 
 export const MemberListDialog = ({ open, onOpenChange, title, type, entityId, entityName }: MemberListDialogProps) => {
-  const { members, assignToFellowship, assignToCell, assignToGroup } = useMembers();
+  const { members, assignToFellowship, assignToCell, assignToTeam } = useMembers();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMember, setSelectedMember] = useState<Profile | null>(null);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
@@ -30,8 +29,8 @@ export const MemberListDialog = ({ open, onOpenChange, title, type, entityId, en
         return member.fellowship_id === entityId;
       case 'cell':
         return member.cell_id === entityId;
-      case 'group':
-        // This would need to be fetched from group_members table
+      case 'team':
+        // This would need to be fetched from team_members table
         return false; // Placeholder
       default:
         return false;
@@ -47,8 +46,8 @@ export const MemberListDialog = ({ open, onOpenChange, title, type, entityId, en
         return matchesSearch && !member.fellowship_id;
       case 'cell':
         return matchesSearch && !member.cell_id;
-      case 'group':
-        return matchesSearch; // Would need to check group_members table
+      case 'team':
+        return matchesSearch; // Would need to check team_members table
       default:
         return false;
     }
@@ -62,8 +61,8 @@ export const MemberListDialog = ({ open, onOpenChange, title, type, entityId, en
       case 'cell':
         await assignToCell(member.id, entityId);
         break;
-      case 'group':
-        await assignToGroup(member.id, entityId);
+      case 'team':
+        await assignToTeam(member.id, entityId);
         break;
     }
   };
@@ -76,8 +75,8 @@ export const MemberListDialog = ({ open, onOpenChange, title, type, entityId, en
       case 'cell':
         await assignToCell(member.id, null);
         break;
-      case 'group':
-        await assignToGroup(member.id, null);
+      case 'team':
+        await assignToTeam(member.id, null);
         break;
     }
   };

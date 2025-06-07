@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Profile } from '@/types/supabase';
 import { useFellowships } from '@/hooks/useFellowships';
 import { useCells } from '@/hooks/useCells';
-import { useGroups } from '@/hooks/useGroups';
+import { useTeams } from '@/hooks/useTeams';
 import { useMembers } from '@/hooks/useMembers';
 
 interface MemberAssignDialogProps {
@@ -19,12 +19,12 @@ interface MemberAssignDialogProps {
 export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignDialogProps) => {
   const { fellowships } = useFellowships();
   const { cells } = useCells();
-  const { groups } = useGroups();
-  const { assignToFellowship, assignToCell, assignToGroup } = useMembers();
+  const { teams } = useTeams();
+  const { assignToFellowship, assignToCell, assignToTeam } = useMembers();
   const [assignments, setAssignments] = useState({
     fellowship_id: '',
     cell_id: '',
-    group_id: '',
+    team_id: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -33,7 +33,7 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
       setAssignments({
         fellowship_id: member.fellowship_id || '',
         cell_id: member.cell_id || '',
-        group_id: '', // We'll need to fetch this from group_members table
+        team_id: '', // We'll need to fetch this from team_members table
       });
     }
   }, [member]);
@@ -54,8 +54,8 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
       await assignToCell(member.id, assignments.cell_id || null);
     }
 
-    // Update group assignment
-    await assignToGroup(member.id, assignments.group_id || null);
+    // Update team assignment
+    await assignToTeam(member.id, assignments.team_id || null);
 
     setIsSubmitting(false);
     onOpenChange(false);
@@ -69,7 +69,7 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
         <DialogHeader>
           <DialogTitle>Assign Member</DialogTitle>
           <DialogDescription>
-            Assign {member.name} to fellowship, cell, and group. Each member can only be in one of each.
+            Assign {member.name} to fellowship, cell, and team. Each member can only be in one of each.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -117,21 +117,21 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="group">Group</Label>
+              <Label htmlFor="team">Team</Label>
               <Select 
-                value={assignments.group_id} 
-                onValueChange={(value) => setAssignments(prev => ({ ...prev, group_id: value }))}
+                value={assignments.team_id} 
+                onValueChange={(value) => setAssignments(prev => ({ ...prev, team_id: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select group" />
+                  <SelectValue placeholder="Select team" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No group</SelectItem>
-                  {groups
-                    .filter(group => !assignments.fellowship_id || group.fellowship_id === assignments.fellowship_id)
-                    .map((group) => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name}
+                  <SelectItem value="">No team</SelectItem>
+                  {teams
+                    .filter(team => !assignments.fellowship_id || team.fellowship_id === assignments.fellowship_id)
+                    .map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name}
                       </SelectItem>
                     ))}
                 </SelectContent>
