@@ -5,19 +5,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useGroups } from '@/hooks/useGroups';
+import { useTeams } from '@/hooks/useTeams';
 import { useFellowships } from '@/hooks/useFellowships';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface CreateGroupDialogProps {
+interface CreateTeamDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps) => {
+export const CreateTeamDialog = ({ open, onOpenChange }: CreateTeamDialogProps) => {
   const { user } = useAuth();
-  const { createGroup } = useGroups();
+  const { createTeam } = useTeams();
   const { fellowships } = useFellowships();
   const [leaders, setLeaders] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -29,7 +29,7 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
 
   useEffect(() => {
     const fetchLeaders = async () => {
-      // Fetch all profiles that could be group leaders
+      // Fetch all profiles that could be team leaders
       const { data } = await supabase
         .from('profiles')
         .select('id, name, fellowship_id');
@@ -54,7 +54,7 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
     e.preventDefault();
     setIsSubmitting(true);
 
-    const { error } = await createGroup({
+    const { error } = await createTeam({
       ...formData,
       fellowship_id: formData.fellowship_id || null,
       leader_id: formData.leader_id || null,
@@ -76,20 +76,20 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Group</DialogTitle>
+          <DialogTitle>Create New Team</DialogTitle>
           <DialogDescription>
-            Add a new outreach group to your fellowship.
+            Add a new outreach team to your fellowship.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Group Name</Label>
+              <Label htmlFor="name">Team Name</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Enter group name"
+                placeholder="Enter team name"
                 required
               />
             </div>
@@ -116,7 +116,7 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="leader">Group Leader</Label>
+              <Label htmlFor="leader">Team Leader</Label>
               <Select 
                 value={formData.leader_id} 
                 onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value }))}
@@ -144,7 +144,7 @@ export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Create Group'}
+              {isSubmitting ? 'Creating...' : 'Create Team'}
             </Button>
           </DialogFooter>
         </form>

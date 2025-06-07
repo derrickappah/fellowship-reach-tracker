@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 interface MemberWithMemberships extends Profile {
   fellowship_memberships?: { fellowship: { name: string } }[];
   cell_memberships?: { cell: { name: string } }[];
-  group_memberships?: { group: { name: string } }[];
+  team_memberships?: { team: { name: string } }[];
   user_role?: { role: string };
 }
 
@@ -59,14 +59,14 @@ export const useMembers = () => {
             .eq('user_id', profile.id);
           memberData.cell_memberships = cellMemberships;
 
-          // Get group memberships
-          const { data: groupMemberships } = await supabase
-            .from('group_members')
+          // Get team memberships
+          const { data: teamMemberships } = await supabase
+            .from('team_members')
             .select(`
-              group:groups(name)
+              team:teams(name)
             `)
             .eq('user_id', profile.id);
-          memberData.group_memberships = groupMemberships;
+          memberData.team_memberships = teamMemberships;
 
           return memberData;
         })
@@ -156,19 +156,19 @@ export const useMembers = () => {
     }
   };
 
-  const assignToGroup = async (userId: string, groupId: string | null) => {
+  const assignToTeam = async (userId: string, teamId: string | null) => {
     try {
-      if (groupId) {
-        // Add to group
+      if (teamId) {
+        // Add to team
         const { error } = await supabase
-          .from('group_members')
-          .upsert({ user_id: userId, group_id: groupId });
+          .from('team_members')
+          .upsert({ user_id: userId, team_id: teamId });
 
         if (error) throw error;
       } else {
-        // Remove from group
+        // Remove from team
         const { error } = await supabase
-          .from('group_members')
+          .from('team_members')
           .delete()
           .eq('user_id', userId);
 
@@ -177,7 +177,7 @@ export const useMembers = () => {
 
       toast({
         title: "Success",
-        description: groupId ? "Member assigned to group" : "Member removed from group",
+        description: teamId ? "Member assigned to team" : "Member removed from team",
       });
 
       fetchMembers();
@@ -201,7 +201,7 @@ export const useMembers = () => {
     loading,
     assignToFellowship,
     assignToCell,
-    assignToGroup,
+    assignToTeam,
     refetch: fetchMembers,
   };
 };

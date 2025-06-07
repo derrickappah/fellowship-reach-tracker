@@ -1,35 +1,35 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Group, GroupInsert } from '@/types/supabase';
+import { Team, TeamInsert } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
 
-export const useGroups = () => {
-  const [groups, setGroups] = useState<Group[]>([]);
+export const useTeams = () => {
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchGroups = async () => {
+  const fetchTeams = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('groups')
+        .from('teams')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       
-      // Transform the data to match our Group type
-      const transformedData = (data || []).map(group => ({
-        ...group,
+      // Transform the data to match our Team type
+      const transformedData = (data || []).map(team => ({
+        ...team,
         fellowship: null,
         leader: null
       }));
       
-      setGroups(transformedData);
+      setTeams(transformedData);
     } catch (error: any) {
       toast({
-        title: "Error fetching groups",
+        title: "Error fetching teams",
         description: error.message,
         variant: "destructive",
       });
@@ -38,11 +38,11 @@ export const useGroups = () => {
     }
   };
 
-  const createGroup = async (groupData: GroupInsert) => {
+  const createTeam = async (teamData: TeamInsert) => {
     try {
       const { data, error } = await supabase
-        .from('groups')
-        .insert(groupData)
+        .from('teams')
+        .insert(teamData)
         .select()
         .single();
 
@@ -50,14 +50,14 @@ export const useGroups = () => {
 
       toast({
         title: "Success",
-        description: "Group created successfully",
+        description: "Team created successfully",
       });
 
-      fetchGroups();
+      fetchTeams();
       return { data, error: null };
     } catch (error: any) {
       toast({
-        title: "Error creating group",
+        title: "Error creating team",
         description: error.message,
         variant: "destructive",
       });
@@ -65,10 +65,10 @@ export const useGroups = () => {
     }
   };
 
-  const updateGroup = async (id: string, updates: Partial<Group>) => {
+  const updateTeam = async (id: string, updates: Partial<Team>) => {
     try {
       const { data, error } = await supabase
-        .from('groups')
+        .from('teams')
         .update(updates)
         .eq('id', id)
         .select()
@@ -78,14 +78,14 @@ export const useGroups = () => {
 
       toast({
         title: "Success",
-        description: "Group updated successfully",
+        description: "Team updated successfully",
       });
 
-      fetchGroups();
+      fetchTeams();
       return { data, error: null };
     } catch (error: any) {
       toast({
-        title: "Error updating group",
+        title: "Error updating team",
         description: error.message,
         variant: "destructive",
       });
@@ -93,10 +93,10 @@ export const useGroups = () => {
     }
   };
 
-  const deleteGroup = async (id: string) => {
+  const deleteTeam = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('groups')
+        .from('teams')
         .delete()
         .eq('id', id);
 
@@ -104,14 +104,14 @@ export const useGroups = () => {
 
       toast({
         title: "Success",
-        description: "Group deleted successfully",
+        description: "Team deleted successfully",
       });
 
-      fetchGroups();
+      fetchTeams();
       return { error: null };
     } catch (error: any) {
       toast({
-        title: "Error deleting group",
+        title: "Error deleting team",
         description: error.message,
         variant: "destructive",
       });
@@ -120,15 +120,15 @@ export const useGroups = () => {
   };
 
   useEffect(() => {
-    fetchGroups();
+    fetchTeams();
   }, []);
 
   return {
-    groups,
+    teams,
     loading,
-    createGroup,
-    updateGroup,
-    deleteGroup,
-    refetch: fetchGroups,
+    createTeam,
+    updateTeam,
+    deleteTeam,
+    refetch: fetchTeams,
   };
 };

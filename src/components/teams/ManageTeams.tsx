@@ -5,28 +5,28 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Users, UserPlus, Settings, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useGroups } from '@/hooks/useGroups';
-import { CreateGroupDialog } from './CreateGroupDialog';
-import { EditGroupDialog } from './EditGroupDialog';
+import { useTeams } from '@/hooks/useTeams';
+import { CreateTeamDialog } from './CreateTeamDialog';
+import { EditTeamDialog } from './EditTeamDialog';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { MemberListDialog } from '@/components/members/MemberListDialog';
 
-export const ManageGroups = () => {
+export const ManageTeams = () => {
   const { user } = useAuth();
-  const { groups, loading, deleteGroup } = useGroups();
+  const { teams, loading, deleteTeam } = useTeams();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<any>(null);
-  const [deletingGroup, setDeletingGroup] = useState<any>(null);
-  const [memberDialog, setMemberDialog] = useState<{ open: boolean; group: any } | null>(null);
+  const [editingTeam, setEditingTeam] = useState<any>(null);
+  const [deletingTeam, setDeletingTeam] = useState<any>(null);
+  const [memberDialog, setMemberDialog] = useState<{ open: boolean; team: any } | null>(null);
 
-  const filteredGroups = user?.role === 'admin' 
-    ? groups 
-    : groups.filter(group => group.fellowship_id === user?.fellowship_id);
+  const filteredTeams = user?.role === 'admin' 
+    ? teams 
+    : teams.filter(team => team.fellowship_id === user?.fellowship_id);
 
   const handleDelete = async () => {
-    if (deletingGroup) {
-      await deleteGroup(deletingGroup.id);
-      setDeletingGroup(null);
+    if (deletingTeam) {
+      await deleteTeam(deletingTeam.id);
+      setDeletingTeam(null);
     }
   };
 
@@ -42,30 +42,30 @@ export const ManageGroups = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Manage Groups</h1>
+          <h1 className="text-3xl font-bold">Manage Teams</h1>
           <p className="text-gray-600">
-            {user?.role === 'admin' ? 'Manage all outreach groups' : 'Manage your fellowship groups'}
+            {user?.role === 'admin' ? 'Manage all outreach teams' : 'Manage your fellowship teams'}
           </p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Create Group
+          Create Team
         </Button>
       </div>
 
-      {/* Groups Grid */}
+      {/* Teams Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredGroups.map((group) => (
-          <Card key={group.id}>
+        {filteredTeams.map((team) => (
+          <Card key={team.id}>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{group.name}</CardTitle>
-                <Badge variant={group.is_active ? 'default' : 'secondary'}>
-                  {group.is_active ? 'Active' : 'Inactive'}
+                <CardTitle className="text-lg">{team.name}</CardTitle>
+                <Badge variant={team.is_active ? 'default' : 'secondary'}>
+                  {team.is_active ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
               <CardDescription>
-                {group.fellowship?.name || 'No fellowship'} • Led by {group.leader?.name || 'No leader assigned'}
+                {team.fellowship?.name || 'No fellowship'} • Led by {team.leader?.name || 'No leader assigned'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -79,7 +79,7 @@ export const ManageGroups = () => {
                   <Button 
                     size="sm" 
                     variant="outline" 
-                    onClick={() => setEditingGroup(group)}
+                    onClick={() => setEditingTeam(team)}
                   >
                     <Edit className="mr-2 h-3 w-3" />
                     Edit
@@ -87,7 +87,7 @@ export const ManageGroups = () => {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    onClick={() => setMemberDialog({ open: true, group })}
+                    onClick={() => setMemberDialog({ open: true, team })}
                   >
                     <UserPlus className="mr-2 h-3 w-3" />
                     Members
@@ -95,7 +95,7 @@ export const ManageGroups = () => {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    onClick={() => setDeletingGroup(group)}
+                    onClick={() => setDeletingTeam(team)}
                     className="text-red-600 hover:text-red-700"
                   >
                     <Trash2 className="h-3 w-3" />
@@ -107,49 +107,49 @@ export const ManageGroups = () => {
         ))}
       </div>
 
-      {filteredGroups.length === 0 && (
+      {filteredTeams.length === 0 && (
         <Card>
           <CardContent className="text-center py-8">
             <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No groups found</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No teams found</h3>
             <p className="text-gray-600 mb-4">
-              Get started by creating your first outreach group.
+              Get started by creating your first outreach team.
             </p>
             <Button onClick={() => setShowCreateDialog(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Create Your First Group
+              Create Your First Team
             </Button>
           </CardContent>
         </Card>
       )}
 
-      <CreateGroupDialog 
+      <CreateTeamDialog 
         open={showCreateDialog} 
         onOpenChange={setShowCreateDialog} 
       />
 
-      <EditGroupDialog 
-        group={editingGroup}
-        open={!!editingGroup} 
-        onOpenChange={(open) => !open && setEditingGroup(null)} 
+      <EditTeamDialog 
+        team={editingTeam}
+        open={!!editingTeam} 
+        onOpenChange={(open) => !open && setEditingTeam(null)} 
       />
 
       <DeleteConfirmDialog
-        open={!!deletingGroup}
-        onOpenChange={(open) => !open && setDeletingGroup(null)}
+        open={!!deletingTeam}
+        onOpenChange={(open) => !open && setDeletingTeam(null)}
         onConfirm={handleDelete}
-        title="Delete Group"
-        description={`Are you sure you want to delete "${deletingGroup?.name}"? This action cannot be undone.`}
+        title="Delete Team"
+        description={`Are you sure you want to delete "${deletingTeam?.name}"? This action cannot be undone.`}
       />
 
       {memberDialog && (
         <MemberListDialog
           open={memberDialog.open}
           onOpenChange={(open) => !open && setMemberDialog(null)}
-          title="Manage Group Members"
-          type="group"
-          entityId={memberDialog.group.id}
-          entityName={memberDialog.group.name}
+          title="Manage Team Members"
+          type="team"
+          entityId={memberDialog.team.id}
+          entityName={memberDialog.team.name}
         />
       )}
     </div>

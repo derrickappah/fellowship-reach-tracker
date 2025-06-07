@@ -146,76 +146,11 @@ export type Database = {
         }
         Relationships: []
       }
-      group_members: {
-        Row: {
-          created_at: string
-          group_id: string | null
-          id: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          group_id?: string | null
-          id?: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          group_id?: string | null
-          id?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "group_members_group_id_fkey"
-            columns: ["group_id"]
-            isOneToOne: false
-            referencedRelation: "groups"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      groups: {
-        Row: {
-          created_at: string
-          fellowship_id: string | null
-          id: string
-          is_active: boolean | null
-          leader_id: string | null
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          fellowship_id?: string | null
-          id?: string
-          is_active?: boolean | null
-          leader_id?: string | null
-          name: string
-        }
-        Update: {
-          created_at?: string
-          fellowship_id?: string | null
-          id?: string
-          is_active?: boolean | null
-          leader_id?: string | null
-          name?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "groups_fellowship_id_fkey"
-            columns: ["fellowship_id"]
-            isOneToOne: false
-            referencedRelation: "fellowships"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       invitees: {
         Row: {
           attended_service: boolean | null
           cell_id: string | null
           email: string | null
-          group_id: string | null
           id: string
           invite_date: string
           invited_by: string | null
@@ -224,12 +159,12 @@ export type Database = {
           phone: string | null
           service_date: string | null
           status: string | null
+          team_id: string | null
         }
         Insert: {
           attended_service?: boolean | null
           cell_id?: string | null
           email?: string | null
-          group_id?: string | null
           id?: string
           invite_date?: string
           invited_by?: string | null
@@ -238,12 +173,12 @@ export type Database = {
           phone?: string | null
           service_date?: string | null
           status?: string | null
+          team_id?: string | null
         }
         Update: {
           attended_service?: boolean | null
           cell_id?: string | null
           email?: string | null
-          group_id?: string | null
           id?: string
           invite_date?: string
           invited_by?: string | null
@@ -252,6 +187,7 @@ export type Database = {
           phone?: string | null
           service_date?: string | null
           status?: string | null
+          team_id?: string | null
         }
         Relationships: [
           {
@@ -262,10 +198,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "invitees_group_id_fkey"
-            columns: ["group_id"]
+            foreignKeyName: "invitees_team_id_fkey"
+            columns: ["team_id"]
             isOneToOne: false
-            referencedRelation: "groups"
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -302,6 +238,70 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          id: string
+          team_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          team_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          team_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          fellowship_id: string | null
+          id: string
+          is_active: boolean | null
+          leader_id: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          fellowship_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          leader_id?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          fellowship_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          leader_id?: string | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groups_fellowship_id_fkey"
+            columns: ["fellowship_id"]
+            isOneToOne: false
+            referencedRelation: "fellowships"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

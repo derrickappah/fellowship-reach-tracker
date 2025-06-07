@@ -41,7 +41,7 @@ export interface Cell {
   leader?: { name: string } | null;
 }
 
-export interface Group {
+export interface Team {
   id: string;
   name: string;
   fellowship_id?: string;
@@ -53,9 +53,9 @@ export interface Group {
   leader?: { name: string } | null;
 }
 
-export interface GroupMember {
+export interface TeamMember {
   id: string;
-  group_id: string;
+  team_id: string;
   user_id: string;
   created_at: string;
 }
@@ -65,7 +65,7 @@ export interface Invitee {
   name: string;
   email?: string;
   phone?: string;
-  group_id?: string;
+  team_id?: string;
   invited_by?: string;
   attended_service: boolean;
   cell_id?: string;
@@ -97,7 +97,7 @@ export interface CellInsert {
   leader_id?: string;
 }
 
-export interface GroupInsert {
+export interface TeamInsert {
   name: string;
   fellowship_id?: string;
   leader_id?: string;

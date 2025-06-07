@@ -6,20 +6,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { useGroups } from '@/hooks/useGroups';
+import { useTeams } from '@/hooks/useTeams';
 import { useFellowships } from '@/hooks/useFellowships';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface EditGroupDialogProps {
-  group: any;
+interface EditTeamDialogProps {
+  team: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export const EditGroupDialog = ({ group, open, onOpenChange }: EditGroupDialogProps) => {
+export const EditTeamDialog = ({ team, open, onOpenChange }: EditTeamDialogProps) => {
   const { user } = useAuth();
-  const { updateGroup } = useGroups();
+  const { updateTeam } = useTeams();
   const { fellowships } = useFellowships();
   const [leaders, setLeaders] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -41,23 +41,23 @@ export const EditGroupDialog = ({ group, open, onOpenChange }: EditGroupDialogPr
   }, []);
 
   useEffect(() => {
-    if (group) {
+    if (team) {
       setFormData({
-        name: group.name || '',
-        fellowship_id: group.fellowship_id || '',
-        leader_id: group.leader_id || '',
-        is_active: group.is_active ?? true,
+        name: team.name || '',
+        fellowship_id: team.fellowship_id || '',
+        leader_id: team.leader_id || '',
+        is_active: team.is_active ?? true,
       });
     }
-  }, [group]);
+  }, [team]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!group) return;
+    if (!team) return;
     
     setIsSubmitting(true);
 
-    const { error } = await updateGroup(group.id, {
+    const { error } = await updateTeam(team.id, {
       ...formData,
       fellowship_id: formData.fellowship_id || null,
       leader_id: formData.leader_id || null,
@@ -78,20 +78,20 @@ export const EditGroupDialog = ({ group, open, onOpenChange }: EditGroupDialogPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Group</DialogTitle>
+          <DialogTitle>Edit Team</DialogTitle>
           <DialogDescription>
-            Update the group information.
+            Update the team information.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Group Name</Label>
+              <Label htmlFor="name">Team Name</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Enter group name"
+                placeholder="Enter team name"
                 required
               />
             </div>
@@ -114,7 +114,7 @@ export const EditGroupDialog = ({ group, open, onOpenChange }: EditGroupDialogPr
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="leader">Group Leader</Label>
+              <Label htmlFor="leader">Team Leader</Label>
               <Select 
                 value={formData.leader_id} 
                 onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value }))}
@@ -137,7 +137,7 @@ export const EditGroupDialog = ({ group, open, onOpenChange }: EditGroupDialogPr
                 checked={formData.is_active}
                 onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
               />
-              <Label htmlFor="is_active">Active Group</Label>
+              <Label htmlFor="is_active">Active Team</Label>
             </div>
           </div>
           <DialogFooter>
@@ -150,7 +150,7 @@ export const EditGroupDialog = ({ group, open, onOpenChange }: EditGroupDialogPr
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Updating...' : 'Update Group'}
+              {isSubmitting ? 'Updating...' : 'Update Team'}
             </Button>
           </DialogFooter>
         </form>
