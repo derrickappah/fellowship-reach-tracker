@@ -40,7 +40,10 @@ export const useTeamPerformance = (selectedDate: Date) => {
       const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Monday start
       const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 }); // Sunday end
 
-      console.log('Fetching team performance for week:', weekStart.toISOString(), 'to', weekEnd.toISOString());
+      console.log('=== TEAM PERFORMANCE DEBUG ===');
+      console.log('Selected date:', selectedDate.toISOString());
+      console.log('Week range:', weekStart.toISOString(), 'to', weekEnd.toISOString());
+      console.log('Current user:', user?.role, user?.fellowship_id);
 
       // Get teams based on user role
       let teamsQuery = supabase.from('teams').select('*');
@@ -50,7 +53,10 @@ export const useTeamPerformance = (selectedDate: Date) => {
       }
 
       const { data: teams, error: teamsError } = await teamsQuery;
-      if (teamsError) throw teamsError;
+      if (teamsError) {
+        console.error('Teams query error:', teamsError);
+        throw teamsError;
+      }
 
       if (!teams || teams.length === 0) {
         console.log('No teams found');
@@ -64,29 +70,66 @@ export const useTeamPerformance = (selectedDate: Date) => {
         return;
       }
 
-      console.log('Found teams:', teams.length, teams.map(t => t.name));
+      console.log('Found teams:', teams.map(t => ({ id: t.id, name: t.name })));
+
+      // Get ALL invitees first to debug
+      const { data: allInvitees, error: allInviteesError } = await supabase
+        .from('invitees')
+        .select('*');
+
+      if (allInviteesError) {
+        console.error('All invitees query error:', allInviteesError);
+      } else {
+        console.log('Total invitees in database:', allInvitees?.length || 0);
+        console.log('Sample invitees:', allInvitees?.slice(0, 3).map(i => ({
+          name: i.name,
+          team_id: i.team_id,
+          invite_date: i.invite_date,
+          service_date: i.service_date,
+          attended_service: i.attended_service,
+          status: i.status
+        })));
+      }
 
       // Get team performance data
       const teamPerformanceData = await Promise.all(
         teams.map(async (team) => {
-          console.log(`Processing team: ${team.name} (ID: ${team.id})`);
+          console.log(`\n--- Processing team: ${team.name} (ID: ${team.id}) ---`);
           
           // Get team members count
-          const { data: teamMembers } = await supabase
+          const { data: teamMembers, error: teamMembersError } = await supabase
             .from('team_members')
             .select('id')
             .eq('team_id', team.id);
 
-          // Get all invitees for this team in the selected week
-          const { data: invitees, error: inviteesError } = await supabase
+          if (teamMembersError) {
+            console.error(`Error fetching team members for ${team.name}:`, teamMembersError);
+          }
+
+          console.log(`Team ${team.name} has ${teamMembers?.length || 0} members`);
+
+          // Get ALL invitees for this team (not filtered by date yet)
+          const { data: allTeamInvitees, error: allTeamInviteesError } = await supabase
+            .from('invitees')
+            .select('*')
+            .eq('team_id', team.id);
+
+          if (allTeamInviteesError) {
+            console.error(`Error fetching all invitees for team ${team.name}:`, allTeamInviteesError);
+          }
+
+          console.log(`Team ${team.name} has ${allTeamInvitees?.length || 0} total invitees in database`);
+
+          // Now filter by the selected week
+          const { data: weekInvitees, error: weekInviteesError } = await supabase
             .from('invitees')
             .select('*')
             .eq('team_id', team.id)
             .gte('invite_date', weekStart.toISOString())
             .lte('invite_date', weekEnd.toISOString());
 
-          if (inviteesError) {
-            console.error('Error fetching invitees for team', team.name, inviteesError);
+          if (weekInviteesError) {
+            console.error(`Error fetching week invitees for team ${team.name}:`, weekInviteesError);
             return {
               id: team.id,
               name: team.name,
@@ -101,15 +144,18 @@ export const useTeamPerformance = (selectedDate: Date) => {
             };
           }
 
-          console.log(`Raw invitees for team ${team.name}:`, invitees?.length || 0, invitees?.map(i => ({
-            name: i.name,
-            invite_date: i.invite_date,
-            service_date: i.service_date,
-            attended_service: i.attended_service,
-            status: i.status
-          })));
+          const inviteesArray = weekInvitees || [];
+          console.log(`Team ${team.name} has ${inviteesArray.length} invitees in selected week`);
 
-          const inviteesArray = invitees || [];
+          if (inviteesArray.length > 0) {
+            console.log(`Invitees details for ${team.name}:`, inviteesArray.map(i => ({
+              name: i.name,
+              invite_date: i.invite_date,
+              service_date: i.service_date,
+              attended_service: i.attended_service,
+              status: i.status
+            })));
+          }
 
           // Categorize invitees by service type
           const wednesdayInvitees = inviteesArray.filter(i => {
@@ -122,9 +168,11 @@ export const useTeamPerformance = (selectedDate: Date) => {
             }
             
             const dayOfWeek = dateToCheck.getDay();
-            console.log(`Invitee ${i.name}: dateToCheck=${dateToCheck.toISOString()}, dayOfWeek=${dayOfWeek}`);
+            const isWednesday = dayOfWeek === 3;
             
-            return dayOfWeek === 3; // Wednesday
+            console.log(`${i.name}: using ${i.service_date ? 'service_date' : 'invite_date'} = ${dateToCheck.toDateString()}, day=${dayOfWeek}, isWednesday=${isWednesday}`);
+            
+            return isWednesday;
           });
 
           const sundayInvitees = inviteesArray.filter(i => {
@@ -137,7 +185,9 @@ export const useTeamPerformance = (selectedDate: Date) => {
             }
             
             const dayOfWeek = dateToCheck.getDay();
-            return dayOfWeek === 0; // Sunday
+            const isSunday = dayOfWeek === 0;
+            
+            return isSunday;
           });
 
           const wednesdayAttendees = wednesdayInvitees.filter(i => i.attended_service === true);
@@ -147,17 +197,7 @@ export const useTeamPerformance = (selectedDate: Date) => {
           const totalAttendees = inviteesArray.filter(i => i.attended_service === true).length;
           const conversions = inviteesArray.filter(i => i.status === 'joined_cell').length;
 
-          console.log(`Team ${team.name} breakdown:`, {
-            totalInvitees,
-            wednesdayInvitees: wednesdayInvitees.length,
-            sundayInvitees: sundayInvitees.length,
-            totalAttendees,
-            conversions,
-            wednesdayDetails: wednesdayInvitees.map(i => ({ name: i.name, attended: i.attended_service })),
-            sundayDetails: sundayInvitees.map(i => ({ name: i.name, attended: i.attended_service }))
-          });
-
-          return {
+          const result = {
             id: team.id,
             name: team.name,
             members: teamMembers?.length || 0,
@@ -169,10 +209,14 @@ export const useTeamPerformance = (selectedDate: Date) => {
             totalAttendees,
             conversions,
           };
+
+          console.log(`Team ${team.name} final stats:`, result);
+          return result;
         })
       );
 
-      console.log('All team performance data:', teamPerformanceData);
+      console.log('\n=== FINAL TEAM PERFORMANCE DATA ===');
+      console.log('All team performance:', teamPerformanceData);
 
       // Calculate totals and top performer
       const totalInvitees = teamPerformanceData.reduce((sum, team) => sum + team.totalInvitees, 0);
@@ -191,7 +235,7 @@ export const useTeamPerformance = (selectedDate: Date) => {
         teams: teamPerformanceData.sort((a, b) => b.totalInvitees - a.totalInvitees),
       };
 
-      console.log('Final team performance summary:', {
+      console.log('FINAL SUMMARY:', {
         totalTeams: finalData.totalTeams,
         totalInvitees: finalData.totalInvitees,
         attendanceRate: finalData.attendanceRate,
