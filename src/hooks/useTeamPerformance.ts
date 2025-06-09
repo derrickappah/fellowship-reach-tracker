@@ -40,7 +40,7 @@ export const useTeamPerformance = (selectedDate: Date) => {
       const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Monday start
       const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 }); // Sunday end
 
-      console.log('Fetching team performance for week:', weekStart, 'to', weekEnd);
+      console.log('Fetching team performance for week:', weekStart.toISOString(), 'to', weekEnd.toISOString());
 
       // Get teams based on user role
       let teamsQuery = supabase.from('teams').select('*');
@@ -53,6 +53,7 @@ export const useTeamPerformance = (selectedDate: Date) => {
       if (teamsError) throw teamsError;
 
       if (!teams || teams.length === 0) {
+        console.log('No teams found');
         setTeamPerformance({
           totalTeams: 0,
           totalInvitees: 0,
@@ -63,11 +64,13 @@ export const useTeamPerformance = (selectedDate: Date) => {
         return;
       }
 
-      console.log('Found teams:', teams);
+      console.log('Found teams:', teams.length, teams.map(t => t.name));
 
       // Get team performance data
       const teamPerformanceData = await Promise.all(
         teams.map(async (team) => {
+          console.log(`Processing team: ${team.name} (ID: ${team.id})`);
+          
           // Get team members count
           const { data: teamMembers } = await supabase
             .from('team_members')
@@ -84,37 +87,74 @@ export const useTeamPerformance = (selectedDate: Date) => {
 
           if (inviteesError) {
             console.error('Error fetching invitees for team', team.name, inviteesError);
+            return {
+              id: team.id,
+              name: team.name,
+              members: teamMembers?.length || 0,
+              wednesdayInvitees: 0,
+              wednesdayAttendees: 0,
+              sundayInvitees: 0,
+              sundayAttendees: 0,
+              totalInvitees: 0,
+              totalAttendees: 0,
+              conversions: 0,
+            };
           }
 
-          console.log(`Invitees for team ${team.name}:`, invitees);
+          console.log(`Raw invitees for team ${team.name}:`, invitees?.length || 0, invitees?.map(i => ({
+            name: i.name,
+            invite_date: i.invite_date,
+            service_date: i.service_date,
+            attended_service: i.attended_service,
+            status: i.status
+          })));
 
-          // If service_date is null, we'll categorize based on invite_date
-          // Wednesday = day 3, Sunday = day 0
-          const wednesdayInvitees = invitees?.filter(i => {
-            const dateToCheck = i.service_date ? new Date(i.service_date) : new Date(i.invite_date);
+          const inviteesArray = invitees || [];
+
+          // Categorize invitees by service type
+          const wednesdayInvitees = inviteesArray.filter(i => {
+            let dateToCheck: Date;
+            
+            if (i.service_date) {
+              dateToCheck = new Date(i.service_date);
+            } else {
+              dateToCheck = new Date(i.invite_date);
+            }
+            
             const dayOfWeek = dateToCheck.getDay();
+            console.log(`Invitee ${i.name}: dateToCheck=${dateToCheck.toISOString()}, dayOfWeek=${dayOfWeek}`);
+            
             return dayOfWeek === 3; // Wednesday
-          }) || [];
+          });
 
-          const sundayInvitees = invitees?.filter(i => {
-            const dateToCheck = i.service_date ? new Date(i.service_date) : new Date(i.invite_date);
+          const sundayInvitees = inviteesArray.filter(i => {
+            let dateToCheck: Date;
+            
+            if (i.service_date) {
+              dateToCheck = new Date(i.service_date);
+            } else {
+              dateToCheck = new Date(i.invite_date);
+            }
+            
             const dayOfWeek = dateToCheck.getDay();
             return dayOfWeek === 0; // Sunday
-          }) || [];
+          });
 
-          const wednesdayAttendees = wednesdayInvitees.filter(i => i.attended_service);
-          const sundayAttendees = sundayInvitees.filter(i => i.attended_service);
+          const wednesdayAttendees = wednesdayInvitees.filter(i => i.attended_service === true);
+          const sundayAttendees = sundayInvitees.filter(i => i.attended_service === true);
 
-          const totalInvitees = invitees?.length || 0;
-          const totalAttendees = invitees?.filter(i => i.attended_service).length || 0;
-          const conversions = invitees?.filter(i => i.status === 'joined_cell').length || 0;
+          const totalInvitees = inviteesArray.length;
+          const totalAttendees = inviteesArray.filter(i => i.attended_service === true).length;
+          const conversions = inviteesArray.filter(i => i.status === 'joined_cell').length;
 
-          console.log(`Team ${team.name} stats:`, {
+          console.log(`Team ${team.name} breakdown:`, {
             totalInvitees,
             wednesdayInvitees: wednesdayInvitees.length,
             sundayInvitees: sundayInvitees.length,
             totalAttendees,
-            conversions
+            conversions,
+            wednesdayDetails: wednesdayInvitees.map(i => ({ name: i.name, attended: i.attended_service })),
+            sundayDetails: sundayInvitees.map(i => ({ name: i.name, attended: i.attended_service }))
           });
 
           return {
@@ -132,7 +172,7 @@ export const useTeamPerformance = (selectedDate: Date) => {
         })
       );
 
-      console.log('Team performance data:', teamPerformanceData);
+      console.log('All team performance data:', teamPerformanceData);
 
       // Calculate totals and top performer
       const totalInvitees = teamPerformanceData.reduce((sum, team) => sum + team.totalInvitees, 0);
@@ -151,11 +191,17 @@ export const useTeamPerformance = (selectedDate: Date) => {
         teams: teamPerformanceData.sort((a, b) => b.totalInvitees - a.totalInvitees),
       };
 
-      console.log('Final team performance data:', finalData);
+      console.log('Final team performance summary:', {
+        totalTeams: finalData.totalTeams,
+        totalInvitees: finalData.totalInvitees,
+        attendanceRate: finalData.attendanceRate,
+        topTeam: finalData.topTeam
+      });
+
       setTeamPerformance(finalData);
 
     } catch (error: any) {
-      console.log('Error fetching team performance:', error);
+      console.error('Error fetching team performance:', error);
       toast({
         title: "Error fetching team performance",
         description: error.message,
@@ -167,7 +213,9 @@ export const useTeamPerformance = (selectedDate: Date) => {
   };
 
   useEffect(() => {
-    fetchTeamPerformance();
+    if (user) {
+      fetchTeamPerformance();
+    }
   }, [selectedDate, user]);
 
   return {
