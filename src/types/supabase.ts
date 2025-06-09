@@ -72,7 +72,7 @@ export interface Invitee {
   invite_date: string;
   service_date?: string;
   notes?: string;
-  status: 'invited' | 'attended' | 'joined_cell' | 'no_show';
+  status: 'invited' | 'confirmed' | 'attended' | 'joined_cell' | 'no_show';
 }
 
 export interface AuthUser {

@@ -11,6 +11,7 @@ import { Trash2 } from 'lucide-react';
 
 const statusColors = {
   invited: 'bg-blue-100 text-blue-800',
+  confirmed: 'bg-yellow-100 text-yellow-800',
   attended: 'bg-green-100 text-green-800',
   joined_cell: 'bg-purple-100 text-purple-800',
   no_show: 'bg-red-100 text-red-800',
@@ -137,7 +138,7 @@ export const InviteeList = () => {
                           <SelectItem value="invited">
                             <Badge className={statusColors.invited}>Invited</Badge>
                           </SelectItem>
-                           <SelectItem value="confirmed">
+                          <SelectItem value="confirmed">
                             <Badge className={statusColors.confirmed}>Confirmed</Badge>
                           </SelectItem>
                           <SelectItem value="attended">
@@ -177,11 +178,11 @@ export const InviteeList = () => {
 
           {filteredInvitees.length > 0 && (
             <div className="mt-4 text-sm text-muted-foreground">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div>
                   <span className="font-medium">Invited:</span> {invitees.filter(i => i.status === 'invited').length}
                 </div>
-                 <div>
+                <div>
                   <span className="font-medium">Confirmed:</span> {invitees.filter(i => i.status === 'confirmed').length}
                 </div>
                 <div>
