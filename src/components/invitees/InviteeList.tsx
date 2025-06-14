@@ -7,10 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useInvitees } from '@/hooks/useInvitees';
 import { format } from 'date-fns';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { InviteeListItemMobile } from './InviteeListItemMobile';
+import { Input } from '@/components/ui/input';
 
 const statusColors = {
   invited: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
@@ -24,11 +25,23 @@ export const InviteeList = () => {
   const { invitees, loading, updateInviteeStatus, deleteInvitee } = useInvitees();
   const { user } = useAuth();
   const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const isMobile = useIsMobile();
 
   const filteredInvitees = invitees.filter(invitee => {
-    if (filter === 'all') return true;
-    return invitee.status === filter;
+    const statusMatch = filter === 'all' || invitee.status === filter;
+
+    const searchTrimmed = searchTerm.trim().toLowerCase();
+    if (!searchTrimmed) {
+      return statusMatch;
+    }
+
+    const searchMatch =
+      invitee.name.toLowerCase().includes(searchTrimmed) ||
+      (invitee.email || '').toLowerCase().includes(searchTrimmed) ||
+      (invitee.phone || '').toLowerCase().includes(searchTrimmed);
+
+    return statusMatch && searchMatch;
   });
 
   const handleStatusChange = (inviteeId: string, newStatus: string) => {
@@ -59,24 +72,34 @@ export const InviteeList = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium">Filter by status:</span>
-              <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="invited">Invited</SelectItem>
-                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                  <SelectItem value="attended">Attended</SelectItem>
-                  <SelectItem value="joined_cell">Joined Cell</SelectItem>
-                  <SelectItem value="no_show">No Show</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto items-start sm:items-center gap-4">
+              <div className="relative w-full sm:w-auto">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search invitees..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full sm:w-64 pl-10"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Select value={filter} onValueChange={setFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="invited">Invited</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="attended">Attended</SelectItem>
+                    <SelectItem value="joined_cell">Joined Cell</SelectItem>
+                    <SelectItem value="no_show">No Show</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground self-end sm:self-auto">
               Total: {filteredInvitees.length} invitees
             </div>
           </div>
