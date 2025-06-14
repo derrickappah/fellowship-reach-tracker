@@ -43,6 +43,14 @@ export const ManageFellowships = () => {
     }
   };
 
+  const handleCardClick = (fellowship: any, event: React.MouseEvent) => {
+    // Prevent card click when clicking on buttons
+    if ((event.target as HTMLElement).closest('button')) {
+      return;
+    }
+    setMemberDialog({ open: true, fellowship });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -78,7 +86,11 @@ export const ManageFellowships = () => {
       {/* Fellowships Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {filteredFellowships.map((fellowship) => (
-          <Card key={fellowship.id}>
+          <Card
+            key={fellowship.id}
+            className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105"
+            onClick={(e) => handleCardClick(fellowship, e)}
+          >
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg flex items-center">

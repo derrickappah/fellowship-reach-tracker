@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -26,12 +27,11 @@ export const MemberListDialog = ({ open, onOpenChange, title, type, entityId, en
   const currentMembers = members.filter(member => {
     switch (type) {
       case 'fellowship':
-        return member.fellowship_id === entityId;
+        return member.fellowship_memberships?.some(fm => fm.fellowship_id === entityId);
       case 'cell':
-        return member.cell_id === entityId;
+        return member.cell_memberships?.some(cm => cm.cell_id === entityId);
       case 'team':
-        // This would need to be fetched from team_members table
-        return false; // Placeholder
+        return member.team_memberships?.some(tm => tm.team_id === entityId);
       default:
         return false;
     }
@@ -41,13 +41,15 @@ export const MemberListDialog = ({ open, onOpenChange, title, type, entityId, en
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          member.email.toLowerCase().includes(searchTerm.toLowerCase());
     
+    if (!matchesSearch) return false;
+
     switch (type) {
       case 'fellowship':
-        return matchesSearch && !member.fellowship_id;
+        return !member.fellowship_memberships?.length;
       case 'cell':
-        return matchesSearch && !member.cell_id;
+        return !member.cell_memberships?.length;
       case 'team':
-        return matchesSearch; // Would need to check team_members table
+        return !member.team_memberships?.some(tm => tm.team_id === entityId);
       default:
         return false;
     }
@@ -149,8 +151,8 @@ export const MemberListDialog = ({ open, onOpenChange, title, type, entityId, en
                       <p className="font-medium">{member.name}</p>
                       <p className="text-sm text-gray-600">{member.email}</p>
                       <div className="flex gap-1 mt-1">
-                        {member.fellowship_id && <Badge variant="secondary" className="text-xs">Fellowship</Badge>}
-                        {member.cell_id && <Badge variant="secondary" className="text-xs">Cell</Badge>}
+                        {!!member.fellowship_memberships?.length && <Badge variant="secondary" className="text-xs">In a Fellowship</Badge>}
+                        {!!member.cell_memberships?.length && <Badge variant="secondary" className="text-xs">In a Cell</Badge>}
                       </div>
                     </div>
                     <Button

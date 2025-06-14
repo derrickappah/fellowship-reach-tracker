@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,14 @@ export const ManageCells = () => {
     }
   };
 
+  const handleCardClick = (cell: Cell, event: React.MouseEvent) => {
+    // Prevent card click when clicking on buttons
+    if ((event.target as HTMLElement).closest('button')) {
+      return;
+    }
+    setMemberDialog({ open: true, cell });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -82,7 +91,11 @@ export const ManageCells = () => {
         {/* Cells Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCells.map((cell) => (
-            <Card key={cell.id}>
+            <Card
+              key={cell.id}
+              className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105"
+              onClick={(e) => handleCardClick(cell, e)}
+            >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg flex items-center">
