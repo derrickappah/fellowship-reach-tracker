@@ -4,10 +4,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
 
+interface FellowshipMembership {
+  fellowship_id: string;
+  fellowship: { name: string } | null;
+}
+interface CellMembership {
+  cell_id: string;
+  cell: { name: string } | null;
+}
+interface TeamMembership {
+  team_id: string;
+  team: { name: string } | null;
+}
+
 interface MemberWithMemberships extends Profile {
-  fellowship_memberships?: { fellowship: { name: string } }[];
-  cell_memberships?: { cell: { name: string } }[];
-  team_memberships?: { team: { name: string } }[];
+  fellowship_memberships?: FellowshipMembership[];
+  cell_memberships?: CellMembership[];
+  team_memberships?: TeamMembership[];
   user_role?: { role: string };
 }
 
@@ -45,6 +58,7 @@ export const useMembers = () => {
           const { data: fellowshipMemberships } = await supabase
             .from('fellowship_members')
             .select(`
+              fellowship_id,
               fellowship:fellowships(name)
             `)
             .eq('user_id', profile.id);
@@ -54,6 +68,7 @@ export const useMembers = () => {
           const { data: cellMemberships } = await supabase
             .from('cell_members')
             .select(`
+              cell_id,
               cell:cells(name)
             `)
             .eq('user_id', profile.id);
@@ -63,6 +78,7 @@ export const useMembers = () => {
           const { data: teamMemberships } = await supabase
             .from('team_members')
             .select(`
+              team_id,
               team:teams(name)
             `)
             .eq('user_id', profile.id);

@@ -13,7 +13,7 @@ import { useMembers } from '@/hooks/useMembers';
 interface MemberAssignDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  member: Profile | null;
+  member: any; // Changed from Profile | null to support full member data with memberships
 }
 
 export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignDialogProps) => {
@@ -31,9 +31,15 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
   React.useEffect(() => {
     if (member) {
       setAssignments({
-        fellowship_id: member.fellowship_id || '',
-        cell_id: member.cell_id || '',
-        team_id: '', // We'll need to fetch this from team_members table
+        fellowship_id: member.fellowship_memberships?.[0]?.fellowship_id || '',
+        cell_id: member.cell_memberships?.[0]?.cell_id || '',
+        team_id: member.team_memberships?.[0]?.team_id || '',
+      });
+    } else {
+      setAssignments({
+        fellowship_id: '',
+        cell_id: '',
+        team_id: '',
       });
     }
   }, [member]);
@@ -44,18 +50,20 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
     
     setIsSubmitting(true);
 
-    // Update fellowship assignment
-    if (assignments.fellowship_id !== (member.fellowship_id || '')) {
+    const currentFellowshipId = member.fellowship_memberships?.[0]?.fellowship_id;
+    if (assignments.fellowship_id !== (currentFellowshipId || '')) {
       await assignToFellowship(member.id, assignments.fellowship_id || null);
     }
 
-    // Update cell assignment
-    if (assignments.cell_id !== (member.cell_id || '')) {
+    const currentCellId = member.cell_memberships?.[0]?.cell_id;
+    if (assignments.cell_id !== (currentCellId || '')) {
       await assignToCell(member.id, assignments.cell_id || null);
     }
 
-    // Update team assignment
-    await assignToTeam(member.id, assignments.team_id || null);
+    const currentTeamId = member.team_memberships?.[0]?.team_id;
+    if (assignments.team_id !== (currentTeamId || '')) {
+      await assignToTeam(member.id, assignments.team_id || null);
+    }
 
     setIsSubmitting(false);
     onOpenChange(false);
