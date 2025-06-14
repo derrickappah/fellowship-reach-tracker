@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -33,18 +32,23 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
       const { data } = await supabase
         .from('profiles')
         .select('id, name, fellowship_id');
-      
-      // Filter leaders based on selected fellowship if any
       let filteredLeaders = data || [];
       if (formData.fellowship_id) {
-        filteredLeaders = filteredLeaders.filter(leader => 
-          leader.fellowship_id === formData.fellowship_id || !leader.fellowship_id
+        filteredLeaders = filteredLeaders.filter(
+          leader => leader.fellowship_id === formData.fellowship_id || !leader.fellowship_id
         );
       }
-      
-      setLeaders(filteredLeaders);
+      // filter out any leader with empty id or name
+      const validLeaders = filteredLeaders.filter(
+        leader =>
+          leader &&
+          typeof leader.id === 'string' &&
+          leader.id.trim() !== '' &&
+          typeof leader.name === 'string' &&
+          leader.name.trim() !== ''
+      );
+      setLeaders(validLeaders);
     };
-    
     if (open) {
       fetchLeaders();
     }
@@ -69,7 +73,7 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
   };
 
   const availableFellowships = user?.role === 'admin' 
-    ? fellowships 
+    ? fellowships.filter(f => typeof f.id === 'string' && f.id.trim() !== '')
     : fellowships.filter(f => f.id === user?.fellowship_id);
 
   return (
@@ -107,6 +111,7 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
                   <SelectValue placeholder="Select fellowship" />
                 </SelectTrigger>
                 <SelectContent>
+                  {/* only one placeholder */}
                   {availableFellowships.map((fellowship) => (
                     <SelectItem key={fellowship.id} value={fellowship.id}>
                       {fellowship.name}
@@ -125,6 +130,7 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
                   <SelectValue placeholder="Select leader" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">No leader</SelectItem>
                   {leaders.map((leader) => (
                     <SelectItem key={leader.id} value={leader.id}>
                       {leader.name}

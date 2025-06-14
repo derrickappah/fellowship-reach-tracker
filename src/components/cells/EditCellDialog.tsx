@@ -42,10 +42,10 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
         setLeaders([]);
         return;
       }
-      // Ensure data conforms to LeaderProfile[], filtering out any null/undefined entries or entries with null id/name
+      // filter out leaders with empty/null/undefined id or name
       const validLeaders = (data || []).filter(
         (leader): leader is LeaderProfile => 
-          leader && typeof leader.id === 'string' && typeof leader.name === 'string'
+          leader && typeof leader.id === 'string' && leader.id.trim() !== '' && typeof leader.name === 'string' && leader.name.trim() !== ''
       );
       setLeaders(validLeaders);
     };
@@ -139,7 +139,9 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">No fellowship</SelectItem>
-                  {fellowships.map((fellowship) => (
+                  {fellowships
+                    .filter(fellowship => typeof fellowship.id === 'string' && fellowship.id.trim() !== '')
+                    .map((fellowship) => (
                     <SelectItem key={fellowship.id} value={fellowship.id}>
                       {fellowship.name}
                     </SelectItem>
@@ -158,7 +160,9 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">No leader</SelectItem>
-                  {leaders.map((leader) => (
+                  {leaders
+                    .filter(leader => typeof leader.id === 'string' && leader.id.trim() !== '' && typeof leader.name === 'string' && leader.name.trim() !== '')
+                    .map((leader) => (
                     <SelectItem key={leader.id} value={leader.id}>
                       {leader.name}
                     </SelectItem>
