@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,11 +8,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 export const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signUp, user } = useAuth();
-  const { toast } = useToast();
+  const {
+    signIn,
+    signUp,
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
 
   // Redirect to home if already logged in
@@ -22,71 +26,63 @@ export const Auth = () => {
       navigate('/');
     }
   }, [user, navigate]);
-
   const [signInData, setSignInData] = useState({
     email: '',
-    password: '',
+    password: ''
   });
-
   const [signUpData, setSignUpData] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
+    confirmPassword: ''
   });
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    const { error } = await signIn(signInData.email, signInData.password);
-
+    const {
+      error
+    } = await signIn(signInData.email, signInData.password);
     if (error) {
       toast({
         title: "Sign in failed",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } else {
       toast({
         title: "Welcome back!",
-        description: "You have successfully signed in.",
+        description: "You have successfully signed in."
       });
       // Navigation will happen automatically via useEffect
     }
-
     setIsLoading(false);
   };
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (signUpData.password !== signUpData.confirmPassword) {
       toast({
         title: "Password mismatch",
         description: "Passwords do not match.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setIsLoading(true);
-
-    const { error } = await signUp(signUpData.email, signUpData.password, signUpData.name);
-
+    const {
+      error
+    } = await signUp(signUpData.email, signUpData.password, signUpData.name);
     if (error) {
       toast({
         title: "Sign up failed",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } else {
       toast({
         title: "Account created!",
-        description: "Please check your email to verify your account.",
+        description: "Please check your email to verify your account."
       });
     }
-
     setIsLoading(false);
   };
 
@@ -94,12 +90,10 @@ export const Auth = () => {
   if (user) {
     return null;
   }
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+  return <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Church Management</CardTitle>
+          <CardTitle className="text-2xl font-bold">Soul Winning Portal</CardTitle>
           <CardDescription>Sign in to manage your church organization</CardDescription>
         </CardHeader>
         <CardContent>
@@ -113,25 +107,17 @@ export const Auth = () => {
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div>
                   <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    value={signInData.email}
-                    onChange={(e) => setSignInData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="john@church.com"
-                    required
-                  />
+                  <Input id="signin-email" type="email" value={signInData.email} onChange={e => setSignInData(prev => ({
+                  ...prev,
+                  email: e.target.value
+                }))} placeholder="john@church.com" required />
                 </div>
                 <div>
                   <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    value={signInData.password}
-                    onChange={(e) => setSignInData(prev => ({ ...prev, password: e.target.value }))}
-                    placeholder="Enter your password"
-                    required
-                  />
+                  <Input id="signin-password" type="password" value={signInData.password} onChange={e => setSignInData(prev => ({
+                  ...prev,
+                  password: e.target.value
+                }))} placeholder="Enter your password" required />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -144,47 +130,31 @@ export const Auth = () => {
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div>
                   <Label htmlFor="signup-name">Full Name</Label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    value={signUpData.name}
-                    onChange={(e) => setSignUpData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="John Doe"
-                    required
-                  />
+                  <Input id="signup-name" type="text" value={signUpData.name} onChange={e => setSignUpData(prev => ({
+                  ...prev,
+                  name: e.target.value
+                }))} placeholder="John Doe" required />
                 </div>
                 <div>
                   <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    value={signUpData.email}
-                    onChange={(e) => setSignUpData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="john@church.com"
-                    required
-                  />
+                  <Input id="signup-email" type="email" value={signUpData.email} onChange={e => setSignUpData(prev => ({
+                  ...prev,
+                  email: e.target.value
+                }))} placeholder="john@church.com" required />
                 </div>
                 <div>
                   <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    value={signUpData.password}
-                    onChange={(e) => setSignUpData(prev => ({ ...prev, password: e.target.value }))}
-                    placeholder="Create a password"
-                    required
-                  />
+                  <Input id="signup-password" type="password" value={signUpData.password} onChange={e => setSignUpData(prev => ({
+                  ...prev,
+                  password: e.target.value
+                }))} placeholder="Create a password" required />
                 </div>
                 <div>
                   <Label htmlFor="signup-confirm-password">Confirm Password</Label>
-                  <Input
-                    id="signup-confirm-password"
-                    type="password"
-                    value={signUpData.confirmPassword}
-                    onChange={(e) => setSignUpData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    placeholder="Confirm your password"
-                    required
-                  />
+                  <Input id="signup-confirm-password" type="password" value={signUpData.confirmPassword} onChange={e => setSignUpData(prev => ({
+                  ...prev,
+                  confirmPassword: e.target.value
+                }))} placeholder="Confirm your password" required />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -195,6 +165,5 @@ export const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
