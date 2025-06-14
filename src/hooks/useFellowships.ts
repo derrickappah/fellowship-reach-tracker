@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Fellowship, FellowshipInsert } from '@/types/supabase';
@@ -45,6 +44,24 @@ export const useFellowships = () => {
         return acc;
       }, {} as Record<string, number>);
 
+      // Get all cells in these fellowships to calculate total member count
+      const { data: fellowshipCells, error: cellsError } = await supabase
+        .from('cells')
+        .select('id, fellowship_id, member_count')
+        .in('fellowship_id', fellowshipIds);
+
+      if (cellsError) {
+        console.warn('Error fetching fellowship cells:', cellsError);
+      }
+
+      // Calculate total member count per fellowship by summing cell member counts
+      const memberCountMap = (fellowshipCells || []).reduce((acc, cell) => {
+        if (cell.fellowship_id) {
+          acc[cell.fellowship_id] = (acc[cell.fellowship_id] || 0) + (cell.member_count || 0);
+        }
+        return acc;
+      }, {} as Record<string, number>);
+
       // Get leader data for fellowships that have leader_id
       const leaderIds = fellowshipsData
         .filter(fellowship => fellowship.leader_id)
@@ -65,10 +82,12 @@ export const useFellowships = () => {
       const transformedFellowships: Fellowship[] = fellowshipsData.map((fellowship: any) => {
         const leader = leadersData.find(l => l.id === fellowship.leader_id);
         const cellCount = cellCountMap[fellowship.id] || 0;
+        const memberCount = memberCountMap[fellowship.id] || 0;
         
         return {
           ...fellowship,
           cell_count: cellCount,
+          member_count: memberCount,
           leader: leader ? { name: leader.name } : null,
         };
       });
