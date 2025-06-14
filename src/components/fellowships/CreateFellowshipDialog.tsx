@@ -7,8 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFellowships } from '@/hooks/useFellowships';
+import { useCells } from '@/hooks/useCells';
 import { supabase } from '@/integrations/supabase/client';
 import { FellowshipInsert } from '@/types/supabase';
+import { Plus, X } from 'lucide-react';
 
 interface CreateFellowshipDialogProps {
   open: boolean;
@@ -17,12 +19,14 @@ interface CreateFellowshipDialogProps {
 
 export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipDialogProps) => {
   const { createFellowship } = useFellowships();
+  const { cells, createCell } = useCells();
   const [leaders, setLeaders] = useState<any[]>([]);
   const [formData, setFormData] = useState<FellowshipInsert>({
     name: '',
     description: '',
     leader_id: '',
   });
+  const [newCells, setNewCells] = useState<string[]>(['']);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -52,18 +56,51 @@ export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipD
     }
   }, [open]);
 
+  const addCellInput = () => {
+    setNewCells([...newCells, '']);
+  };
+
+  const removeCellInput = (index: number) => {
+    setNewCells(newCells.filter((_, i) => i !== index));
+  };
+
+  const updateCellName = (index: number, name: string) => {
+    const updated = [...newCells];
+    updated[index] = name;
+    setNewCells(updated);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const { error } = await createFellowship({
-      ...formData,
-      leader_id: formData.leader_id || null,
-    });
-    
-    if (!error) {
+    try {
+      // First create the fellowship
+      const { data: fellowship, error: fellowshipError } = await createFellowship({
+        ...formData,
+        leader_id: formData.leader_id || null,
+      });
+      
+      if (fellowshipError || !fellowship) {
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Then create the cells for this fellowship
+      const validCellNames = newCells.filter(name => name.trim() !== '');
+      for (const cellName of validCellNames) {
+        await createCell({
+          name: cellName.trim(),
+          fellowship_id: fellowship.id,
+        });
+      }
+
+      // Reset form
       setFormData({ name: '', description: '', leader_id: '' });
+      setNewCells(['']);
       onOpenChange(false);
+    } catch (error) {
+      console.error('Error creating fellowship with cells:', error);
     }
     
     setIsSubmitting(false);
@@ -71,11 +108,11 @@ export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Create New Fellowship</DialogTitle>
           <DialogDescription>
-            Add a new fellowship to your church community.
+            Add a new fellowship to your church community and optionally create cells.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -126,6 +163,37 @@ export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipD
                 placeholder="Describe the fellowship"
                 rows={3}
               />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Cells (Optional)</Label>
+                <Button type="button" size="sm" variant="outline" onClick={addCellInput}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Cell
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {newCells.map((cellName, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={cellName}
+                      onChange={(e) => updateCellName(index, e.target.value)}
+                      placeholder="Enter cell name"
+                    />
+                    {newCells.length > 1 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => removeCellInput(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <DialogFooter>
