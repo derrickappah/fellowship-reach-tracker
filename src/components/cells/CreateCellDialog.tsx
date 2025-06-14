@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -101,10 +102,10 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
             <div className="space-y-2">
               <Label htmlFor="fellowship">Fellowship</Label>
               <Select 
-                value={formData.fellowship_id} 
+                value={formData.fellowship_id || 'no-fellowship'} 
                 onValueChange={(value) => setFormData(prev => ({ 
                   ...prev, 
-                  fellowship_id: value,
+                  fellowship_id: value === 'no-fellowship' ? '' : value,
                   leader_id: '' // Reset leader when fellowship changes
                 }))}
               >
@@ -112,6 +113,7 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
                   <SelectValue placeholder="Select fellowship" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="no-fellowship">No fellowship</SelectItem>
                   {availableFellowships
                     .map((fellowship) => (
                       <SelectItem key={fellowship.id} value={fellowship.id}>

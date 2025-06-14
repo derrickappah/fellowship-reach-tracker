@@ -76,15 +76,15 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="fellowship">Fellowship</Label>
-              <Select 
-                value={assignments.fellowship_id} 
-                onValueChange={(value) => setAssignments(prev => ({ ...prev, fellowship_id: value }))}
+              <Select
+                value={assignments.fellowship_id || 'unassigned'}
+                onValueChange={(value) => setAssignments(prev => ({ ...prev, fellowship_id: value === 'unassigned' ? '' : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select fellowship" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No fellowship</SelectItem>
+                  <SelectItem value="unassigned">No fellowship</SelectItem>
                   {fellowships
                     .filter((fellowship) => fellowship.id && typeof fellowship.id === 'string' && fellowship.id.trim() !== '')
                     .map((fellowship) => (
@@ -98,15 +98,15 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
             
             <div className="space-y-2">
               <Label htmlFor="cell">Cell</Label>
-              <Select 
-                value={assignments.cell_id} 
-                onValueChange={(value) => setAssignments(prev => ({ ...prev, cell_id: value }))}
+              <Select
+                value={assignments.cell_id || 'unassigned'}
+                onValueChange={(value) => setAssignments(prev => ({ ...prev, cell_id: value === 'unassigned' ? '' : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select cell" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No cell</SelectItem>
+                  <SelectItem value="unassigned">No cell</SelectItem>
                   {cells
                     .filter(cell => cell.id && typeof cell.id === 'string' && cell.id.trim() !== '' && (!assignments.fellowship_id || cell.fellowship_id === assignments.fellowship_id))
                     .map((cell) => (
@@ -120,15 +120,15 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
             
             <div className="space-y-2">
               <Label htmlFor="team">Team</Label>
-              <Select 
-                value={assignments.team_id} 
-                onValueChange={(value) => setAssignments(prev => ({ ...prev, team_id: value }))}
+              <Select
+                value={assignments.team_id || 'unassigned'}
+                onValueChange={(value) => setAssignments(prev => ({ ...prev, team_id: value === 'unassigned' ? '' : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select team" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No team</SelectItem>
+                  <SelectItem value="unassigned">No team</SelectItem>
                   {teams
                     .filter(team => team.id && typeof team.id === 'string' && team.id.trim() !== '' && (!assignments.fellowship_id || team.fellowship_id === assignments.fellowship_id))
                     .map((team) => (
