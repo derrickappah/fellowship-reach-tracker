@@ -28,7 +28,6 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
 
   useEffect(() => {
     const fetchLeaders = async () => {
-      // Fetch all profiles that could be cell leaders
       const { data } = await supabase
         .from('profiles')
         .select('id, name, fellowship_id');
@@ -38,7 +37,7 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
           leader => leader.fellowship_id === formData.fellowship_id || !leader.fellowship_id
         );
       }
-      // filter out any leader with empty id or name
+      // Only allow leaders with a valid, non-empty id and name
       const validLeaders = filteredLeaders.filter(
         leader =>
           leader &&
@@ -111,11 +110,13 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
                   <SelectValue placeholder="Select fellowship" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* only one placeholder */}
-                  {availableFellowships.map((fellowship) => (
-                    <SelectItem key={fellowship.id} value={fellowship.id}>
-                      {fellowship.name}
-                    </SelectItem>
+                  <SelectItem value="" disabled>Select fellowship</SelectItem>
+                  {availableFellowships
+                    .filter(fellowship => typeof fellowship.id === 'string' && fellowship.id.trim() !== '')
+                    .map((fellowship) => (
+                      <SelectItem key={fellowship.id} value={fellowship.id}>
+                        {fellowship.name}
+                      </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -131,10 +132,18 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">No leader</SelectItem>
-                  {leaders.map((leader) => (
-                    <SelectItem key={leader.id} value={leader.id}>
-                      {leader.name}
-                    </SelectItem>
+                  {leaders
+                    .filter(
+                      (leader) =>
+                        typeof leader.id === 'string' &&
+                        leader.id.trim() !== '' &&
+                        typeof leader.name === 'string' &&
+                        leader.name.trim() !== ''
+                    )
+                    .map((leader) => (
+                      <SelectItem key={leader.id} value={leader.id}>
+                        {leader.name}
+                      </SelectItem>
                   ))}
                 </SelectContent>
               </Select>

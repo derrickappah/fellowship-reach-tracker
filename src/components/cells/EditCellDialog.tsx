@@ -36,15 +36,14 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
       const { data, error } = await supabase
         .from('profiles')
         .select('id, name');
-      
       if (error) {
         console.error("Error fetching leaders:", error);
         setLeaders([]);
         return;
       }
-      // filter out leaders with empty/null/undefined id or name
+      // Only allow leaders with a valid, non-empty id and name
       const validLeaders = (data || []).filter(
-        (leader): leader is LeaderProfile => 
+        (leader): leader is LeaderProfile =>
           leader && typeof leader.id === 'string' && leader.id.trim() !== '' && typeof leader.name === 'string' && leader.name.trim() !== ''
       );
       setLeaders(validLeaders);
@@ -142,9 +141,9 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
                   {fellowships
                     .filter(fellowship => typeof fellowship.id === 'string' && fellowship.id.trim() !== '')
                     .map((fellowship) => (
-                    <SelectItem key={fellowship.id} value={fellowship.id}>
-                      {fellowship.name}
-                    </SelectItem>
+                      <SelectItem key={fellowship.id} value={fellowship.id}>
+                        {fellowship.name}
+                      </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -161,11 +160,17 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
                 <SelectContent>
                   <SelectItem value="">No leader</SelectItem>
                   {leaders
-                    .filter(leader => typeof leader.id === 'string' && leader.id.trim() !== '' && typeof leader.name === 'string' && leader.name.trim() !== '')
+                    .filter(
+                      (leader) =>
+                        typeof leader.id === 'string' &&
+                        leader.id.trim() !== '' &&
+                        typeof leader.name === 'string' &&
+                        leader.name.trim() !== ''
+                    )
                     .map((leader) => (
-                    <SelectItem key={leader.id} value={leader.id}>
-                      {leader.name}
-                    </SelectItem>
+                      <SelectItem key={leader.id} value={leader.id}>
+                        {leader.name}
+                      </SelectItem>
                   ))}
                 </SelectContent>
               </Select>

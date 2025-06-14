@@ -36,10 +36,17 @@ export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipD
           user_roles!inner(role)
         `)
         .in('user_roles.role', ['admin', 'fellowship_leader']);
-      
-      setLeaders(data || []);
+      // Filter for valid leaders only
+      const validLeaders = (data || []).filter(
+        leader =>
+          leader &&
+          typeof leader.id === 'string' &&
+          leader.id.trim() !== '' &&
+          typeof leader.name === 'string' &&
+          leader.name.trim() !== ''
+      );
+      setLeaders(validLeaders);
     };
-    
     if (open) {
       fetchLeaders();
     }
@@ -93,10 +100,19 @@ export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipD
                   <SelectValue placeholder="Select a leader" />
                 </SelectTrigger>
                 <SelectContent>
-                  {leaders.map((leader) => (
-                    <SelectItem key={leader.id} value={leader.id}>
-                      {leader.name}
-                    </SelectItem>
+                  <SelectItem value="">No leader</SelectItem>
+                  {leaders
+                    .filter(
+                      (leader) =>
+                        typeof leader.id === 'string' &&
+                        leader.id.trim() !== '' &&
+                        typeof leader.name === 'string' &&
+                        leader.name.trim() !== ''
+                    )
+                    .map((leader) => (
+                      <SelectItem key={leader.id} value={leader.id}>
+                        {leader.name}
+                      </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
