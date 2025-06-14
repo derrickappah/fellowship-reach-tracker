@@ -72,21 +72,6 @@ export const useTeamPerformance = (selectedDate: Date) => {
 
       console.log('Found teams:', teams.map(t => ({ id: t.id, name: t.name })));
 
-      // Debug: Check all invitees first
-      const { data: allInvitees, error: allInviteesError } = await supabase
-        .from('invitees')
-        .select('*');
-      
-      console.log('Total invitees in database:', allInvitees?.length || 0);
-      if (allInvitees && allInvitees.length > 0) {
-        console.log('Sample invitee dates:', allInvitees.slice(0, 5).map(i => ({
-          name: i.name,
-          invite_date: i.invite_date,
-          service_date: i.service_date,
-          team_id: i.team_id
-        })));
-      }
-
       // Get team performance data
       const teamPerformanceData = await Promise.all(
         teams.map(async (team) => {
@@ -146,19 +131,38 @@ export const useTeamPerformance = (selectedDate: Date) => {
             })));
           }
 
-          // Categorize invitees by service type - use service_date if available, otherwise invite_date
+          // For now, let's categorize all invitees as Sunday service since we don't have 
+          // a specific field to indicate which service they were invited to
+          // In a real system, you'd want to add a "service_type" field to the invitees table
           const wednesdayInvitees = inviteesArray.filter(i => {
-            const dateToCheck = i.service_date ? new Date(i.service_date) : new Date(i.invite_date);
-            const dayOfWeek = dateToCheck.getDay();
-            console.log(`${i.name}: checking date ${dateToCheck.toDateString()}, day=${dayOfWeek}, isWednesday=${dayOfWeek === 3}`);
-            return dayOfWeek === 3; // Wednesday
+            // If service_date exists and it's a Wednesday, count as Wednesday
+            if (i.service_date) {
+              const serviceDate = new Date(i.service_date);
+              const dayOfWeek = serviceDate.getDay();
+              console.log(`${i.name}: service_date ${serviceDate.toDateString()}, day=${dayOfWeek}, isWednesday=${dayOfWeek === 3}`);
+              return dayOfWeek === 3;
+            }
+            // If no service_date, assume it's for the next service in the week
+            // For simplicity, let's say if invite_date is Mon-Wed, it's for Wednesday service
+            const inviteDate = new Date(i.invite_date);
+            const inviteDayOfWeek = inviteDate.getDay();
+            console.log(`${i.name}: invite_date ${inviteDate.toDateString()}, day=${inviteDayOfWeek}, assumingWednesday=${inviteDayOfWeek >= 1 && inviteDayOfWeek <= 3}`);
+            return inviteDayOfWeek >= 1 && inviteDayOfWeek <= 3; // Monday to Wednesday
           });
 
           const sundayInvitees = inviteesArray.filter(i => {
-            const dateToCheck = i.service_date ? new Date(i.service_date) : new Date(i.invite_date);
-            const dayOfWeek = dateToCheck.getDay();
-            console.log(`${i.name}: checking date ${dateToCheck.toDateString()}, day=${dayOfWeek}, isSunday=${dayOfWeek === 0}`);
-            return dayOfWeek === 0; // Sunday
+            // If service_date exists and it's a Sunday, count as Sunday
+            if (i.service_date) {
+              const serviceDate = new Date(i.service_date);
+              const dayOfWeek = serviceDate.getDay();
+              console.log(`${i.name}: service_date ${serviceDate.toDateString()}, day=${dayOfWeek}, isSunday=${dayOfWeek === 0}`);
+              return dayOfWeek === 0;
+            }
+            // If no service_date, assume it's for Sunday if invited Thu-Sun
+            const inviteDate = new Date(i.invite_date);
+            const inviteDayOfWeek = inviteDate.getDay();
+            console.log(`${i.name}: invite_date ${inviteDate.toDateString()}, day=${inviteDayOfWeek}, assumingSunday=${inviteDayOfWeek === 0 || inviteDayOfWeek >= 4}`);
+            return inviteDayOfWeek === 0 || inviteDayOfWeek >= 4; // Thursday to Sunday
           });
 
           const wednesdayAttendees = wednesdayInvitees.filter(i => i.attended_service === true);
