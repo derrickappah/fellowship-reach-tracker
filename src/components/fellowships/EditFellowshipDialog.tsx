@@ -33,17 +33,19 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fellowship) return;
-    
     setIsSubmitting(true);
 
     const { error } = await updateFellowship(fellowship.id, formData);
-    
+
     if (!error) {
       onOpenChange(false);
     }
-    
     setIsSubmitting(false);
   };
+
+  // Defensive: Do not render unless fellowship is valid
+  if (!open) return null;
+  if (!fellowship) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

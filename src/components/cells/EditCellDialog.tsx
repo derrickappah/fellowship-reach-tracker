@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -41,15 +42,14 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
         setLeaders([]);
         return;
       }
-      // Only allow leaders with a valid, non-empty id and name
       const validLeaders = (data || []).filter(
         (leader): leader is LeaderProfile =>
           leader && typeof leader.id === 'string' && leader.id.trim() !== '' && typeof leader.name === 'string' && leader.name.trim() !== ''
       );
       setLeaders(validLeaders);
     };
-    fetchLeaders();
-  }, []);
+    if (open) fetchLeaders();
+  }, [open]);
 
   useEffect(() => {
     if (cell) {
@@ -62,7 +62,6 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
   }, [cell]);
 
   useEffect(() => {
-    // log when cell changes
     console.log("[EditCellDialog] cell prop:", cell);
     if (cell && typeof cell.id !== "string") {
       console.error("[EditCellDialog] Invalid cell.id value", cell.id);
@@ -75,23 +74,16 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cell) return;
-    
     setIsSubmitting(true);
-
     const { error } = await updateCell(cell.id, {
       ...formData,
       fellowship_id: formData.fellowship_id || null,
       leader_id: formData.leader_id || null,
     });
-    
-    if (!error) {
-      onOpenChange(false);
-    }
-    
+    if (!error) onOpenChange(false);
     setIsSubmitting(false);
   };
 
-  // Defensive: Do not render unless cell is valid
   if (!open) return null;
   if (!cell) {
     console.warn("[EditCellDialog] Not rendering (cell is null)");
@@ -105,6 +97,13 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
     console.error("[EditCellDialog] Not rendering: cell.name is not a string", cell.name);
     return <div className="text-red-600 p-4">Error: Cell name is invalid.</div>;
   }
+
+  const availableFellowships = fellowships.filter(
+    f => typeof f.id === "string" && f.id.trim() !== "" && typeof f.name === "string" && f.name.trim() !== ""
+  );
+  const availableLeaders = leaders.filter(
+    l => typeof l.id === "string" && l.id.trim() !== "" && typeof l.name === "string" && l.name.trim() !== ""
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -130,20 +129,18 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
             <div className="space-y-2">
               <Label htmlFor="fellowship">Fellowship</Label>
               <Select 
-                value={formData.fellowship_id} 
+                value={formData.fellowship_id || ""}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, fellowship_id: value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select fellowship" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No fellowship</SelectItem>
-                  {fellowships
-                    .filter(fellowship => typeof fellowship.id === 'string' && fellowship.id.trim() !== '' && typeof fellowship.name === 'string' && fellowship.name.trim() !== '')
-                    .map((fellowship) => (
-                      <SelectItem key={fellowship.id} value={fellowship.id}>
-                        {fellowship.name}
-                      </SelectItem>
+                  <SelectItem value="" disabled>Select fellowship</SelectItem>
+                  {availableFellowships.map((fellowship) => (
+                    <SelectItem key={fellowship.id} value={fellowship.id}>
+                      {fellowship.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -151,26 +148,18 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
             <div className="space-y-2">
               <Label htmlFor="leader">Cell Leader</Label>
               <Select 
-                value={formData.leader_id} 
+                value={formData.leader_id || ""}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select leader" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No leader</SelectItem>
-                  {leaders
-                    .filter(
-                      (leader) =>
-                        typeof leader.id === 'string' &&
-                        leader.id.trim() !== '' &&
-                        typeof leader.name === 'string' &&
-                        leader.name.trim() !== ''
-                    )
-                    .map((leader) => (
-                      <SelectItem key={leader.id} value={leader.id}>
-                        {leader.name}
-                      </SelectItem>
+                  <SelectItem value="" disabled>Select leader</SelectItem>
+                  {availableLeaders.map((leader) => (
+                    <SelectItem key={leader.id} value={leader.id}>
+                      {leader.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
