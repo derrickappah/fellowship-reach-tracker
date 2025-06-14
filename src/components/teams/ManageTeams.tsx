@@ -10,6 +10,7 @@ import { CreateTeamDialog } from './CreateTeamDialog';
 import { EditTeamDialog } from './EditTeamDialog';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { MemberListDialog } from '@/components/members/MemberListDialog';
+import { TeamInvitesDialog } from './TeamInvitesDialog';
 
 export const ManageTeams = () => {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ export const ManageTeams = () => {
   const [editingTeam, setEditingTeam] = useState<any>(null);
   const [deletingTeam, setDeletingTeam] = useState<any>(null);
   const [memberDialog, setMemberDialog] = useState<{ open: boolean; team: any } | null>(null);
+  const [teamInvitesDialog, setTeamInvitesDialog] = useState<{ open: boolean; team: any } | null>(null);
 
   const filteredTeams = user?.role === 'admin' 
     ? teams 
@@ -28,6 +30,14 @@ export const ManageTeams = () => {
       await deleteTeam(deletingTeam.id);
       setDeletingTeam(null);
     }
+  };
+
+  const handleCardClick = (team: any, event: React.MouseEvent) => {
+    // Prevent card click when clicking on buttons
+    if ((event.target as HTMLElement).closest('button')) {
+      return;
+    }
+    setTeamInvitesDialog({ open: true, team });
   };
 
   if (loading) {
@@ -56,7 +66,11 @@ export const ManageTeams = () => {
       {/* Teams Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTeams.map((team) => (
-          <Card key={team.id}>
+          <Card 
+            key={team.id} 
+            className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 hover:bg-accent/10"
+            onClick={(e) => handleCardClick(team, e)}
+          >
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{team.name}</CardTitle>
@@ -150,6 +164,14 @@ export const ManageTeams = () => {
           type="team"
           entityId={memberDialog.team.id}
           entityName={memberDialog.team.name}
+        />
+      )}
+
+      {teamInvitesDialog && (
+        <TeamInvitesDialog
+          open={teamInvitesDialog.open}
+          onOpenChange={(open) => !open && setTeamInvitesDialog(null)}
+          team={teamInvitesDialog.team}
         />
       )}
     </div>
