@@ -28,7 +28,7 @@ export const InviteeListItemMobile = ({ invitee, onStatusChange, onDelete, canEd
   const status = invitee.status || 'invited';
   
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md hover:scale-[1.02] animate-fade-in">
       <CardHeader className="flex flex-row justify-between items-start gap-4">
         <div>
           <CardTitle className="text-lg">{invitee.name}</CardTitle>
@@ -39,7 +39,7 @@ export const InviteeListItemMobile = ({ invitee, onStatusChange, onDelete, canEd
             </div>
           )}
         </div>
-        <Badge className={cn("whitespace-nowrap", statusColors[status as keyof typeof statusColors])}>
+        <Badge className={cn("whitespace-nowrap transition-colors duration-200", statusColors[status as keyof typeof statusColors])}>
           {status.replace('_', ' ').toUpperCase()}
         </Badge>
       </CardHeader>
@@ -79,7 +79,7 @@ export const InviteeListItemMobile = ({ invitee, onStatusChange, onDelete, canEd
               onValueChange={(value) => onStatusChange(invitee.id, value)}
               disabled={!canEditOrDelete}
           >
-              <SelectTrigger className="w-[150px] h-9">
+              <SelectTrigger className="w-[150px] h-9 transition-all duration-200 hover:bg-muted/50">
                   <SelectValue placeholder="Change status" />
               </SelectTrigger>
               <SelectContent>
@@ -94,7 +94,7 @@ export const InviteeListItemMobile = ({ invitee, onStatusChange, onDelete, canEd
               variant="ghost"
               size="icon"
               onClick={() => onDelete(invitee.id)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/30"
+              className="text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/30 hover:scale-110 transition-all duration-200"
               disabled={!canEditOrDelete}
           >
               <Trash2 className="h-4 w-4" />
@@ -104,4 +104,3 @@ export const InviteeListItemMobile = ({ invitee, onStatusChange, onDelete, canEd
     </Card>
   );
 };
-

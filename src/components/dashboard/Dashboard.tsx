@@ -15,7 +15,7 @@ export const Dashboard = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Church Management Dashboard</h1>
           <p className="text-muted-foreground mt-1">
@@ -29,7 +29,7 @@ export const Dashboard = () => {
               <Button
                 variant="outline"
                 className={cn(
-                  "w-full md:w-[280px] justify-start text-left font-normal",
+                  "w-full md:w-[280px] justify-start text-left font-normal transition-all duration-200 hover:scale-105",
                   !selectedDate && "text-muted-foreground"
                 )}
               >
@@ -37,7 +37,7 @@ export const Dashboard = () => {
                 {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
+            <PopoverContent className="w-auto p-0 animate-scale-in" align="end">
               <Calendar
                 mode="single"
                 selected={selectedDate}
@@ -51,7 +51,9 @@ export const Dashboard = () => {
       </div>
 
       {/* Team Performance Overview */}
-      <TeamPerformance selectedDate={selectedDate} />
+      <div className="animate-fade-in" style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}>
+        <TeamPerformance selectedDate={selectedDate} />
+      </div>
     </div>
   );
 };

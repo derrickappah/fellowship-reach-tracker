@@ -50,14 +50,14 @@ export const ManageTeams = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="text-3xl font-bold">Manage Teams</h1>
           <p className="text-gray-600">
             {user?.role === 'admin' ? 'Manage all outreach teams' : 'Manage your fellowship teams'}
           </p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
+        <Button onClick={() => setShowCreateDialog(true)} className="hover:scale-105 transition-transform duration-200">
           <Plus className="mr-2 h-4 w-4" />
           Create Team
         </Button>
@@ -65,16 +65,17 @@ export const ManageTeams = () => {
 
       {/* Teams Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTeams.map((team) => (
+        {filteredTeams.map((team, index) => (
           <Card 
             key={team.id} 
-            className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 hover:bg-accent/10"
+            className="cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 hover:bg-accent/10 animate-fade-in"
+            style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
             onClick={(e) => handleCardClick(team, e)}
           >
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{team.name}</CardTitle>
-                <Badge variant={team.is_active ? 'default' : 'secondary'}>
+                <Badge variant={team.is_active ? 'default' : 'secondary'} className="transition-colors duration-200">
                   {team.is_active ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
@@ -94,6 +95,7 @@ export const ManageTeams = () => {
                     size="sm" 
                     variant="outline" 
                     onClick={() => setEditingTeam(team)}
+                    className="hover:scale-105 transition-all duration-200"
                   >
                     <Edit className="mr-2 h-3 w-3" />
                     Edit
@@ -102,6 +104,7 @@ export const ManageTeams = () => {
                     size="sm" 
                     variant="outline"
                     onClick={() => setMemberDialog({ open: true, team })}
+                    className="hover:scale-105 transition-all duration-200"
                   >
                     <UserPlus className="mr-2 h-3 w-3" />
                     Members
@@ -110,7 +113,7 @@ export const ManageTeams = () => {
                     size="sm" 
                     variant="outline"
                     onClick={() => setDeletingTeam(team)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 hover:text-red-700 hover:scale-105 transition-all duration-200"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -122,14 +125,14 @@ export const ManageTeams = () => {
       </div>
 
       {filteredTeams.length === 0 && (
-        <Card>
+        <Card className="animate-fade-in">
           <CardContent className="text-center py-8">
-            <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <Users className="mx-auto h-12 w-12 text-gray-400 mb-4 animate-pulse" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No teams found</h3>
             <p className="text-gray-600 mb-4">
               Get started by creating your first outreach team.
             </p>
-            <Button onClick={() => setShowCreateDialog(true)}>
+            <Button onClick={() => setShowCreateDialog(true)} className="hover:scale-105 transition-transform duration-200">
               <Plus className="mr-2 h-4 w-4" />
               Create Your First Team
             </Button>
