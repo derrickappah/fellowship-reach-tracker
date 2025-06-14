@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dashboard } from '@/components/dashboard/Dashboard';
@@ -178,8 +177,8 @@ const Index = () => {
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top bar for mobile */}
-        <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 lg:hidden flex-shrink-0">
+        {/* Top bar for mobile - made sticky */}
+        <div className="sticky top-0 z-40 bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 lg:hidden flex-shrink-0">
           <div className="flex items-center justify-between h-16 px-4">
             <Button
               variant="ghost"
