@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useInvitees } from '@/hooks/useInvitees';
 import { format } from 'date-fns';
 import { Trash2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const statusColors = {
   invited: 'bg-blue-100 text-blue-800',
@@ -19,6 +20,7 @@ const statusColors = {
 
 export const InviteeList = () => {
   const { invitees, loading, updateInviteeStatus, deleteInvitee } = useInvitees();
+  const { user } = useAuth();
   const [filter, setFilter] = useState('all');
 
   const filteredInvitees = invitees.filter(invitee => {
@@ -91,80 +93,89 @@ export const InviteeList = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredInvitees.map((invitee) => (
-                  <TableRow key={invitee.id}>
-                    <TableCell className="font-medium">{invitee.name}</TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        {invitee.email && (
-                          <div className="text-sm">{invitee.email}</div>
-                        )}
-                        {invitee.phone && (
-                          <div className="text-sm text-muted-foreground">{invitee.phone}</div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {invitee.inviter?.name || 'Unknown'}
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        {invitee.team?.name && (
-                          <div className="text-sm">Team: {invitee.team.name}</div>
-                        )}
-                        {invitee.cell?.name && (
-                          <div className="text-sm">Cell: {invitee.cell.name}</div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(invitee.invite_date), 'MMM dd, yyyy')}
-                    </TableCell>
-                    <TableCell>
-                      {invitee.service_date 
-                        ? format(new Date(invitee.service_date), 'MMM dd, yyyy')
-                        : '-'
-                      }
-                    </TableCell>
-                    <TableCell>
-                      <Select
-                        value={invitee.status || 'invited'}
-                        onValueChange={(value) => handleStatusChange(invitee.id, value)}
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="invited">
-                            <Badge className={statusColors.invited}>Invited</Badge>
-                          </SelectItem>
-                          <SelectItem value="confirmed">
-                            <Badge className={statusColors.confirmed}>Confirmed</Badge>
-                          </SelectItem>
-                          <SelectItem value="attended">
-                            <Badge className={statusColors.attended}>Attended</Badge>
-                          </SelectItem>
-                          <SelectItem value="joined_cell">
-                            <Badge className={statusColors.joined_cell}>Joined Cell</Badge>
-                          </SelectItem>
-                          <SelectItem value="no_show">
-                            <Badge className={statusColors.no_show}>No Show</Badge>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(invitee.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredInvitees.map((invitee) => {
+                  const isOwner = invitee.invited_by === user?.id;
+                  const isAdmin = user?.role === 'admin';
+                  const isFellowshipLeader = user?.role === 'fellowship_leader';
+                  const canEditOrDelete = isAdmin || isFellowshipLeader || isOwner;
+
+                  return (
+                    <TableRow key={invitee.id}>
+                      <TableCell className="font-medium">{invitee.name}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {invitee.email && (
+                            <div className="text-sm">{invitee.email}</div>
+                          )}
+                          {invitee.phone && (
+                            <div className="text-sm text-muted-foreground">{invitee.phone}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {invitee.inviter?.name || 'Unknown'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {invitee.team?.name && (
+                            <div className="text-sm">Team: {invitee.team.name}</div>
+                          )}
+                          {invitee.cell?.name && (
+                            <div className="text-sm">Cell: {invitee.cell.name}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(invitee.invite_date), 'MMM dd, yyyy')}
+                      </TableCell>
+                      <TableCell>
+                        {invitee.service_date 
+                          ? format(new Date(invitee.service_date), 'MMM dd, yyyy')
+                          : '-'
+                        }
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={invitee.status || 'invited'}
+                          onValueChange={(value) => handleStatusChange(invitee.id, value)}
+                          disabled={!canEditOrDelete}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="invited">
+                              <Badge className={statusColors.invited}>Invited</Badge>
+                            </SelectItem>
+                            <SelectItem value="confirmed">
+                              <Badge className={statusColors.confirmed}>Confirmed</Badge>
+                            </SelectItem>
+                            <SelectItem value="attended">
+                              <Badge className={statusColors.attended}>Attended</Badge>
+                            </SelectItem>
+                            <SelectItem value="joined_cell">
+                              <Badge className={statusColors.joined_cell}>Joined Cell</Badge>
+                            </SelectItem>
+                            <SelectItem value="no_show">
+                              <Badge className={statusColors.no_show}>No Show</Badge>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(invitee.id)}
+                          className="text-red-600 hover:text-red-700"
+                          disabled={!canEditOrDelete}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
                 {filteredInvitees.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
