@@ -161,29 +161,29 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Wednesday Service */}
                   <div className="bg-blue-50 p-3 rounded-lg">
-                    <h4 className="font-medium text-blue-800 mb-2">Wednesday Midweek</h4>
-                    <div className="flex justify-between text-sm">
-                      <span>Invited: <span className="font-bold">{team.wednesdayInvitees}</span></span>
+                    <h4 className="font-medium text-blue-900 mb-2">Wednesday Midweek</h4>
+                    <div className="flex justify-between text-sm text-blue-800">
+                      <span>Invited: <span className="font-bold text-blue-900">{team.wednesdayInvitees}</span></span>
                       <span>Attended: <span className="font-bold text-blue-600">{team.wednesdayAttendees}</span></span>
                     </div>
                   </div>
 
                   {/* Sunday Service */}
                   <div className="bg-green-50 p-3 rounded-lg">
-                    <h4 className="font-medium text-green-800 mb-2">Sunday Service</h4>
-                    <div className="flex justify-between text-sm">
-                      <span>Invited: <span className="font-bold">{team.sundayInvitees}</span></span>
+                    <h4 className="font-medium text-green-900 mb-2">Sunday Service</h4>
+                    <div className="flex justify-between text-sm text-green-800">
+                      <span>Invited: <span className="font-bold text-green-900">{team.sundayInvitees}</span></span>
                       <span>Attended: <span className="font-bold text-green-600">{team.sundayAttendees}</span></span>
                     </div>
                   </div>
 
                   {/* Total Performance */}
                   <div className="bg-purple-50 p-3 rounded-lg">
-                    <h4 className="font-medium text-purple-800 mb-2">Weekly Total</h4>
-                    <div className="space-y-1 text-sm">
+                    <h4 className="font-medium text-purple-900 mb-2">Weekly Total</h4>
+                    <div className="space-y-1 text-sm text-purple-800">
                       <div className="flex justify-between">
                         <span>Total Invited:</span>
-                        <span className="font-bold">{team.totalInvitees}</span>
+                        <span className="font-bold text-purple-900">{team.totalInvitees}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Total Attended:</span>
