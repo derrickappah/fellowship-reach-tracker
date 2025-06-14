@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,8 +38,8 @@ export const UpdateProfileForm = () => {
       email: '',
       name: '',
       phone: '',
-      cell_id: '',
-      team_id: '',
+      cell_id: 'unassigned',
+      team_id: 'unassigned',
     },
   });
 
@@ -61,8 +62,8 @@ export const UpdateProfileForm = () => {
             name: user.name,
             email: user.email,
             phone: profileData?.phone || '',
-            cell_id: profileData?.cell_id || '',
-            team_id: teamData?.team_id || '',
+            cell_id: profileData?.cell_id || 'unassigned',
+            team_id: teamData?.team_id || 'unassigned',
           });
 
           if (profileError && profileError.code !== 'PGRST116') {
@@ -83,8 +84,8 @@ export const UpdateProfileForm = () => {
       p_user_id: user.id,
       p_name: data.name,
       p_phone: data.phone || null,
-      p_cell_id: data.cell_id || null,
-      p_team_id: data.team_id || null,
+      p_cell_id: data.cell_id === 'unassigned' ? null : data.cell_id,
+      p_team_id: data.team_id === 'unassigned' ? null : data.team_id,
     });
 
     if (error) {
@@ -163,14 +164,14 @@ export const UpdateProfileForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Cell</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                  <Select onValueChange={field.onChange} value={field.value || 'unassigned'}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a cell" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">No cell assigned</SelectItem>
+                      <SelectItem value="unassigned">No cell assigned</SelectItem>
                       {cells.map((cell) => (
                         <SelectItem key={cell.id} value={cell.id}>
                           {cell.name}
@@ -188,14 +189,14 @@ export const UpdateProfileForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Team</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                  <Select onValueChange={field.onChange} value={field.value || 'unassigned'}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a team" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">No team assigned</SelectItem>
+                      <SelectItem value="unassigned">No team assigned</SelectItem>
                       {teams.map((team) => (
                         <SelectItem key={team.id} value={team.id}>
                           {team.name}
