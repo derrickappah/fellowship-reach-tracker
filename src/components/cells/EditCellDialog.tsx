@@ -16,10 +16,15 @@ interface EditCellDialogProps {
   cell: Cell | null;
 }
 
+interface LeaderProfile {
+  id: string;
+  name: string;
+}
+
 export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps) => {
   const { updateCell } = useCells();
   const { fellowships } = useFellowships();
-  const [leaders, setLeaders] = useState<any[]>([]); // Consider typing leaders more strictly if possible
+  const [leaders, setLeaders] = useState<LeaderProfile[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     fellowship_id: '',
@@ -29,10 +34,21 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
 
   useEffect(() => {
     const fetchLeaders = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .select('id, name'); // Assuming profiles has id and name
-      setLeaders(data || []);
+        .select('id, name');
+      
+      if (error) {
+        console.error("Error fetching leaders:", error);
+        setLeaders([]);
+        return;
+      }
+      // Ensure data conforms to LeaderProfile[], filtering out any null/undefined entries or entries with null id/name
+      const validLeaders = (data || []).filter(
+        (leader): leader is LeaderProfile => 
+          leader && typeof leader.id === 'string' && typeof leader.name === 'string'
+      );
+      setLeaders(validLeaders);
     };
     fetchLeaders();
   }, []);
@@ -40,7 +56,7 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
   useEffect(() => {
     if (cell) {
       setFormData({
-        name: cell.name || '', // Ensure name is always a string
+        name: cell.name || '',
         fellowship_id: cell.fellowship_id || '',
         leader_id: cell.leader_id || '',
       });
@@ -55,8 +71,8 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
 
     const { error } = await updateCell(cell.id, {
       ...formData,
-      fellowship_id: formData.fellowship_id || null, // Convert empty string back to null for DB
-      leader_id: formData.leader_id || null,       // Convert empty string back to null for DB
+      fellowship_id: formData.fellowship_id || null,
+      leader_id: formData.leader_id || null,
     });
     
     if (!error) {
