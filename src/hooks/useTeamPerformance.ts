@@ -193,20 +193,27 @@ export const useTeamPerformance = (selectedDate: Date) => {
       console.log('\n=== FINAL TEAM PERFORMANCE DATA ===');
       console.log('All team performance:', teamPerformanceData);
 
-      // Calculate totals and top performer
+      // Calculate totals and top performer - Fixed calculation
       const totalInvitees = teamPerformanceData.reduce((sum, team) => sum + team.totalInvitees, 0);
       const totalAttendees = teamPerformanceData.reduce((sum, team) => sum + team.totalAttendees, 0);
       const attendanceRate = totalInvitees > 0 ? Math.round((totalAttendees / totalInvitees) * 100) : 0;
 
+      // Find top team by total invitees
       const topTeam = teamPerformanceData.reduce((top, team) => {
-        return team.totalInvitees > (top?.totalInvitees || 0) ? team : top;
-      }, teamPerformanceData[0] || null);
+        if (!top || team.totalInvitees > top.totalInvitees) {
+          return team;
+        }
+        return top;
+      }, null as typeof teamPerformanceData[0] | null);
 
       const finalData = {
         totalTeams: teams.length,
         totalInvitees,
         attendanceRate,
-        topTeam: topTeam ? { name: topTeam.name, invitees: topTeam.totalInvitees } : null,
+        topTeam: topTeam && topTeam.totalInvitees > 0 ? { 
+          name: topTeam.name, 
+          invitees: topTeam.totalInvitees 
+        } : null,
         teams: teamPerformanceData.sort((a, b) => b.totalInvitees - a.totalInvitees),
       };
 
