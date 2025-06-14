@@ -85,7 +85,8 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
     try {
       // Update fellowship details
       const { error: fellowshipError } = await updateFellowship(fellowship.id, {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
         leader_id: formData.leader_id === 'no-leader' ? null : formData.leader_id || null,
       });
       if (fellowshipError) {
