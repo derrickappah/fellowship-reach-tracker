@@ -37,13 +37,12 @@ export const useTeamPerformance = (selectedDate: Date) => {
     try {
       setLoading(true);
 
-      const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Monday start
-      const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 }); // Sunday end
+      const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
 
       console.log('=== TEAM PERFORMANCE DEBUG ===');
       console.log('Selected date:', selectedDate.toISOString());
       console.log('Week range:', format(weekStart, 'yyyy-MM-dd'), 'to', format(weekEnd, 'yyyy-MM-dd'));
-      console.log('Current user:', user?.role, user?.fellowship_id);
 
       // Get teams based on user role
       let teamsQuery = supabase.from('teams').select('*');
@@ -53,13 +52,9 @@ export const useTeamPerformance = (selectedDate: Date) => {
       }
 
       const { data: teams, error: teamsError } = await teamsQuery;
-      if (teamsError) {
-        console.error('Teams query error:', teamsError);
-        throw teamsError;
-      }
+      if (teamsError) throw teamsError;
 
       if (!teams || teams.length === 0) {
-        console.log('No teams found');
         setTeamPerformance({
           totalTeams: 0,
           totalInvitees: 0,
@@ -75,100 +70,49 @@ export const useTeamPerformance = (selectedDate: Date) => {
       // Get team performance data
       const teamPerformanceData = await Promise.all(
         teams.map(async (team) => {
-          console.log(`\n--- Processing team: ${team.name} (ID: ${team.id}) ---`);
+          console.log(`\n--- Processing team: ${team.name} ---`);
           
           // Get team members count
-          const { data: teamMembers, error: teamMembersError } = await supabase
+          const { data: teamMembers } = await supabase
             .from('team_members')
             .select('id')
             .eq('team_id', team.id);
 
-          if (teamMembersError) {
-            console.error(`Error fetching team members for ${team.name}:`, teamMembersError);
-          }
-
-          console.log(`Team ${team.name} has ${teamMembers?.length || 0} members`);
-
-          // Get invitees for this team in the selected week - using date format YYYY-MM-DD
+          // Get invitees for this team in the selected week
           const weekStartStr = format(weekStart, 'yyyy-MM-dd');
           const weekEndStr = format(weekEnd, 'yyyy-MM-dd');
 
-          console.log(`Querying invitees for team ${team.name} between ${weekStartStr} and ${weekEndStr}`);
-
-          const { data: weekInvitees, error: weekInviteesError } = await supabase
+          const { data: weekInvitees } = await supabase
             .from('invitees')
             .select('*')
             .eq('team_id', team.id)
             .gte('invite_date', weekStartStr)
             .lte('invite_date', weekEndStr);
 
-          if (weekInviteesError) {
-            console.error(`Error fetching week invitees for team ${team.name}:`, weekInviteesError);
-            return {
-              id: team.id,
-              name: team.name,
-              members: teamMembers?.length || 0,
-              wednesdayInvitees: 0,
-              wednesdayAttendees: 0,
-              sundayInvitees: 0,
-              sundayAttendees: 0,
-              totalInvitees: 0,
-              totalAttendees: 0,
-              conversions: 0,
-            };
-          }
-
           const inviteesArray = weekInvitees || [];
-          console.log(`Team ${team.name} has ${inviteesArray.length} invitees in selected week`);
+          console.log(`Team ${team.name} has ${inviteesArray.length} invitees`);
 
-          if (inviteesArray.length > 0) {
-            console.log(`Invitees details for ${team.name}:`, inviteesArray.map(i => ({
-              name: i.name,
-              invite_date: i.invite_date,
-              service_date: i.service_date,
-              attended_service: i.attended_service,
-              status: i.status
-            })));
-          }
-
-          // For now, let's categorize all invitees as Sunday service since we don't have 
-          // a specific field to indicate which service they were invited to
-          // In a real system, you'd want to add a "service_type" field to the invitees table
+          // Categorize invitees
           const wednesdayInvitees = inviteesArray.filter(i => {
-            // If service_date exists and it's a Wednesday, count as Wednesday
             if (i.service_date) {
               const serviceDate = new Date(i.service_date);
-              const dayOfWeek = serviceDate.getDay();
-              console.log(`${i.name}: service_date ${serviceDate.toDateString()}, day=${dayOfWeek}, isWednesday=${dayOfWeek === 3}`);
-              return dayOfWeek === 3;
+              return serviceDate.getDay() === 3;
             }
-            // If no service_date, assume it's for the next service in the week
-            // For simplicity, let's say if invite_date is Mon-Wed, it's for Wednesday service
             const inviteDate = new Date(i.invite_date);
-            const inviteDayOfWeek = inviteDate.getDay();
-            console.log(`${i.name}: invite_date ${inviteDate.toDateString()}, day=${inviteDayOfWeek}, assumingWednesday=${inviteDayOfWeek >= 1 && inviteDayOfWeek <= 3}`);
-            return inviteDayOfWeek >= 1 && inviteDayOfWeek <= 3; // Monday to Wednesday
+            return inviteDate.getDay() >= 1 && inviteDate.getDay() <= 3;
           });
 
           const sundayInvitees = inviteesArray.filter(i => {
-            // If service_date exists and it's a Sunday, count as Sunday
             if (i.service_date) {
               const serviceDate = new Date(i.service_date);
-              const dayOfWeek = serviceDate.getDay();
-              console.log(`${i.name}: service_date ${serviceDate.toDateString()}, day=${dayOfWeek}, isSunday=${dayOfWeek === 0}`);
-              return dayOfWeek === 0;
+              return serviceDate.getDay() === 0;
             }
-            // If no service_date, assume it's for Sunday if invited Thu-Sun
             const inviteDate = new Date(i.invite_date);
-            const inviteDayOfWeek = inviteDate.getDay();
-            console.log(`${i.name}: invite_date ${inviteDate.toDateString()}, day=${inviteDayOfWeek}, assumingSunday=${inviteDayOfWeek === 0 || inviteDayOfWeek >= 4}`);
-            return inviteDayOfWeek === 0 || inviteDayOfWeek >= 4; // Thursday to Sunday
+            return inviteDate.getDay() === 0 || inviteDate.getDay() >= 4;
           });
 
           const wednesdayAttendees = wednesdayInvitees.filter(i => i.attended_service === true);
           const sundayAttendees = sundayInvitees.filter(i => i.attended_service === true);
-
-          const totalInvitees = inviteesArray.length;
           const totalAttendees = inviteesArray.filter(i => i.attended_service === true).length;
           const conversions = inviteesArray.filter(i => i.status === 'joined_cell').length;
 
@@ -180,25 +124,47 @@ export const useTeamPerformance = (selectedDate: Date) => {
             wednesdayAttendees: wednesdayAttendees.length,
             sundayInvitees: sundayInvitees.length,
             sundayAttendees: sundayAttendees.length,
-            totalInvitees,
+            totalInvitees: inviteesArray.length,
             totalAttendees,
             conversions,
           };
 
-          console.log(`Team ${team.name} final stats:`, result);
+          console.log(`Team ${team.name} stats:`, {
+            totalInvitees: result.totalInvitees,
+            totalAttendees: result.totalAttendees,
+            wednesdayInvitees: result.wednesdayInvitees,
+            sundayInvitees: result.sundayInvitees
+          });
+
           return result;
         })
       );
 
-      console.log('\n=== FINAL TEAM PERFORMANCE DATA ===');
-      console.log('All team performance:', teamPerformanceData);
+      console.log('\n=== CALCULATING TOTALS ===');
+      console.log('Team performance data:', teamPerformanceData.map(t => ({
+        name: t.name,
+        totalInvitees: t.totalInvitees,
+        totalAttendees: t.totalAttendees
+      })));
 
-      // Calculate totals and top performer - Fixed calculation
-      const totalInvitees = teamPerformanceData.reduce((sum, team) => sum + team.totalInvitees, 0);
-      const totalAttendees = teamPerformanceData.reduce((sum, team) => sum + team.totalAttendees, 0);
+      // Calculate totals step by step with debugging
+      const totalInvitees = teamPerformanceData.reduce((sum, team) => {
+        console.log(`Adding ${team.name}: ${team.totalInvitees} to sum ${sum}`);
+        return sum + team.totalInvitees;
+      }, 0);
+
+      const totalAttendees = teamPerformanceData.reduce((sum, team) => {
+        console.log(`Adding ${team.name} attendees: ${team.totalAttendees} to sum ${sum}`);
+        return sum + team.totalAttendees;
+      }, 0);
+
+      console.log('CALCULATED TOTALS:');
+      console.log('Total invitees:', totalInvitees);
+      console.log('Total attendees:', totalAttendees);
+
       const attendanceRate = totalInvitees > 0 ? Math.round((totalAttendees / totalInvitees) * 100) : 0;
 
-      // Find top team by total invitees
+      // Find top team
       const topTeam = teamPerformanceData.reduce((top, team) => {
         if (!top || team.totalInvitees > top.totalInvitees) {
           return team;
@@ -217,7 +183,8 @@ export const useTeamPerformance = (selectedDate: Date) => {
         teams: teamPerformanceData.sort((a, b) => b.totalInvitees - a.totalInvitees),
       };
 
-      console.log('FINAL SUMMARY:', {
+      console.log('FINAL DATA BEFORE SET STATE:', finalData);
+      console.log('Setting state with:', {
         totalTeams: finalData.totalTeams,
         totalInvitees: finalData.totalInvitees,
         attendanceRate: finalData.attendanceRate,
