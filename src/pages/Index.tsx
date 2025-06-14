@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dashboard } from '@/components/dashboard/Dashboard';
@@ -6,6 +5,7 @@ import { InviteeForm } from '@/components/invitees/InviteeForm';
 import { InviteeList } from '@/components/invitees/InviteeList';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { InstallButton } from '@/components/ui/InstallButton';
 import { 
   Church, 
   Users, 
@@ -190,6 +190,12 @@ const Index = () => {
               <Settings className="h-5 w-5" />
             </Button>
           </div>
+          
+          {/* Add InstallButton here */}
+          <div className="mb-3">
+            <InstallButton />
+          </div>
+          
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -224,7 +230,10 @@ const Index = () => {
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
               {availableNavigation.find(item => item.id === currentSection)?.name || 'Dashboard'}
             </h1>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <InstallButton />
+              <ThemeToggle />
+            </div>
           </div>
         </div>
 
