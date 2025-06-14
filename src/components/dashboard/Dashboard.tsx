@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,12 +5,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { ManageFellowships } from '@/components/fellowships/ManageFellowships';
-import { ManageCells } from '@/components/cells/ManageCells';
 import { ManageTeams } from '@/components/teams/ManageTeams';
 import { ManageMembers } from '@/components/members/ManageMembers';
 import { Reports } from '@/components/reports/Reports';
 import { TeamPerformance } from '@/components/dashboard/TeamPerformance';
-import { Users, Building, Users2, UserPlus, BarChart3, CalendarIcon } from 'lucide-react';
+import { Users, Building, UserPlus, BarChart3, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,7 +20,6 @@ export const Dashboard = () => {
 
   const tabsConfig = [
     { value: 'fellowships', label: 'Fellowships', icon: Building, roles: ['admin'], component: <ManageFellowships /> },
-    { value: 'cells', label: 'Cells', icon: Users2, roles: ['admin'], component: <ManageCells /> },
     { value: 'teams', label: 'Teams', icon: UserPlus, roles: ['admin', 'fellowship_leader'], component: <ManageTeams /> },
     { value: 'members', label: 'Members', icon: Users, roles: ['admin', 'fellowship_leader'], component: <ManageMembers /> },
     { value: 'reports', label: 'Reports', icon: BarChart3, roles: ['admin', 'fellowship_leader', 'member'], component: <Reports /> },
