@@ -1,7 +1,7 @@
 
 {
-  "name": "Fellowship Reach Tracker",
-  "short_name": "Fellowship Tracker",
+  "name": "Soul Winning Portal",
+  "short_name": "Soul Winning Portal",
   "description": "Church management and fellowship tracking application",
   "start_url": "/",
   "display": "standalone",
