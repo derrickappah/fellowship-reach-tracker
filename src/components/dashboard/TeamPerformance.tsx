@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -57,16 +56,16 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-foreground">Weekly Team Performance</h2>
-        <Badge variant="outline" className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground">Weekly Team Performance</h2>
+        <Badge variant="outline" className="flex items-center gap-2 self-start sm:self-center">
           <Calendar className="h-3 w-3" />
           {format(weekStart, "MMM d")} - {format(weekEnd, "MMM d, yyyy")}
         </Badge>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Teams</CardTitle>
@@ -140,9 +139,9 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
           <div className="space-y-4">
             {teamPerformance?.teams?.map((team) => (
               <div key={team.id} className="border border-border rounded-lg p-4 bg-card">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
                       <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
@@ -152,7 +151,7 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
                       </p>
                     </div>
                   </div>
-                  <Badge variant={team.totalInvitees > 5 ? "default" : "secondary"}>
+                  <Badge variant={team.totalInvitees > 5 ? "default" : "secondary"} className="self-start sm:self-center">
                     {team.totalInvitees > 5 ? "High Performer" : "Getting Started"}
                   </Badge>
                 </div>

@@ -14,22 +14,22 @@ export const Dashboard = () => {
   const { user } = useAuth();
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-4 md:p-6 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Church Management Dashboard</h1>
-          <p className="text-muted-foreground">
-            {user?.role === 'admin' ? 'Manage your church community, fellowships, cells, and members' : 'Welcome to your dashboard'}
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Church Management Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            {user?.role === 'admin' ? 'Manage your church community and performance' : 'Welcome to your dashboard'}
           </p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 w-full md:w-auto">
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 className={cn(
-                  "w-[240px] justify-start text-left font-normal",
+                  "w-full md:w-[280px] justify-start text-left font-normal",
                   !selectedDate && "text-muted-foreground"
                 )}
               >
@@ -37,7 +37,7 @@ export const Dashboard = () => {
                 {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0" align="end">
               <Calendar
                 mode="single"
                 selected={selectedDate}
