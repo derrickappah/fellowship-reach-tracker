@@ -77,7 +77,7 @@ export const useReports = (dateRange?: DateRange) => {
       if (inviteesError) throw inviteesError;
 
       const totalInvitees = invitees?.length || 0;
-      const totalAttendees = invitees?.filter(i => i.attended_service).length || 0;
+      const totalAttendees = invitees?.filter(i => i.status === 'attended' || i.status === 'joined_cell').length || 0;
       const totalConversions = invitees?.filter(i => i.status === 'joined_cell').length || 0;
       const conversionRate = totalInvitees > 0 ? Math.round((totalAttendees / totalInvitees) * 100) : 0;
 
@@ -101,7 +101,7 @@ export const useReports = (dateRange?: DateRange) => {
         return {
           week: format(weekStart, 'MMM d'),
           invitees: weekInvitees.length,
-          attendees: weekInvitees.filter((i) => i.attended_service).length,
+          attendees: weekInvitees.filter((i) => i.status === 'attended' || i.status === 'joined_cell').length,
           conversions: weekInvitees.filter((i) => i.status === 'joined_cell').length,
         };
       });
@@ -112,7 +112,7 @@ export const useReports = (dateRange?: DateRange) => {
       // Status distribution
       const statusCounts = {
         invited: invitees?.filter(i => i.status === 'invited').length || 0,
-        attended: invitees?.filter(i => i.attended_service).length || 0,
+        attended: invitees?.filter(i => i.status === 'attended').length || 0,
         joined_cell: invitees?.filter(i => i.status === 'joined_cell').length || 0,
         no_show: invitees?.filter(i => i.status === 'no_show').length || 0,
       };
@@ -149,7 +149,7 @@ export const useReports = (dateRange?: DateRange) => {
                 .lte('invite_date', toDate.toISOString());
 
               const inviteesCount = fellowshipInvitees?.length || 0;
-              const attendeesCount = fellowshipInvitees?.filter(i => i.attended_service).length || 0;
+              const attendeesCount = fellowshipInvitees?.filter(i => i.status === 'attended' || i.status === 'joined_cell').length || 0;
               const conversionsCount = fellowshipInvitees?.filter(i => i.status === 'joined_cell').length || 0;
 
               return {
