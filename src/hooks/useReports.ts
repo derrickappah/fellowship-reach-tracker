@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -7,7 +6,6 @@ import {
   eachWeekOfInterval,
   endOfWeek,
   format,
-  differenceInWeeks,
   subDays,
 } from 'date-fns';
 
@@ -108,9 +106,8 @@ export const useReports = (dateRange?: DateRange) => {
         };
       });
 
-      const weeksInInterval = differenceInWeeks(toDate, fromDate, { weekStartsOn: 1 }) || 1;
       const averageWeeklyInvites =
-        weeklyData.reduce((sum, week) => sum + week.invitees, 0) / weeksInInterval;
+        weeklyData.length > 0 ? totalInvitees / weeklyData.length : 0;
 
       // Status distribution
       const statusCounts = {
