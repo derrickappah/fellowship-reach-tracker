@@ -340,6 +340,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_user_profile_and_team: {
+        Args: {
+          p_user_id: string
+          p_name: string
+          p_phone: string
+          p_cell_id: string
+          p_team_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "fellowship_leader" | "member"

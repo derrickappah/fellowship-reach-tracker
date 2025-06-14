@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,11 +10,16 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { useCells } from '@/hooks/useCells';
+import { useTeams } from '@/hooks/useTeams';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const profileFormSchema = z.object({
   email: z.string().email(),
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   phone: z.string().optional(),
+  cell_id: z.string().optional(),
+  team_id: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -24,6 +28,8 @@ export const UpdateProfileForm = () => {
   const { user, refetchUser } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = React.useState(true);
+  const { cells, loading: cellsLoading } = useCells();
+  const { teams, loading: teamsLoading } = useTeams();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -31,25 +37,39 @@ export const UpdateProfileForm = () => {
       email: '',
       name: '',
       phone: '',
+      cell_id: '',
+      team_id: '',
     },
   });
 
   useEffect(() => {
     if (user) {
       setLoading(true);
-      supabase
-        .from('profiles')
-        .select('phone')
-        .eq('id', user.id)
-        .single()
-        .then(({ data, error }) => {
+      Promise.all([
+        supabase
+          .from('profiles')
+          .select('phone, cell_id')
+          .eq('id', user.id)
+          .single(),
+        supabase
+          .from('team_members')
+          .select('team_id')
+          .eq('user_id', user.id)
+          .maybeSingle()
+      ]).then(([{ data: profileData, error: profileError }, { data: teamData, error: teamError }]) => {
           form.reset({
             name: user.name,
             email: user.email,
-            phone: data?.phone || '',
+            phone: profileData?.phone || '',
+            cell_id: profileData?.cell_id || '',
+            team_id: teamData?.team_id || '',
           });
-          if (error && error.code !== 'PGRST116') { // Ignore no rows found error
-            toast({ title: "Error fetching profile phone", description: error.message, variant: "destructive" });
+
+          if (profileError && profileError.code !== 'PGRST116') {
+            toast({ title: "Error fetching profile data", description: profileError.message, variant: "destructive" });
+          }
+          if (teamError) {
+            toast({ title: "Error fetching team data", description: teamError.message, variant: "destructive" });
           }
           setLoading(false);
         });
@@ -59,10 +79,13 @@ export const UpdateProfileForm = () => {
   const onSubmit = async (data: ProfileFormValues) => {
     if (!user) return;
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ name: data.name, phone: data.phone || null })
-      .eq('id', user.id);
+    const { error } = await supabase.rpc('update_user_profile_and_team', {
+      p_user_id: user.id,
+      p_name: data.name,
+      p_phone: data.phone || null,
+      p_cell_id: data.cell_id || null,
+      p_team_id: data.team_id || null,
+    });
 
     if (error) {
       toast({ title: "Error updating profile", description: error.message, variant: "destructive" });
@@ -72,7 +95,7 @@ export const UpdateProfileForm = () => {
     }
   };
 
-  if (loading) {
+  if (loading || cellsLoading || teamsLoading) {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
@@ -130,6 +153,56 @@ export const UpdateProfileForm = () => {
                   <FormControl>
                     <Input placeholder="Your phone number" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cell_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cell</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a cell" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">No cell assigned</SelectItem>
+                      {cells.map((cell) => (
+                        <SelectItem key={cell.id} value={cell.id}>
+                          {cell.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="team_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Team</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a team" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">No team assigned</SelectItem>
+                      {teams.map((team) => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
