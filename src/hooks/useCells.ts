@@ -17,7 +17,7 @@ export const useCells = () => {
         .select(`
           *,
           fellowship:fellowships(id, name),
-          leader:profiles!cells_leader_id_fkey(id, name)
+          leader:profiles(id, name)
         `)
         .order('created_at', { ascending: false });
 
