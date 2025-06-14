@@ -60,7 +60,6 @@ const Index = () => {
     { name: 'Manage Members', icon: Users, id: 'members', roles: ['admin', 'fellowship_leader'] },
     { name: 'Manage Fellowships', icon: Church, id: 'fellowships', roles: ['admin'] },
     { name: 'Manage Cells', icon: Group, id: 'cells', roles: ['admin'] },
-    { name: 'Profile Settings', icon: Settings, id: 'profile-settings', roles: ['admin', 'fellowship_leader', 'member'] },
   ];
 
   const availableNavigation = navigation.filter(item => 
@@ -160,11 +159,24 @@ const Index = () => {
         </nav>
 
         <div className="flex-shrink-0 p-4 border-t dark:border-gray-700">
-          <div className="mb-3">
-            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.name}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-              {user.role.replace('_', ' ')}
-            </p>
+          <div className="flex justify-between items-center mb-3">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.name}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                {user.role.replace('_', ' ')}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setCurrentSection('profile-settings');
+                setSidebarOpen(false);
+              }}
+              className="h-8 w-8 flex-shrink-0"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
           </div>
           <div className="flex gap-2">
             <Button
