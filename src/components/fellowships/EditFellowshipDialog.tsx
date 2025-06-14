@@ -165,10 +165,12 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="no-leader">No leader</SelectItem>
-                  {members.map((member) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      {member.name}
-                    </SelectItem>
+                  {members
+                    .filter((member) => member.id)
+                    .map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        {member.name}
+                      </SelectItem>
                   ))}
                 </SelectContent>
               </Select>

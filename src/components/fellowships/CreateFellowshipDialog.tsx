@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -97,10 +96,12 @@ export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipD
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="no-leader">No leader</SelectItem>
-                  {members.map((member) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      {member.name}
-                    </SelectItem>
+                  {members
+                    .filter((member) => member.id)
+                    .map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        {member.name}
+                      </SelectItem>
                   ))}
                 </SelectContent>
               </Select>

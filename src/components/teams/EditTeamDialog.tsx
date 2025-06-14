@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -106,10 +105,12 @@ export const EditTeamDialog = ({ team, open, onOpenChange }: EditTeamDialogProps
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="no-fellowship">No fellowship</SelectItem>
-                  {availableFellowships.map((fellowship) => (
-                    <SelectItem key={fellowship.id} value={fellowship.id}>
-                      {fellowship.name}
-                    </SelectItem>
+                  {availableFellowships
+                    .filter((fellowship) => fellowship.id)
+                    .map((fellowship) => (
+                      <SelectItem key={fellowship.id} value={fellowship.id}>
+                        {fellowship.name}
+                      </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -125,10 +126,12 @@ export const EditTeamDialog = ({ team, open, onOpenChange }: EditTeamDialogProps
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="no-leader">No leader</SelectItem>
-                  {leaders.map((leader) => (
-                    <SelectItem key={leader.id} value={leader.id}>
-                      {leader.name}
-                    </SelectItem>
+                  {leaders
+                    .filter((leader) => leader.id)
+                    .map((leader) => (
+                      <SelectItem key={leader.id} value={leader.id}>
+                        {leader.name}
+                      </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
