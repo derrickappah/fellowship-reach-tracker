@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useTeamPerformance } from '@/hooks/useTeamPerformance';
-import { Users, Target, TrendingUp, Award, Calendar } from 'lucide-react';
-import { format, startOfWeek, endOfWeek } from 'date-fns';
+import { Users, Target, TrendingUp, Award, Calendar, Medal } from 'lucide-react';
+import { format, startOfWeek, endOfWeek, formatISO } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TeamPerformanceProps {
   selectedDate: Date;
@@ -11,9 +12,72 @@ interface TeamPerformanceProps {
 
 export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
   const { teamPerformance, loading } = useTeamPerformance(selectedDate);
+  const [topInviter, setTopInviter] = useState<{ name: string; count: number } | null>(null);
+  const [topInviterLoading, setTopInviterLoading] = useState(true);
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
+
+  useEffect(() => {
+    const fetchTopInviter = async () => {
+      if (!selectedDate) return;
+      setTopInviterLoading(true);
+      try {
+        const weekStartIso = formatISO(startOfWeek(selectedDate, { weekStartsOn: 1 }));
+        const weekEndIso = formatISO(endOfWeek(selectedDate, { weekStartsOn: 1 }));
+
+        const { data: invitees, error: inviteesError } = await supabase
+          .from('invitees')
+          .select('invited_by')
+          .gte('invite_date', weekStartIso)
+          .lte('invite_date', weekEndIso)
+          .not('invited_by', 'is', null);
+
+        if (inviteesError) throw inviteesError;
+
+        if (!invitees || invitees.length === 0) {
+          setTopInviter(null);
+          return;
+        }
+
+        const inviterCounts = invitees.reduce((acc, { invited_by }) => {
+          if (invited_by) {
+            acc[invited_by] = (acc[invited_by] || 0) + 1;
+          }
+          return acc;
+        }, {} as Record<string, number>);
+
+        const topInviterId = Object.keys(inviterCounts).length > 0
+          ? Object.keys(inviterCounts).reduce((a, b) => inviterCounts[a] > inviterCounts[b] ? a : b)
+          : null;
+        
+        if (!topInviterId) {
+          setTopInviter(null);
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('name')
+          .eq('id', topInviterId)
+          .single();
+
+        if (profileError) {
+          setTopInviter(null);
+          console.error('Error fetching top inviter profile:', profileError.message);
+        } else if (profile) {
+          setTopInviter({ name: profile.name, count: inviterCounts[topInviterId] });
+        }
+      } catch (error: any) {
+        console.error('Error fetching top inviter:', error.message);
+        setTopInviter(null);
+      } finally {
+        setTopInviterLoading(false);
+      }
+    };
+
+    fetchTopInviter();
+  }, [selectedDate]);
 
   // Add debugging logs to see what the component receives
   console.log('=== TEAM PERFORMANCE COMPONENT DEBUG ===');
@@ -26,8 +90,8 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[1, 2, 3, 4].map((i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {[1, 2, 3, 4, 5].map((i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader className="pb-2">
               <div className="h-4 bg-muted rounded w-3/4"></div>
@@ -118,11 +182,35 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-              {displayTopTeam?.name || 'N/A'}
+              {teamPerformance?.topTeam?.name || 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">
-              {displayTopTeam?.invitees || 0} invitees
+              {teamPerformance?.topTeam?.invitees || 0} invitees
             </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Top Inviter</CardTitle>
+            <Medal className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {topInviterLoading ? (
+              <div className="space-y-2">
+                <div className="h-7 bg-muted rounded w-3/4 animate-pulse"></div>
+                <div className="h-3 bg-muted rounded w-1/2 animate-pulse"></div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                  {topInviter?.name || 'N/A'}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {topInviter ? `${topInviter.count} invitees this week` : 'No invites this week'}
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
