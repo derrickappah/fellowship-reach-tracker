@@ -16,6 +16,15 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
 
+  // Add debugging logs to see what the component receives
+  console.log('=== TEAM PERFORMANCE COMPONENT DEBUG ===');
+  console.log('teamPerformance received by component:', teamPerformance);
+  console.log('loading state:', loading);
+  console.log('totalInvitees from state:', teamPerformance?.totalInvitees);
+  console.log('totalTeams from state:', teamPerformance?.totalTeams);
+  console.log('attendanceRate from state:', teamPerformance?.attendanceRate);
+  console.log('topTeam from state:', teamPerformance?.topTeam);
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -32,6 +41,19 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
       </div>
     );
   }
+
+  // Force display actual values and add fallbacks
+  const displayTotalTeams = teamPerformance?.totalTeams ?? 0;
+  const displayTotalInvitees = teamPerformance?.totalInvitees ?? 0;
+  const displayAttendanceRate = teamPerformance?.attendanceRate ?? 0;
+  const displayTopTeam = teamPerformance?.topTeam;
+
+  console.log('Display values:', {
+    displayTotalTeams,
+    displayTotalInvitees,
+    displayAttendanceRate,
+    displayTopTeam
+  });
 
   return (
     <div className="space-y-6">
@@ -52,7 +74,7 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              {teamPerformance?.totalTeams || 0}
+              {displayTotalTeams}
             </div>
             <p className="text-xs text-muted-foreground">
               Active teams this week
@@ -67,7 +89,7 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {teamPerformance?.totalInvitees || 0}
+              {displayTotalInvitees}
             </div>
             <p className="text-xs text-muted-foreground">
               People invited this week
@@ -82,7 +104,7 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">
-              {teamPerformance?.attendanceRate || 0}%
+              {displayAttendanceRate}%
             </div>
             <p className="text-xs text-muted-foreground">
               Of invited people attended
@@ -97,10 +119,10 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
-              {teamPerformance?.topTeam?.name || 'N/A'}
+              {displayTopTeam?.name || 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">
-              {teamPerformance?.topTeam?.invitees || 0} invitees
+              {displayTopTeam?.invitees || 0} invitees
             </p>
           </CardContent>
         </Card>
