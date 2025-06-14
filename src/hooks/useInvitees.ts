@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Invitee } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
 
-interface InviteeWithInviter extends Invitee {
+export interface InviteeWithInviter extends Invitee {
   inviter?: { name: string } | null;
   team?: { name: string } | null;
   cell?: { name: string } | null;
