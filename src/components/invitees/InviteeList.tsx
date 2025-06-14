@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -26,23 +26,42 @@ export const InviteeList = () => {
   const { user } = useAuth();
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('invite_date_desc');
   const isMobile = useIsMobile();
 
-  const filteredInvitees = invitees.filter(invitee => {
-    const statusMatch = filter === 'all' || invitee.status === filter;
+  const sortedAndFilteredInvitees = useMemo(() => {
+    const filtered = invitees.filter(invitee => {
+      const statusMatch = filter === 'all' || invitee.status === filter;
+  
+      const searchTrimmed = searchTerm.trim().toLowerCase();
+      if (!searchTrimmed) {
+        return statusMatch;
+      }
+  
+      const searchMatch =
+        invitee.name.toLowerCase().includes(searchTrimmed) ||
+        (invitee.email || '').toLowerCase().includes(searchTrimmed) ||
+        (invitee.phone || '').toLowerCase().includes(searchTrimmed);
+  
+      return statusMatch && searchMatch;
+    });
 
-    const searchTrimmed = searchTerm.trim().toLowerCase();
-    if (!searchTrimmed) {
-      return statusMatch;
-    }
+    return [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'invite_date_asc':
+          return new Date(a.invite_date).getTime() - new Date(b.invite_date).getTime();
+        case 'invite_date_desc':
+          return new Date(b.invite_date).getTime() - new Date(a.invite_date).getTime();
+        case 'team_name_asc':
+          return (a.team?.name || '').localeCompare(b.team?.name || '');
+        case 'team_name_desc':
+          return (b.team?.name || '').localeCompare(a.team?.name || '');
+        default:
+          return new Date(b.invite_date).getTime() - new Date(a.invite_date).getTime();
+      }
+    });
 
-    const searchMatch =
-      invitee.name.toLowerCase().includes(searchTrimmed) ||
-      (invitee.email || '').toLowerCase().includes(searchTrimmed) ||
-      (invitee.phone || '').toLowerCase().includes(searchTrimmed);
-
-    return statusMatch && searchMatch;
-  });
+  }, [invitees, filter, searchTerm, sortBy]);
 
   const handleStatusChange = (inviteeId: string, newStatus: string) => {
     updateInviteeStatus(inviteeId, newStatus);
@@ -83,7 +102,7 @@ export const InviteeList = () => {
                   className="w-full sm:w-64 pl-10"
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Select value={filter} onValueChange={setFilter}>
                   <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by status" />
@@ -97,16 +116,27 @@ export const InviteeList = () => {
                     <SelectItem value="no_show">No Show</SelectItem>
                   </SelectContent>
                 </Select>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="invite_date_desc">Invite Date (Newest)</SelectItem>
+                    <SelectItem value="invite_date_asc">Invite Date (Oldest)</SelectItem>
+                    <SelectItem value="team_name_asc">Team (A-Z)</SelectItem>
+                    <SelectItem value="team_name_desc">Team (Z-A)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="text-sm text-muted-foreground self-end sm:self-auto">
-              Total: {filteredInvitees.length} invitees
+              Total: {sortedAndFilteredInvitees.length} invitees
             </div>
           </div>
 
           {isMobile ? (
             <div className="space-y-4">
-              {filteredInvitees.map((invitee) => {
+              {sortedAndFilteredInvitees.map((invitee) => {
                 const isOwner = invitee.invited_by === user?.id;
                 const isAdmin = user?.role === 'admin';
                 const isFellowshipLeader = user?.role === 'fellowship_leader';
@@ -122,7 +152,7 @@ export const InviteeList = () => {
                   />
                 );
               })}
-              {filteredInvitees.length === 0 && (
+              {sortedAndFilteredInvitees.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground rounded-lg border border-dashed">
                   <p>No invitees found matching the current filter.</p>
                 </div>
@@ -144,7 +174,7 @@ export const InviteeList = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredInvitees.map((invitee) => {
+                  {sortedAndFilteredInvitees.map((invitee) => {
                     const isOwner = invitee.invited_by === user?.id;
                     const isAdmin = user?.role === 'admin';
                     const isFellowshipLeader = user?.role === 'fellowship_leader';
@@ -222,7 +252,7 @@ export const InviteeList = () => {
                       </TableRow>
                     );
                   })}
-                  {filteredInvitees.length === 0 && (
+                  {sortedAndFilteredInvitees.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                         No invitees found matching the current filter.
@@ -234,7 +264,7 @@ export const InviteeList = () => {
             </div>
           )}
           
-          {filteredInvitees.length > 0 && (
+          {sortedAndFilteredInvitees.length > 0 && (
             <div className="mt-4 text-sm text-muted-foreground">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div>
