@@ -1,13 +1,24 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReports } from '@/hooks/useReports';
+import { format, subDays } from 'date-fns';
+import { DateRange } from 'react-day-picker';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 export const Reports = () => {
   const { user } = useAuth();
-  const { reportsData, loading } = useReports();
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 29),
+    to: new Date(),
+  });
+  const { reportsData, loading } = useReports(date);
 
   if (loading) {
     return (
@@ -28,14 +39,53 @@ export const Reports = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Reports & Analytics</h1>
           <p className="text-gray-600">
-            {user?.role === 'admin' ? 'System-wide analytics' : 
-             user?.role === 'fellowship_leader' ? 'Fellowship analytics' : 
-             'Your outreach analytics'}
+            {user?.role === 'admin'
+              ? 'System-wide analytics'
+              : user?.role === 'fellowship_leader'
+              ? 'Fellowship analytics'
+              : 'Your outreach analytics'}
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="date"
+                variant={'outline'}
+                className={cn(
+                  'w-full md:w-[300px] justify-start text-left font-normal',
+                  !date && 'text-muted-foreground'
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date?.from ? (
+                  date.to ? (
+                    <>
+                      {format(date.from, 'LLL dd, yyyy')} - {format(date.to, 'LLL dd, yyyy')}
+                    </>
+                  ) : (
+                    format(date.from, 'LLL dd, yyyy')
+                  )
+                ) : (
+                  <span>Pick a date range</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={date?.from}
+                selected={date}
+                onSelect={setDate}
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 

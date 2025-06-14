@@ -3,6 +3,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  eachWeekOfInterval,
+  endOfWeek,
+  format,
+  differenceInWeeks,
+  subDays,
+} from 'date-fns';
 
 interface ReportsData {
   totalInvitees: number;
@@ -28,7 +35,12 @@ interface ReportsData {
   }>;
 }
 
-export const useReports = () => {
+interface DateRange {
+  from?: Date;
+  to?: Date;
+}
+
+export const useReports = (dateRange?: DateRange) => {
   const [reportsData, setReportsData] = useState<ReportsData | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -38,8 +50,15 @@ export const useReports = () => {
     try {
       setLoading(true);
 
+      const fromDate = dateRange?.from || subDays(new Date(), 29);
+      const toDate = dateRange?.to || new Date();
+
       // Base query for invitees
       let inviteesQuery = supabase.from('invitees').select('*');
+      
+      inviteesQuery = inviteesQuery
+        .gte('invite_date', fromDate.toISOString())
+        .lte('invite_date', toDate.toISOString());
       
       // Filter based on user role
       if (user?.role === 'fellowship_leader' && user.fellowship_id) {
@@ -64,31 +83,34 @@ export const useReports = () => {
       const totalConversions = invitees?.filter(i => i.status === 'joined_cell').length || 0;
       const conversionRate = totalInvitees > 0 ? Math.round((totalAttendees / totalInvitees) * 100) : 0;
 
-      // Calculate weekly data (last 4 weeks)
-      const fourWeeksAgo = new Date();
-      fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
+      // Calculate weekly data
+      const weeks = eachWeekOfInterval(
+        {
+          start: fromDate,
+          end: toDate,
+        },
+        { weekStartsOn: 1 } // Monday
+      );
 
-      const weeklyData = [];
-      for (let i = 0; i < 4; i++) {
-        const weekStart = new Date(fourWeeksAgo);
-        weekStart.setDate(weekStart.getDate() + (i * 7));
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekEnd.getDate() + 6);
+      const weeklyData = weeks.map((weekStart) => {
+        const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+        const weekInvitees =
+          invitees?.filter((inv) => {
+            const inviteDate = new Date(inv.invite_date);
+            return inviteDate >= weekStart && inviteDate <= weekEnd;
+          }) || [];
 
-        const weekInvitees = invitees?.filter(inv => {
-          const inviteDate = new Date(inv.invite_date);
-          return inviteDate >= weekStart && inviteDate <= weekEnd;
-        }) || [];
-
-        weeklyData.push({
-          week: `Week ${i + 1}`,
+        return {
+          week: format(weekStart, 'MMM d'),
           invitees: weekInvitees.length,
-          attendees: weekInvitees.filter(i => i.attended_service).length,
-          conversions: weekInvitees.filter(i => i.status === 'joined_cell').length,
-        });
-      }
+          attendees: weekInvitees.filter((i) => i.attended_service).length,
+          conversions: weekInvitees.filter((i) => i.status === 'joined_cell').length,
+        };
+      });
 
-      const averageWeeklyInvites = weeklyData.reduce((sum, week) => sum + week.invitees, 0) / 4;
+      const weeksInInterval = differenceInWeeks(toDate, fromDate, { weekStartsOn: 1 }) || 1;
+      const averageWeeklyInvites =
+        weeklyData.reduce((sum, week) => sum + week.invitees, 0) / weeksInInterval;
 
       // Status distribution
       const statusCounts = {
@@ -125,7 +147,9 @@ export const useReports = () => {
               const { data: fellowshipInvitees } = await supabase
                 .from('invitees')
                 .select('*')
-                .in('cell_id', cellIds);
+                .in('cell_id', cellIds)
+                .gte('invite_date', fromDate.toISOString())
+                .lte('invite_date', toDate.toISOString());
 
               const inviteesCount = fellowshipInvitees?.length || 0;
               const attendeesCount = fellowshipInvitees?.filter(i => i.attended_service).length || 0;
@@ -164,8 +188,10 @@ export const useReports = () => {
   };
 
   useEffect(() => {
-    fetchReports();
-  }, [user]);
+    if (user) {
+      fetchReports();
+    }
+  }, [user, dateRange]);
 
   return {
     reportsData,
