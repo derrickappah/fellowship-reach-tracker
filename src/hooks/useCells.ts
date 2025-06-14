@@ -16,14 +16,23 @@ export const useCells = () => {
         .from('cells')
         .select(`
           *,
-          fellowship:fellowships!cells_fellowship_id_fkey(id, name),
-          leader:profiles!cells_leader_id_fkey(id, name)
+          fellowships(id, name),
+          profiles(id, name)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       
-      setCells(data || []);
+      // Transform the data to match the Cell type
+      const transformedCells: Cell[] = (data || []).map((cell: any) => ({
+        ...cell,
+        fellowship: cell.fellowships ? { name: cell.fellowships.name } : null,
+        leader: cell.profiles ? { name: cell.profiles.name } : null,
+        fellowships: undefined, // Remove the original property
+        profiles: undefined, // Remove the original property
+      }));
+      
+      setCells(transformedCells);
     } catch (error: any) {
       toast({
         title: "Error fetching cells",
