@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFellowships } from '@/hooks/useFellowships';
 import { useCells } from '@/hooks/useCells';
+import { supabase } from '@/integrations/supabase/client';
 import { X } from 'lucide-react';
 
 interface EditFellowshipDialogProps {
@@ -19,9 +21,11 @@ interface EditFellowshipDialogProps {
 export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFellowshipDialogProps) => {
   const { updateFellowship, refetch: refetchFellowships } = useFellowships();
   const { cells, updateCell } = useCells();
+  const [members, setMembers] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    leader_id: '',
   });
   const [assignedCells, setAssignedCells] = useState<string[]>([]);
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
@@ -32,10 +36,25 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
   const availableCells = cells.filter(cell => !cell.fellowship_id);
 
   useEffect(() => {
+    const fetchMembers = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .order('name', { ascending: true });
+      setMembers(data || []);
+    };
+    
+    if (open) {
+      fetchMembers();
+    }
+  }, [open]);
+
+  useEffect(() => {
     if (fellowship) {
       setFormData({
         name: fellowship.name || '',
         description: fellowship.description || '',
+        leader_id: fellowship.leader_id || '',
       });
       // Set initially assigned cells
       setAssignedCells(fellowshipCells.map(cell => cell.id));
@@ -65,7 +84,10 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
 
     try {
       // Update fellowship details
-      const { error: fellowshipError } = await updateFellowship(fellowship.id, formData);
+      const { error: fellowshipError } = await updateFellowship(fellowship.id, {
+        ...formData,
+        leader_id: formData.leader_id === 'no-leader' ? null : formData.leader_id || null,
+      });
       if (fellowshipError) {
         setIsSubmitting(false);
         return;
@@ -123,6 +145,26 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
                 placeholder="Describe the fellowship"
                 rows={3}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="leader">Fellowship Leader</Label>
+              <Select 
+                value={formData.leader_id || 'no-leader'} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value === 'no-leader' ? '' : value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select leader" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no-leader">No leader</SelectItem>
+                  {members.map((member) => (
+                    <SelectItem key={member.id} value={member.id}>
+                      {member.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
