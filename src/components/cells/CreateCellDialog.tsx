@@ -72,9 +72,11 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
     setIsSubmitting(false);
   };
 
+  const allFellowships = fellowships.filter(f => typeof f.id === 'string' && f.id.trim() !== '' && typeof f.name === 'string' && f.name.trim() !== '');
+
   const availableFellowships = user?.role === 'admin' 
-    ? fellowships.filter(f => typeof f.id === 'string' && f.id.trim() !== '' && typeof f.name === 'string' && f.name.trim() !== '')
-    : fellowships.filter(f => f.id === user?.fellowship_id);
+    ? allFellowships
+    : allFellowships.filter(f => f.id === user?.fellowship_id);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -112,7 +114,6 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
                 </SelectTrigger>
                 <SelectContent>
                   {availableFellowships
-                    .filter(fellowship => typeof fellowship.id === 'string' && fellowship.id.trim() !== '' && typeof fellowship.name === 'string' && fellowship.name.trim() !== '')
                     .map((fellowship) => (
                       <SelectItem key={fellowship.id} value={fellowship.id}>
                         {fellowship.name}
@@ -124,22 +125,15 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
             <div className="space-y-2">
               <Label htmlFor="leader">Cell Leader</Label>
               <Select 
-                value={formData.leader_id} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value }))}
+                value={formData.leader_id || 'no-leader'} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value === 'no-leader' ? '' : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select leader" />
-                </SelectTrigger>
+                </Trigger>
                 <SelectContent>
                   <SelectItem value="no-leader">No leader</SelectItem>
                   {leaders
-                    .filter(
-                      (leader) =>
-                        typeof leader.id === 'string' &&
-                        leader.id.trim() !== '' &&
-                        typeof leader.name === 'string' &&
-                        leader.name.trim() !== ''
-                    )
                     .map((leader) => (
                       <SelectItem key={leader.id} value={leader.id}>
                         {leader.name}
