@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,8 +31,15 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get cells assigned to this fellowship and available cells
-  const fellowshipCells = cells.filter(cell => cell.fellowship_id === fellowship?.id);
-  const availableCells = cells.filter(cell => !cell.fellowship_id);
+  const fellowshipCells = useMemo(() => 
+    cells.filter(cell => cell.fellowship_id === fellowship?.id),
+    [cells, fellowship?.id]
+  );
+
+  const availableCells = useMemo(() =>
+    cells.filter(cell => !cell.fellowship_id),
+    [cells]
+  );
 
   useEffect(() => {
     const fetchMembers = async () => {
