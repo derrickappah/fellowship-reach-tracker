@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { InviteeForm } from '@/components/invitees/InviteeForm';
@@ -30,11 +30,17 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
 const Index = () => {
-  const [currentSection, setCurrentSection] = useState('dashboard');
+  const [currentSection, setCurrentSection] = useState(() => {
+    return localStorage.getItem('currentSection') || 'dashboard';
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    localStorage.setItem('currentSection', currentSection);
+  }, [currentSection]);
 
   // Show loading spinner while checking auth
   if (loading) {
@@ -75,6 +81,7 @@ const Index = () => {
         variant: "destructive",
       });
     } else {
+      localStorage.removeItem('currentSection');
       toast({
         title: "Signed out",
         description: "You have been signed out successfully.",
