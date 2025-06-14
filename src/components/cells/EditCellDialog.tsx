@@ -19,7 +19,7 @@ interface EditCellDialogProps {
 export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps) => {
   const { updateCell } = useCells();
   const { fellowships } = useFellowships();
-  const [leaders, setLeaders] = useState<any[]>([]);
+  const [leaders, setLeaders] = useState<any[]>([]); // Consider typing leaders more strictly if possible
   const [formData, setFormData] = useState({
     name: '',
     fellowship_id: '',
@@ -31,7 +31,7 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
     const fetchLeaders = async () => {
       const { data } = await supabase
         .from('profiles')
-        .select('id, name');
+        .select('id, name'); // Assuming profiles has id and name
       setLeaders(data || []);
     };
     fetchLeaders();
@@ -40,7 +40,7 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
   useEffect(() => {
     if (cell) {
       setFormData({
-        name: cell.name,
+        name: cell.name || '', // Ensure name is always a string
         fellowship_id: cell.fellowship_id || '',
         leader_id: cell.leader_id || '',
       });
@@ -55,8 +55,8 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
 
     const { error } = await updateCell(cell.id, {
       ...formData,
-      fellowship_id: formData.fellowship_id || null,
-      leader_id: formData.leader_id || null,
+      fellowship_id: formData.fellowship_id || null, // Convert empty string back to null for DB
+      leader_id: formData.leader_id || null,       // Convert empty string back to null for DB
     });
     
     if (!error) {
@@ -146,3 +146,4 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
     </Dialog>
   );
 };
+

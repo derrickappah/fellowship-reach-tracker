@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,15 +10,16 @@ import { CreateCellDialog } from './CreateCellDialog';
 import { EditCellDialog } from './EditCellDialog';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { MemberListDialog } from '@/components/members/MemberListDialog';
+import { Cell } from '@/types/supabase'; // Import Cell type
 
 export const ManageCells = () => {
   const { user } = useAuth();
   const { cells, loading, deleteCell } = useCells();
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingCell, setEditingCell] = useState<any>(null);
-  const [deletingCell, setDeletingCell] = useState<any>(null);
-  const [memberDialog, setMemberDialog] = useState<{ open: boolean; cell: any } | null>(null);
+  const [editingCell, setEditingCell] = useState<Cell | null>(null); // Changed type from any to Cell | null
+  const [deletingCell, setDeletingCell] = useState<Cell | null>(null); // Changed type from any to Cell | null
+  const [memberDialog, setMemberDialog] = useState<{ open: boolean; cell: Cell } | null>(null); // Assuming cell here is also of type Cell
 
   // Only admins can access this component
   if (user?.role !== 'admin') {
