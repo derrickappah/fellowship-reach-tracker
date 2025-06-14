@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useTeamPerformance } from '@/hooks/useTeamPerformance';
-import { Users, Target, TrendingUp, Award, Calendar, Medal } from 'lucide-react';
+import { Users, Target, TrendingUp, Award, Calendar, Medal, UserCheck } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, formatISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -14,6 +14,8 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
   const { teamPerformance, loading } = useTeamPerformance(selectedDate);
   const [topInviter, setTopInviter] = useState<{ name: string; count: number } | null>(null);
   const [topInviterLoading, setTopInviterLoading] = useState(true);
+  const [confirmedInvites, setConfirmedInvites] = useState(0);
+  const [confirmedInvitesLoading, setConfirmedInvitesLoading] = useState(true);
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -79,6 +81,35 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
     fetchTopInviter();
   }, [selectedDate]);
 
+  useEffect(() => {
+    const fetchConfirmedInvites = async () => {
+      if (!selectedDate) return;
+      setConfirmedInvitesLoading(true);
+      try {
+        const weekStartIso = formatISO(startOfWeek(selectedDate, { weekStartsOn: 1 }));
+        const weekEndIso = formatISO(endOfWeek(selectedDate, { weekStartsOn: 1 }));
+
+        const { count, error } = await supabase
+          .from('invitees')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'confirmed')
+          .gte('invite_date', weekStartIso)
+          .lte('invite_date', weekEndIso);
+
+        if (error) throw error;
+        
+        setConfirmedInvites(count || 0);
+      } catch (error: any) {
+        console.error('Error fetching confirmed invites:', error.message);
+        setConfirmedInvites(0);
+      } finally {
+        setConfirmedInvitesLoading(false);
+      }
+    };
+
+    fetchConfirmedInvites();
+  }, [selectedDate]);
+
   // Add debugging logs to see what the component receives
   console.log('=== TEAM PERFORMANCE COMPONENT DEBUG ===');
   console.log('teamPerformance received by component:', teamPerformance);
@@ -90,8 +121,8 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {[1, 2, 3, 4, 5].map((i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader className="pb-2">
               <div className="h-4 bg-muted rounded w-3/4"></div>
@@ -129,7 +160,7 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Teams</CardTitle>
@@ -157,6 +188,30 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
             <p className="text-xs text-muted-foreground">
               People invited this week
             </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Confirmed Invites</CardTitle>
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {confirmedInvitesLoading ? (
+              <div className="space-y-2">
+                <div className="h-7 bg-muted rounded w-3/4 animate-pulse"></div>
+                <div className="h-3 bg-muted rounded w-1/2 animate-pulse"></div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
+                  {confirmedInvites}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Invitees who confirmed attendance
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
