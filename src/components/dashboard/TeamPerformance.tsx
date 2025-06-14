@@ -92,7 +92,7 @@ export const TeamPerformance = ({ selectedDate }: TeamPerformanceProps) => {
         const { count, error } = await supabase
           .from('invitees')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'confirmed')
+          .in('status', ['confirmed', 'attended', 'joined_cell'])
           .gte('invite_date', weekStartIso)
           .lte('invite_date', weekEndIso);
 

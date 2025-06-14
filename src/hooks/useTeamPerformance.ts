@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -134,9 +133,9 @@ export const useTeamPerformance = (selectedDate: Date) => {
             return inviteDate.getDay() === 0 || inviteDate.getDay() >= 4;
           });
 
-          const wednesdayAttendees = wednesdayInvitees.filter(i => i.attended_service === true);
-          const sundayAttendees = sundayInvitees.filter(i => i.attended_service === true);
-          const totalAttendees = inviteesArray.filter(i => i.attended_service === true).length;
+          const wednesdayAttendees = wednesdayInvitees.filter(i => i.attended_service === true || ['attended', 'joined_cell'].includes(i.status as string));
+          const sundayAttendees = sundayInvitees.filter(i => i.attended_service === true || ['attended', 'joined_cell'].includes(i.status as string));
+          const totalAttendees = inviteesArray.filter(i => i.attended_service === true || ['attended', 'joined_cell'].includes(i.status as string)).length;
           const conversions = inviteesArray.filter(i => i.status === 'joined_cell').length;
 
           const result = {
