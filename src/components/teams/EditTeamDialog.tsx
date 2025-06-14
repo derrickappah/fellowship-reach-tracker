@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -106,7 +107,7 @@ export const EditTeamDialog = ({ team, open, onOpenChange }: EditTeamDialogProps
                 <SelectContent>
                   <SelectItem value="no-fellowship">No fellowship</SelectItem>
                   {availableFellowships
-                    .filter((fellowship) => fellowship.id)
+                    .filter((fellowship) => fellowship.id && typeof fellowship.id === 'string' && fellowship.id.trim() !== '')
                     .map((fellowship) => (
                       <SelectItem key={fellowship.id} value={fellowship.id}>
                         {fellowship.name}
@@ -127,7 +128,7 @@ export const EditTeamDialog = ({ team, open, onOpenChange }: EditTeamDialogProps
                 <SelectContent>
                   <SelectItem value="no-leader">No leader</SelectItem>
                   {leaders
-                    .filter((leader) => leader.id)
+                    .filter((leader) => leader.id && typeof leader.id === 'string' && leader.id.trim() !== '')
                     .map((leader) => (
                       <SelectItem key={leader.id} value={leader.id}>
                         {leader.name}
