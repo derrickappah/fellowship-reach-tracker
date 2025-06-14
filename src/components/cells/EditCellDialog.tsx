@@ -62,6 +62,17 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
     }
   }, [cell]);
 
+  useEffect(() => {
+    // log when cell changes
+    console.log("[EditCellDialog] cell prop:", cell);
+    if (cell && typeof cell.id !== "string") {
+      console.error("[EditCellDialog] Invalid cell.id value", cell.id);
+    }
+    if (cell && typeof cell.name !== "string") {
+      console.error("[EditCellDialog] Invalid cell.name value", cell.name);
+    }
+  }, [cell]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cell) return;
@@ -82,8 +93,18 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
   };
 
   // Defensive: Do not render unless cell is valid
-  if (!open || !cell || typeof cell.id !== 'string' || typeof cell.name !== 'string') {
+  if (!open) return null;
+  if (!cell) {
+    console.warn("[EditCellDialog] Not rendering (cell is null)");
     return null;
+  }
+  if (typeof cell.id !== 'string') {
+    console.error("[EditCellDialog] Not rendering: cell.id is not a string", cell.id);
+    return <div className="text-red-600 p-4">Error: Cell ID is invalid.</div>;
+  }
+  if (typeof cell.name !== 'string') {
+    console.error("[EditCellDialog] Not rendering: cell.name is not a string", cell.name);
+    return <div className="text-red-600 p-4">Error: Cell name is invalid.</div>;
   }
 
   return (
