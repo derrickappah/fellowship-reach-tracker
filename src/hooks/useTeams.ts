@@ -19,7 +19,7 @@ export const useTeams = () => {
         .select(`
           *,
           fellowship:fellowships(name),
-          leader:profiles!leader_id(name)
+          leader:profiles(name)
         `)
         .order('created_at', { ascending: false });
 
