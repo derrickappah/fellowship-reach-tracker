@@ -196,7 +196,7 @@ const Index = () => {
       {/* Main content area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar for mobile - made sticky */}
-        <div className="sticky top-0 z-40 bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 lg:hidden flex-shrink-0">
+        <div className={`sticky top-0 z-40 bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 lg:hidden flex-shrink-0 overflow-hidden transition-all duration-300 ${sidebarOpen ? 'h-0' : 'h-16'}`}>
           <div className="flex items-center justify-between h-16 px-4">
             <Button
               variant="ghost"
