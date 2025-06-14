@@ -154,8 +154,10 @@ export const ManageCells = () => {
 
       <EditCellDialog 
         cell={editingCell}
-        open={!!editingCell} 
-        onOpenChange={(open) => !open && setEditingCell(null)} 
+        open={!!editingCell && typeof editingCell.id === 'string'}
+        onOpenChange={(open) => {
+          if (!open) setEditingCell(null);
+        }}
       />
 
       <DeleteConfirmDialog

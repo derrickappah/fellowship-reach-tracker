@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -82,7 +81,10 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
     setIsSubmitting(false);
   };
 
-  if (!cell) return null;
+  // Defensive: Do not render unless cell is valid
+  if (!open || !cell || typeof cell.id !== 'string' || typeof cell.name !== 'string') {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -162,4 +164,3 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
     </Dialog>
   );
 };
-
