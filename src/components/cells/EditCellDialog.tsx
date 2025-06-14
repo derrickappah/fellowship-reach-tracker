@@ -136,7 +136,6 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
                   <SelectValue placeholder="Select fellowship" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="" disabled>Select fellowship</SelectItem>
                   {availableFellowships.map((fellowship) => (
                     <SelectItem key={fellowship.id} value={fellowship.id}>
                       {fellowship.name}
@@ -155,7 +154,6 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
                   <SelectValue placeholder="Select leader" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="" disabled>Select leader</SelectItem>
                   {availableLeaders.map((leader) => (
                     <SelectItem key={leader.id} value={leader.id}>
                       {leader.name}
