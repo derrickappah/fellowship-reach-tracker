@@ -75,11 +75,14 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
     e.preventDefault();
     if (!cell) return;
     setIsSubmitting(true);
-    const { error } = await updateCell(cell.id, {
+    
+    const updateData = {
       ...formData,
       fellowship_id: formData.fellowship_id || null,
-      leader_id: formData.leader_id || null,
-    });
+      leader_id: formData.leader_id === 'no-leader' ? null : formData.leader_id || null,
+    };
+    
+    const { error } = await updateCell(cell.id, updateData);
     if (!error) onOpenChange(false);
     setIsSubmitting(false);
   };
@@ -129,13 +132,14 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
             <div className="space-y-2">
               <Label htmlFor="fellowship">Fellowship</Label>
               <Select 
-                value={formData.fellowship_id || ""}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, fellowship_id: value }))}
+                value={formData.fellowship_id || "no-fellowship"}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, fellowship_id: value === "no-fellowship" ? "" : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select fellowship" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="no-fellowship">No fellowship</SelectItem>
                   {availableFellowships.map((fellowship) => (
                     <SelectItem key={fellowship.id} value={fellowship.id}>
                       {fellowship.name}
@@ -147,13 +151,14 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
             <div className="space-y-2">
               <Label htmlFor="leader">Cell Leader</Label>
               <Select 
-                value={formData.leader_id || ""}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value }))}
+                value={formData.leader_id || "no-leader"}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value === "no-leader" ? "" : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select leader" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="no-leader">No leader</SelectItem>
                   {availableLeaders.map((leader) => (
                     <SelectItem key={leader.id} value={leader.id}>
                       {leader.name}

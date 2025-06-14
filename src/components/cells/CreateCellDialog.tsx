@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -110,7 +111,6 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
                   <SelectValue placeholder="Select fellowship" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="" disabled>Select fellowship</SelectItem>
                   {availableFellowships
                     .filter(fellowship => typeof fellowship.id === 'string' && fellowship.id.trim() !== '' && typeof fellowship.name === 'string' && fellowship.name.trim() !== '')
                     .map((fellowship) => (
@@ -131,7 +131,7 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
                   <SelectValue placeholder="Select leader" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No leader</SelectItem>
+                  <SelectItem value="no-leader">No leader</SelectItem>
                   {leaders
                     .filter(
                       (leader) =>

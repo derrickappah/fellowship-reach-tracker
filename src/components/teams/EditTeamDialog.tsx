@@ -59,8 +59,8 @@ export const EditTeamDialog = ({ team, open, onOpenChange }: EditTeamDialogProps
 
     const { error } = await updateTeam(team.id, {
       ...formData,
-      fellowship_id: formData.fellowship_id || null,
-      leader_id: formData.leader_id || null,
+      fellowship_id: formData.fellowship_id === 'no-fellowship' ? null : formData.fellowship_id || null,
+      leader_id: formData.leader_id === 'no-leader' ? null : formData.leader_id || null,
     });
     
     if (!error) {
@@ -98,13 +98,14 @@ export const EditTeamDialog = ({ team, open, onOpenChange }: EditTeamDialogProps
             <div className="space-y-2">
               <Label htmlFor="fellowship">Fellowship</Label>
               <Select 
-                value={formData.fellowship_id} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, fellowship_id: value }))}
+                value={formData.fellowship_id || 'no-fellowship'} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, fellowship_id: value === 'no-fellowship' ? '' : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select fellowship" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="no-fellowship">No fellowship</SelectItem>
                   {availableFellowships.map((fellowship) => (
                     <SelectItem key={fellowship.id} value={fellowship.id}>
                       {fellowship.name}
@@ -116,13 +117,14 @@ export const EditTeamDialog = ({ team, open, onOpenChange }: EditTeamDialogProps
             <div className="space-y-2">
               <Label htmlFor="leader">Team Leader</Label>
               <Select 
-                value={formData.leader_id} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value }))}
+                value={formData.leader_id || 'no-leader'} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value === 'no-leader' ? '' : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select leader" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="no-leader">No leader</SelectItem>
                   {leaders.map((leader) => (
                     <SelectItem key={leader.id} value={leader.id}>
                       {leader.name}

@@ -75,7 +75,7 @@ export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipD
       // First create the fellowship
       const { data: fellowship, error: fellowshipError } = await createFellowship({
         ...formData,
-        leader_id: formData.leader_id || null,
+        leader_id: formData.leader_id === 'no-leader' ? null : formData.leader_id || null,
       });
       
       if (fellowshipError || !fellowship) {
@@ -127,14 +127,14 @@ export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipD
             <div className="space-y-2">
               <Label htmlFor="leader">Fellowship Leader</Label>
               <Select 
-                value={formData.leader_id || ''} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value }))}
+                value={formData.leader_id || 'no-leader'} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, leader_id: value === 'no-leader' ? '' : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a leader" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No leader</SelectItem>
+                  <SelectItem value="no-leader">No leader</SelectItem>
                   {leaders
                     .filter(
                       (leader) =>
