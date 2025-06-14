@@ -3,30 +3,42 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Team, TeamInsert } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useTeams = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchTeams = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      let query = supabase
         .from('teams')
-        .select('*')
+        .select(`
+          *,
+          fellowship:fellowships(name),
+          leader:profiles!teams_leader_id_fkey(name)
+        `)
         .order('created_at', { ascending: false });
+
+      // Filter teams based on user role
+      if (user?.role === 'fellowship_leader') {
+        // Fellowship leaders see teams in their fellowship
+        query = query.eq('fellowship_id', user.fellowship_id);
+      } else if (user?.role === 'member') {
+        // Members see only teams they lead
+        query = query.eq('leader_id', user.id);
+      }
+      // Admins see all teams (no additional filter needed)
+
+      const { data, error } = await query;
 
       if (error) throw error;
       
-      // Transform the data to match our Team type
-      const transformedData = (data || []).map(team => ({
-        ...team,
-        fellowship: null,
-        leader: null
-      }));
-      
-      setTeams(transformedData);
+      setTeams(data || []);
     } catch (error: any) {
       toast({
         title: "Error fetching teams",
@@ -121,7 +133,7 @@ export const useTeams = () => {
 
   useEffect(() => {
     fetchTeams();
-  }, []);
+  }, [user]);
 
   return {
     teams,

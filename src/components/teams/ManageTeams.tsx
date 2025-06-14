@@ -21,9 +21,36 @@ export const ManageTeams = () => {
   const [memberDialog, setMemberDialog] = useState<{ open: boolean; team: any } | null>(null);
   const [teamInvitesDialog, setTeamInvitesDialog] = useState<{ open: boolean; team: any } | null>(null);
 
-  const filteredTeams = user?.role === 'admin' 
-    ? teams 
-    : teams.filter(team => team.fellowship_id === user?.fellowship_id);
+  const getPageDescription = () => {
+    switch (user?.role) {
+      case 'admin':
+        return 'Manage all outreach teams';
+      case 'fellowship_leader':
+        return 'Manage your fellowship teams';
+      case 'member':
+        return 'Manage teams you lead';
+      default:
+        return 'Manage teams';
+    }
+  };
+
+  const canEditTeam = (team: any) => {
+    if (user?.role === 'admin') return true;
+    if (user?.role === 'fellowship_leader') return true;
+    if (user?.role === 'member' && team.leader_id === user.id) return true;
+    return false;
+  };
+
+  const canDeleteTeam = (team: any) => {
+    if (user?.role === 'admin') return true;
+    if (user?.role === 'fellowship_leader') return true;
+    if (user?.role === 'member' && team.leader_id === user.id) return true;
+    return false;
+  };
+
+  const canCreateTeam = () => {
+    return user?.role === 'admin' || user?.role === 'fellowship_leader';
+  };
 
   const handleDelete = async () => {
     if (deletingTeam) {
@@ -53,19 +80,19 @@ export const ManageTeams = () => {
       <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="text-3xl font-bold">Manage Teams</h1>
-          <p className="text-gray-600">
-            {user?.role === 'admin' ? 'Manage all outreach teams' : 'Manage your fellowship teams'}
-          </p>
+          <p className="text-gray-600">{getPageDescription()}</p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)} className="hover:scale-105 transition-transform duration-200">
-          <Plus className="mr-2 h-4 w-4" />
-          Create Team
-        </Button>
+        {canCreateTeam() && (
+          <Button onClick={() => setShowCreateDialog(true)} className="hover:scale-105 transition-transform duration-200">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Team
+          </Button>
+        )}
       </div>
 
       {/* Teams Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTeams.map((team, index) => (
+        {teams.map((team, index) => (
           <Card 
             key={team.id} 
             className="cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 hover:bg-accent/10 animate-fade-in"
@@ -91,15 +118,17 @@ export const ManageTeams = () => {
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => setEditingTeam(team)}
-                    className="hover:scale-105 transition-all duration-200"
-                  >
-                    <Edit className="mr-2 h-3 w-3" />
-                    Edit
-                  </Button>
+                  {canEditTeam(team) && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => setEditingTeam(team)}
+                      className="hover:scale-105 transition-all duration-200"
+                    >
+                      <Edit className="mr-2 h-3 w-3" />
+                      Edit
+                    </Button>
+                  )}
                   <Button 
                     size="sm" 
                     variant="outline"
@@ -109,14 +138,16 @@ export const ManageTeams = () => {
                     <UserPlus className="mr-2 h-3 w-3" />
                     Members
                   </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => setDeletingTeam(team)}
-                    className="text-red-600 hover:text-red-700 hover:scale-105 transition-all duration-200"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                  {canDeleteTeam(team) && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setDeletingTeam(team)}
+                      className="text-red-600 hover:text-red-700 hover:scale-105 transition-all duration-200"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -124,26 +155,33 @@ export const ManageTeams = () => {
         ))}
       </div>
 
-      {filteredTeams.length === 0 && (
+      {teams.length === 0 && (
         <Card className="animate-fade-in">
           <CardContent className="text-center py-8">
             <Users className="mx-auto h-12 w-12 text-gray-400 mb-4 animate-pulse" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No teams found</h3>
             <p className="text-gray-600 mb-4">
-              Get started by creating your first outreach team.
+              {user?.role === 'member' 
+                ? 'You are not leading any teams yet.' 
+                : 'Get started by creating your first outreach team.'
+              }
             </p>
-            <Button onClick={() => setShowCreateDialog(true)} className="hover:scale-105 transition-transform duration-200">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Your First Team
-            </Button>
+            {canCreateTeam() && (
+              <Button onClick={() => setShowCreateDialog(true)} className="hover:scale-105 transition-transform duration-200">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Your First Team
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
 
-      <CreateTeamDialog 
-        open={showCreateDialog} 
-        onOpenChange={setShowCreateDialog} 
-      />
+      {canCreateTeam() && (
+        <CreateTeamDialog 
+          open={showCreateDialog} 
+          onOpenChange={setShowCreateDialog} 
+        />
+      )}
 
       <EditTeamDialog 
         team={editingTeam}
