@@ -72,7 +72,7 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
   };
 
   const availableFellowships = user?.role === 'admin' 
-    ? fellowships.filter(f => typeof f.id === 'string' && f.id.trim() !== '')
+    ? fellowships.filter(f => typeof f.id === 'string' && f.id.trim() !== '' && typeof f.name === 'string' && f.name.trim() !== '')
     : fellowships.filter(f => f.id === user?.fellowship_id);
 
   return (
@@ -112,7 +112,7 @@ export const CreateCellDialog = ({ open, onOpenChange }: CreateCellDialogProps) 
                 <SelectContent>
                   <SelectItem value="" disabled>Select fellowship</SelectItem>
                   {availableFellowships
-                    .filter(fellowship => typeof fellowship.id === 'string' && fellowship.id.trim() !== '')
+                    .filter(fellowship => typeof fellowship.id === 'string' && fellowship.id.trim() !== '' && typeof fellowship.name === 'string' && fellowship.name.trim() !== '')
                     .map((fellowship) => (
                       <SelectItem key={fellowship.id} value={fellowship.id}>
                         {fellowship.name}

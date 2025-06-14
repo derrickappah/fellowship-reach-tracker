@@ -139,7 +139,7 @@ export const EditCellDialog = ({ open, onOpenChange, cell }: EditCellDialogProps
                 <SelectContent>
                   <SelectItem value="">No fellowship</SelectItem>
                   {fellowships
-                    .filter(fellowship => typeof fellowship.id === 'string' && fellowship.id.trim() !== '')
+                    .filter(fellowship => typeof fellowship.id === 'string' && fellowship.id.trim() !== '' && typeof fellowship.name === 'string' && fellowship.name.trim() !== '')
                     .map((fellowship) => (
                       <SelectItem key={fellowship.id} value={fellowship.id}>
                         {fellowship.name}

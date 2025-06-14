@@ -36,7 +36,7 @@ export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipD
           user_roles!inner(role)
         `)
         .in('user_roles.role', ['admin', 'fellowship_leader']);
-      // Filter for valid leaders only
+      // Filter ONLY valid leaders
       const validLeaders = (data || []).filter(
         leader =>
           leader &&
