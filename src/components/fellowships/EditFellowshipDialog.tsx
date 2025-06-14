@@ -166,7 +166,7 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
                 <SelectContent>
                   <SelectItem value="no-leader">No leader</SelectItem>
                   {members
-                    .filter((member) => member.id)
+                    .filter((member) => member.id && typeof member.id === 'string' && member.id.trim() !== '')
                     .map((member) => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.name}

@@ -85,7 +85,9 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">No fellowship</SelectItem>
-                  {fellowships.map((fellowship) => (
+                  {fellowships
+                    .filter((fellowship) => fellowship.id && typeof fellowship.id === 'string' && fellowship.id.trim() !== '')
+                    .map((fellowship) => (
                     <SelectItem key={fellowship.id} value={fellowship.id}>
                       {fellowship.name}
                     </SelectItem>
@@ -106,7 +108,7 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
                 <SelectContent>
                   <SelectItem value="">No cell</SelectItem>
                   {cells
-                    .filter(cell => !assignments.fellowship_id || cell.fellowship_id === assignments.fellowship_id)
+                    .filter(cell => cell.id && typeof cell.id === 'string' && cell.id.trim() !== '' && (!assignments.fellowship_id || cell.fellowship_id === assignments.fellowship_id))
                     .map((cell) => (
                       <SelectItem key={cell.id} value={cell.id}>
                         {cell.name}
@@ -128,7 +130,7 @@ export const MemberAssignDialog = ({ open, onOpenChange, member }: MemberAssignD
                 <SelectContent>
                   <SelectItem value="">No team</SelectItem>
                   {teams
-                    .filter(team => !assignments.fellowship_id || team.fellowship_id === assignments.fellowship_id)
+                    .filter(team => team.id && typeof team.id === 'string' && team.id.trim() !== '' && (!assignments.fellowship_id || team.fellowship_id === assignments.fellowship_id))
                     .map((team) => (
                       <SelectItem key={team.id} value={team.id}>
                         {team.name}
