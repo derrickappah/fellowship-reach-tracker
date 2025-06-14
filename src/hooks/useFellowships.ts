@@ -12,20 +12,68 @@ export const useFellowships = () => {
   const fetchFellowships = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // First, get all fellowships
+      const { data: fellowshipsData, error: fellowshipsError } = await supabase
         .from('fellowships')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      
+      if (fellowshipsError) throw fellowshipsError;
+
+      if (!fellowshipsData || fellowshipsData.length === 0) {
+        setFellowships([]);
+        return;
+      }
+
+      // Get cell counts for each fellowship
+      const fellowshipIds = fellowshipsData.map(f => f.id);
+      const { data: cellCounts, error: cellCountsError } = await supabase
+        .from('cells')
+        .select('fellowship_id')
+        .in('fellowship_id', fellowshipIds);
+
+      if (cellCountsError) {
+        console.warn('Error fetching cell counts:', cellCountsError);
+      }
+
+      // Calculate cell counts per fellowship
+      const cellCountMap = (cellCounts || []).reduce((acc, cell) => {
+        if (cell.fellowship_id) {
+          acc[cell.fellowship_id] = (acc[cell.fellowship_id] || 0) + 1;
+        }
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Get leader data for fellowships that have leader_id
+      const leaderIds = fellowshipsData
+        .filter(fellowship => fellowship.leader_id)
+        .map(fellowship => fellowship.leader_id);
+
+      let leadersData: any[] = [];
+      if (leaderIds.length > 0) {
+        const { data: lData, error: lError } = await supabase
+          .from('profiles')
+          .select('id, name')
+          .in('id', leaderIds);
+        
+        if (lError) console.warn('Error fetching leaders:', lError);
+        else leadersData = lData || [];
+      }
+
       // Transform the data to match our Fellowship type
-      const transformedData = (data || []).map(fellowship => ({
-        ...fellowship,
-        leader: null // We'll fetch leader info separately if needed
-      }));
+      const transformedFellowships: Fellowship[] = fellowshipsData.map((fellowship: any) => {
+        const leader = leadersData.find(l => l.id === fellowship.leader_id);
+        const cellCount = cellCountMap[fellowship.id] || 0;
+        
+        return {
+          ...fellowship,
+          cell_count: cellCount,
+          leader: leader ? { name: leader.name } : null,
+        };
+      });
       
-      setFellowships(transformedData);
+      setFellowships(transformedFellowships);
     } catch (error: any) {
       toast({
         title: "Error fetching fellowships",

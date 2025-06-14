@@ -18,7 +18,7 @@ interface CreateFellowshipDialogProps {
 }
 
 export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipDialogProps) => {
-  const { createFellowship } = useFellowships();
+  const { createFellowship, refetch: refetchFellowships } = useFellowships();
   const { cells, updateCell } = useCells();
   const [leaders, setLeaders] = useState<any[]>([]);
   const [formData, setFormData] = useState<FellowshipInsert>({
@@ -93,6 +93,8 @@ export const CreateFellowshipDialog = ({ open, onOpenChange }: CreateFellowshipD
       // Reset form
       setFormData({ name: '', description: '', leader_id: '' });
       setSelectedCells([]);
+      // Refresh fellowships to update cell count
+      refetchFellowships();
       onOpenChange(false);
     } catch (error) {
       console.error('Error creating fellowship:', error);

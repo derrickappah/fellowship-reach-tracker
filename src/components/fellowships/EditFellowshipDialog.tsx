@@ -17,7 +17,7 @@ interface EditFellowshipDialogProps {
 }
 
 export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFellowshipDialogProps) => {
-  const { updateFellowship } = useFellowships();
+  const { updateFellowship, refetch: refetchFellowships } = useFellowships();
   const { cells, updateCell } = useCells();
   const [formData, setFormData] = useState({
     name: '',
@@ -46,6 +46,8 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
     // Remove cell from fellowship
     await updateCell(cellId, { fellowship_id: null });
     setAssignedCells(assignedCells.filter(id => id !== cellId));
+    // Refresh fellowships to update cell count
+    refetchFellowships();
   };
 
   const handleCellToggle = (cellId: string, checked: boolean) => {
@@ -77,6 +79,8 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
       }
 
       setSelectedCells([]);
+      // Refresh fellowships to update cell count
+      refetchFellowships();
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating fellowship:', error);
