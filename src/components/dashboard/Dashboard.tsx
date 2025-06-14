@@ -14,9 +14,23 @@ import { TeamPerformance } from '@/components/dashboard/TeamPerformance';
 import { Users, Building, Users2, UserPlus, BarChart3, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const { user } = useAuth();
+
+  const tabsConfig = [
+    { value: 'fellowships', label: 'Fellowships', icon: Building, roles: ['admin'], component: <ManageFellowships /> },
+    { value: 'cells', label: 'Cells', icon: Users2, roles: ['admin'], component: <ManageCells /> },
+    { value: 'teams', label: 'Teams', icon: UserPlus, roles: ['admin', 'fellowship_leader'], component: <ManageTeams /> },
+    { value: 'members', label: 'Members', icon: Users, roles: ['admin', 'fellowship_leader'], component: <ManageMembers /> },
+    { value: 'reports', label: 'Reports', icon: BarChart3, roles: ['admin', 'fellowship_leader', 'member'], component: <Reports /> },
+  ];
+
+  const availableTabs = user ? tabsConfig.filter(tab => tab.roles.includes(user.role)) : [];
+  
+  const defaultTab = availableTabs.length > 0 ? availableTabs[0].value : '';
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -24,7 +38,7 @@ export const Dashboard = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Church Management Dashboard</h1>
           <p className="text-muted-foreground">
-            Manage your church community, fellowships, cells, and members
+            {user?.role === 'admin' ? 'Manage your church community, fellowships, cells, and members' : 'Welcome to your dashboard'}
           </p>
         </div>
         
@@ -58,50 +72,24 @@ export const Dashboard = () => {
       {/* Team Performance Overview */}
       <TeamPerformance selectedDate={selectedDate} />
 
-      <Tabs defaultValue="fellowships" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="fellowships" className="flex items-center gap-2">
-            <Building className="h-4 w-4" />
-            Fellowships
-          </TabsTrigger>
-          <TabsTrigger value="cells" className="flex items-center gap-2">
-            <Users2 className="h-4 w-4" />
-            Cells
-          </TabsTrigger>
-          <TabsTrigger value="teams" className="flex items-center gap-2">
-            <UserPlus className="h-4 w-4" />
-            Teams
-          </TabsTrigger>
-          <TabsTrigger value="members" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Members
-          </TabsTrigger>
-          <TabsTrigger value="reports" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Reports
-          </TabsTrigger>
-        </TabsList>
+      {availableTabs.length > 0 && (
+        <Tabs defaultValue={defaultTab} className="space-y-6">
+          <TabsList className={`grid w-full grid-cols-${availableTabs.length}`}>
+            {availableTabs.map(tab => (
+              <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2">
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        <TabsContent value="fellowships" className="space-y-6">
-          <ManageFellowships />
-        </TabsContent>
-
-        <TabsContent value="cells" className="space-y-6">
-          <ManageCells />
-        </TabsContent>
-
-        <TabsContent value="teams" className="space-y-6">
-          <ManageTeams />
-        </TabsContent>
-
-        <TabsContent value="members" className="space-y-6">
-          <ManageMembers />
-        </TabsContent>
-
-        <TabsContent value="reports" className="space-y-6">
-          <Reports />
-        </TabsContent>
-      </Tabs>
+          {availableTabs.map(tab => (
+            <TabsContent key={tab.value} value={tab.value} className="space-y-6">
+              {tab.component}
+            </TabsContent>
+          ))}
+        </Tabs>
+      )}
     </div>
   );
 };

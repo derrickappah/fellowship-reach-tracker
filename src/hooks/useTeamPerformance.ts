@@ -49,6 +49,29 @@ export const useTeamPerformance = (selectedDate: Date) => {
       
       if (user?.role === 'fellowship_leader' && user.fellowship_id) {
         teamsQuery = teamsQuery.eq('fellowship_id', user.fellowship_id);
+      } else if (user?.role === 'member') {
+        const { data: teamMemberships, error: membershipError } = await supabase
+          .from('team_members')
+          .select('team_id')
+          .eq('user_id', user.id);
+
+        if (membershipError) throw membershipError;
+
+        const teamIds = teamMemberships?.map(tm => tm.team_id).filter(id => id) as string[] || [];
+        
+        if (teamIds.length === 0) {
+          setTeamPerformance({
+            totalTeams: 0,
+            totalInvitees: 0,
+            attendanceRate: 0,
+            topTeam: null,
+            teams: [],
+          });
+          setLoading(false);
+          return;
+        }
+
+        teamsQuery = teamsQuery.in('id', teamIds);
       }
 
       const { data: teams, error: teamsError } = await teamsQuery;
