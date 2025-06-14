@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dashboard } from '@/components/dashboard/Dashboard';
@@ -15,13 +16,15 @@ import {
   Menu,
   X,
   UserPlus,
-  UserCheck
+  UserCheck,
+  Settings
 } from 'lucide-react';
 import { Reports } from '@/components/reports/Reports';
 import { ManageTeams } from '@/components/teams/ManageTeams';
 import { ManageMembers } from '@/components/members/ManageMembers';
 import { ManageFellowships } from '@/components/fellowships/ManageFellowships';
 import { ManageCells } from '@/components/cells/ManageCells';
+import { ProfileSettings } from '@/components/profile/ProfileSettings';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -57,6 +60,7 @@ const Index = () => {
     { name: 'Manage Members', icon: Users, id: 'members', roles: ['admin', 'fellowship_leader'] },
     { name: 'Manage Fellowships', icon: Church, id: 'fellowships', roles: ['admin'] },
     { name: 'Manage Cells', icon: Group, id: 'cells', roles: ['admin'] },
+    { name: 'Profile Settings', icon: Settings, id: 'profile-settings', roles: ['admin', 'fellowship_leader', 'member'] },
   ];
 
   const availableNavigation = navigation.filter(item => 
@@ -99,6 +103,8 @@ const Index = () => {
         return <ManageFellowships />;
       case 'cells':
         return <ManageCells />;
+      case 'profile-settings':
+        return <ProfileSettings />;
       default:
         return <Dashboard />;
     }
