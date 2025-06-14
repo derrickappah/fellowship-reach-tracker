@@ -72,25 +72,6 @@ export const useTeamPerformance = (selectedDate: Date) => {
 
       console.log('Found teams:', teams.map(t => ({ id: t.id, name: t.name })));
 
-      // Get ALL invitees first to debug
-      const { data: allInvitees, error: allInviteesError } = await supabase
-        .from('invitees')
-        .select('*');
-
-      if (allInviteesError) {
-        console.error('All invitees query error:', allInviteesError);
-      } else {
-        console.log('Total invitees in database:', allInvitees?.length || 0);
-        console.log('Sample invitees:', allInvitees?.slice(0, 3).map(i => ({
-          name: i.name,
-          team_id: i.team_id,
-          invite_date: i.invite_date,
-          service_date: i.service_date,
-          attended_service: i.attended_service,
-          status: i.status
-        })));
-      }
-
       // Get team performance data
       const teamPerformanceData = await Promise.all(
         teams.map(async (team) => {
@@ -108,19 +89,7 @@ export const useTeamPerformance = (selectedDate: Date) => {
 
           console.log(`Team ${team.name} has ${teamMembers?.length || 0} members`);
 
-          // Get ALL invitees for this team (not filtered by date yet)
-          const { data: allTeamInvitees, error: allTeamInviteesError } = await supabase
-            .from('invitees')
-            .select('*')
-            .eq('team_id', team.id);
-
-          if (allTeamInviteesError) {
-            console.error(`Error fetching all invitees for team ${team.name}:`, allTeamInviteesError);
-          }
-
-          console.log(`Team ${team.name} has ${allTeamInvitees?.length || 0} total invitees in database`);
-
-          // Now filter by the selected week
+          // Get invitees for this team in the selected week
           const { data: weekInvitees, error: weekInviteesError } = await supabase
             .from('invitees')
             .select('*')
@@ -157,37 +126,17 @@ export const useTeamPerformance = (selectedDate: Date) => {
             })));
           }
 
-          // Categorize invitees by service type
+          // Categorize invitees by service type - use service_date if available, otherwise invite_date
           const wednesdayInvitees = inviteesArray.filter(i => {
-            let dateToCheck: Date;
-            
-            if (i.service_date) {
-              dateToCheck = new Date(i.service_date);
-            } else {
-              dateToCheck = new Date(i.invite_date);
-            }
-            
+            const dateToCheck = i.service_date ? new Date(i.service_date) : new Date(i.invite_date);
             const dayOfWeek = dateToCheck.getDay();
-            const isWednesday = dayOfWeek === 3;
-            
-            console.log(`${i.name}: using ${i.service_date ? 'service_date' : 'invite_date'} = ${dateToCheck.toDateString()}, day=${dayOfWeek}, isWednesday=${isWednesday}`);
-            
-            return isWednesday;
+            return dayOfWeek === 3; // Wednesday
           });
 
           const sundayInvitees = inviteesArray.filter(i => {
-            let dateToCheck: Date;
-            
-            if (i.service_date) {
-              dateToCheck = new Date(i.service_date);
-            } else {
-              dateToCheck = new Date(i.invite_date);
-            }
-            
+            const dateToCheck = i.service_date ? new Date(i.service_date) : new Date(i.invite_date);
             const dayOfWeek = dateToCheck.getDay();
-            const isSunday = dayOfWeek === 0;
-            
-            return isSunday;
+            return dayOfWeek === 0; // Sunday
           });
 
           const wednesdayAttendees = wednesdayInvitees.filter(i => i.attended_service === true);
