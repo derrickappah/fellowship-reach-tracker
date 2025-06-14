@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useFellowships } from '@/hooks/useFellowships';
 import { useCells } from '@/hooks/useCells';
-import { Plus, X, Trash2 } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface EditFellowshipDialogProps {
   fellowship: any;
@@ -17,14 +18,18 @@ interface EditFellowshipDialogProps {
 
 export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFellowshipDialogProps) => {
   const { updateFellowship } = useFellowships();
-  const { cells, createCell, updateCell, deleteCell } = useCells();
+  const { cells, updateCell } = useCells();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
   });
-  const [fellowshipCells, setFellowshipCells] = useState<any[]>([]);
-  const [newCells, setNewCells] = useState<string[]>([]);
+  const [assignedCells, setAssignedCells] = useState<string[]>([]);
+  const [selectedCells, setSelectedCells] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get cells assigned to this fellowship and available cells
+  const fellowshipCells = cells.filter(cell => cell.fellowship_id === fellowship?.id);
+  const availableCells = cells.filter(cell => !cell.fellowship_id);
 
   useEffect(() => {
     if (fellowship) {
@@ -32,42 +37,23 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
         name: fellowship.name || '',
         description: fellowship.description || '',
       });
+      // Set initially assigned cells
+      setAssignedCells(fellowshipCells.map(cell => cell.id));
     }
-  }, [fellowship]);
+  }, [fellowship, fellowshipCells]);
 
-  useEffect(() => {
-    if (fellowship && cells) {
-      const fellowshipRelatedCells = cells.filter(cell => cell.fellowship_id === fellowship.id);
-      setFellowshipCells(fellowshipRelatedCells);
+  const handleRemoveCell = async (cellId: string) => {
+    // Remove cell from fellowship
+    await updateCell(cellId, { fellowship_id: null });
+    setAssignedCells(assignedCells.filter(id => id !== cellId));
+  };
+
+  const handleCellToggle = (cellId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCells([...selectedCells, cellId]);
+    } else {
+      setSelectedCells(selectedCells.filter(id => id !== cellId));
     }
-  }, [fellowship, cells]);
-
-  const addNewCellInput = () => {
-    setNewCells([...newCells, '']);
-  };
-
-  const removeNewCellInput = (index: number) => {
-    setNewCells(newCells.filter((_, i) => i !== index));
-  };
-
-  const updateNewCellName = (index: number, name: string) => {
-    const updated = [...newCells];
-    updated[index] = name;
-    setNewCells(updated);
-  };
-
-  const handleDeleteCell = async (cellId: string) => {
-    if (confirm('Are you sure you want to delete this cell?')) {
-      await deleteCell(cellId);
-    }
-  };
-
-  const updateExistingCellName = (cellId: string, newName: string) => {
-    setFellowshipCells(cells => 
-      cells.map(cell => 
-        cell.id === cellId ? { ...cell, name: newName } : cell
-      )
-    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,23 +69,14 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
         return;
       }
 
-      // Update existing cells
-      for (const cell of fellowshipCells) {
-        if (cell.name !== cells.find(c => c.id === cell.id)?.name) {
-          await updateCell(cell.id, { name: cell.name });
-        }
-      }
-
-      // Create new cells
-      const validNewCellNames = newCells.filter(name => name.trim() !== '');
-      for (const cellName of validNewCellNames) {
-        await createCell({
-          name: cellName.trim(),
+      // Assign newly selected cells to this fellowship
+      for (const cellId of selectedCells) {
+        await updateCell(cellId, {
           fellowship_id: fellowship.id,
         });
       }
 
-      setNewCells([]);
+      setSelectedCells([]);
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating fellowship:', error);
@@ -118,7 +95,7 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
         <DialogHeader>
           <DialogTitle>Edit Fellowship</DialogTitle>
           <DialogDescription>
-            Update the fellowship information and manage its cells.
+            Update the fellowship information and manage its cell assignments.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -145,61 +122,46 @@ export const EditFellowshipDialog = ({ fellowship, open, onOpenChange }: EditFel
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Existing Cells</Label>
-              </div>
-              <div className="space-y-2">
-                {fellowshipCells.map((cell) => (
-                  <div key={cell.id} className="flex gap-2">
-                    <Input
-                      value={cell.name}
-                      onChange={(e) => updateExistingCellName(cell.id, e.target.value)}
-                      placeholder="Cell name"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDeleteCell(cell.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                {fellowshipCells.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No cells in this fellowship</p>
+              <Label>Currently Assigned Cells</Label>
+              <div className="space-y-2 max-h-32 overflow-y-auto border rounded-md p-2">
+                {fellowshipCells.length > 0 ? (
+                  fellowshipCells.map((cell) => (
+                    <div key={cell.id} className="flex items-center justify-between bg-muted p-2 rounded">
+                      <span className="text-sm">{cell.name}</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRemoveCell(cell.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No cells assigned to this fellowship</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Add New Cells</Label>
-                <Button type="button" size="sm" variant="outline" onClick={addNewCellInput}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Cell
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {newCells.map((cellName, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      value={cellName}
-                      onChange={(e) => updateNewCellName(index, e.target.value)}
-                      placeholder="Enter cell name"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => removeNewCellInput(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                {newCells.length === 0 && (
-                  <p className="text-sm text-muted-foreground">Click "Add Cell" to create new cells</p>
+              <Label>Assign Additional Cells</Label>
+              <div className="space-y-2 max-h-32 overflow-y-auto border rounded-md p-2">
+                {availableCells.length > 0 ? (
+                  availableCells.map((cell) => (
+                    <div key={cell.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={cell.id}
+                        checked={selectedCells.includes(cell.id)}
+                        onCheckedChange={(checked) => handleCellToggle(cell.id, checked as boolean)}
+                      />
+                      <Label htmlFor={cell.id} className="text-sm font-normal">
+                        {cell.name}
+                      </Label>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No unassigned cells available</p>
                 )}
               </div>
             </div>
