@@ -142,8 +142,8 @@ const Index = () => {
           </Button>
         </div>
 
-        <nav className="flex-1 mt-6 px-3 overflow-y-auto">
-          {availableNavigation.map((item) => {
+        <nav key={sidebarOpen ? 'open' : 'closed'} className="flex-1 mt-6 px-3 overflow-y-auto">
+          {availableNavigation.map((item, index) => {
             const isActive = currentSection === item.id;
             return (
               <button
@@ -159,7 +159,12 @@ const Index = () => {
                 }`}
               >
                 <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                {item.name}
+                <span
+                  className={sidebarOpen ? 'animate-fade-in' : ''}
+                  style={sidebarOpen ? { animationDelay: `${index * 75}ms`, animationFillMode: 'backwards' } : {}}
+                >
+                  {item.name}
+                </span>
               </button>
             );
           })}
