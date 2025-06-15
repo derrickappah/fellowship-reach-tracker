@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -17,6 +16,7 @@ import { DateRange } from 'react-day-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
+import { InviteeStats } from './InviteeStats';
 
 const statusColors = {
   invited: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
@@ -153,9 +153,10 @@ export const InviteeList = () => {
 
   return (
     <div className="space-y-6">
+      <InviteeStats data={sortedAndFilteredInvitees} />
       <Card>
         <CardHeader>
-          <CardTitle>Invitee Management</CardTitle>
+          <CardTitle>Invitee List</CardTitle>
           <CardDescription>
             View and manage all church invitees and their status
           </CardDescription>
