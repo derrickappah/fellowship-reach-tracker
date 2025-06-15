@@ -18,8 +18,7 @@ export const useTeams = () => {
         .from('teams')
         .select(`
           *,
-          fellowship:fellowships(name),
-          leader_profile:profiles!leader_id(name)
+          fellowship:fellowships(name)
         `)
         .order('created_at', { ascending: false });
 
@@ -37,11 +36,24 @@ export const useTeams = () => {
 
       if (error) throw error;
       
+      // Fetch leader profiles separately to avoid join issues
+      const teamIds = (data || []).map(team => team.leader_id).filter(Boolean);
+      const { data: leaders } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .in('id', teamIds);
+
+      // Create a map of leader profiles for quick lookup
+      const leaderMap = new Map();
+      (leaders || []).forEach(leader => {
+        leaderMap.set(leader.id, leader);
+      });
+      
       // Transform the data to ensure proper typing
       const transformedTeams = (data || []).map(team => ({
         ...team,
         fellowship: team.fellowship || null,
-        leader: team.leader_profile || null
+        leader: team.leader_id ? leaderMap.get(team.leader_id) || null : null
       }));
       
       setTeams(transformedTeams);
