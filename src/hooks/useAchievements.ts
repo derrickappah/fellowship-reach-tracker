@@ -16,16 +16,17 @@ export const useAchievements = () => {
   const initializeAchievements = async () => {
     console.log('Initializing achievements...');
     
-    // Check if achievements already exist
-    const { data: existingAchievements } = await supabase
+    // Fetch existing achievement names to avoid duplicates
+    const { data: existingAchievements, error: fetchError } = await supabase
       .from('achievements')
-      .select('*')
-      .limit(1);
+      .select('name');
 
-    if (existingAchievements && existingAchievements.length > 0) {
-      console.log('Achievements already exist, skipping initialization');
+    if (fetchError) {
+      console.log('Error fetching existing achievements:', fetchError);
       return;
     }
+
+    const existingAchievementNames = existingAchievements.map(a => a.name);
 
     // Create sample achievements
     const sampleAchievements = [
@@ -212,15 +213,26 @@ export const useAchievements = () => {
       },
     ];
 
+    const newAchievementsToInsert = sampleAchievements.filter(
+      (achievement) => !existingAchievementNames.includes(achievement.name)
+    );
+
+    if (newAchievementsToInsert.length === 0) {
+      console.log('All defined achievements already exist in the database.');
+      return;
+    }
+
+    console.log(`Found ${newAchievementsToInsert.length} new achievements to insert.`);
+
     try {
       const { error } = await supabase
         .from('achievements')
-        .insert(sampleAchievements);
+        .insert(newAchievementsToInsert);
 
       if (error) {
         console.log('Error creating sample achievements:', error);
       } else {
-        console.log('Sample achievements created successfully');
+        console.log('New sample achievements created successfully');
       }
     } catch (error) {
       console.log('Error initializing achievements:', error);
