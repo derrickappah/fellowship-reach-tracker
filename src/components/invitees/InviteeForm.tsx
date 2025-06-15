@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,6 +61,33 @@ export const InviteeForm = () => {
     }
 
     try {
+      // Prevent duplicate invitees
+      const duplicateFilters = [];
+      if (formData.email && formData.email.trim() !== '') {
+        duplicateFilters.push(`email.eq.${formData.email.trim()}`);
+      }
+      if (formData.phone && formData.phone.trim() !== '') {
+        duplicateFilters.push(`phone.eq.${formData.phone.trim()}`);
+      }
+
+      if (duplicateFilters.length > 0) {
+        const { data: existing, error: checkError } = await supabase
+          .from('invitees')
+          .select('name')
+          .or(duplicateFilters.join(','));
+
+        if (checkError) throw checkError;
+        
+        if (existing && existing.length > 0) {
+          toast({
+            title: "Possible Duplicate Invitee",
+            description: `An invitee named "${existing[0].name}" with the same email or phone may already exist.`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
       const { error } = await supabase
         .from('invitees')
         .insert({
