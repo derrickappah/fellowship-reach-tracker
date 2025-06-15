@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Users, UserPlus, Settings, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTeams } from '@/hooks/useTeams';
+import { useMembers } from '@/hooks/useMembers';
 import { CreateTeamDialog } from './CreateTeamDialog';
 import { EditTeamDialog } from './EditTeamDialog';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
@@ -15,6 +16,7 @@ import { TeamInvitesDialog } from './TeamInvitesDialog';
 export const ManageTeams = () => {
   const { user } = useAuth();
   const { teams, loading, deleteTeam } = useTeams();
+  const { members } = useMembers();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingTeam, setEditingTeam] = useState<any>(null);
   const [deletingTeam, setDeletingTeam] = useState<any>(null);
@@ -28,29 +30,46 @@ export const ManageTeams = () => {
       case 'fellowship_leader':
         return 'Manage your fellowship teams';
       case 'member':
-        return 'Manage teams you lead';
+        return 'Manage teams you are part of';
       default:
         return 'Manage teams';
     }
   };
 
+  const isTeamMember = (team: any) => {
+    if (!user) return false;
+    // Check if user is a member of this team
+    const member = members.find(m => m.id === user.id);
+    return member?.team_memberships?.some(tm => tm.team_id === team.id) || false;
+  };
+
   const canEditTeam = (team: any) => {
     if (user?.role === 'admin') return true;
     if (user?.role === 'fellowship_leader') return true;
-    if (user?.role === 'member' && team.leader_id === user.id) return true;
+    if (user?.role === 'member' && (team.leader_id === user.id || isTeamMember(team))) return true;
     return false;
   };
 
   const canDeleteTeam = (team: any) => {
     if (user?.role === 'admin') return true;
     if (user?.role === 'fellowship_leader') return true;
-    if (user?.role === 'member' && team.leader_id === user.id) return true;
+    if (user?.role === 'member' && team.leader_id === user.id) return true; // Only team leaders can delete
     return false;
   };
 
   const canCreateTeam = () => {
     return user?.role === 'admin' || user?.role === 'fellowship_leader';
   };
+
+  // Filter teams based on user permissions
+  const filteredTeams = teams.filter(team => {
+    if (user?.role === 'admin') return true;
+    if (user?.role === 'fellowship_leader') return team.fellowship_id === user.fellowship_id;
+    if (user?.role === 'member') {
+      return team.leader_id === user.id || isTeamMember(team);
+    }
+    return false;
+  });
 
   const handleDelete = async () => {
     if (deletingTeam) {
@@ -92,7 +111,7 @@ export const ManageTeams = () => {
 
       {/* Teams Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {teams.map((team, index) => (
+        {filteredTeams.map((team, index) => (
           <Card 
             key={team.id} 
             className="cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 hover:bg-accent/10 animate-fade-in"
@@ -114,7 +133,8 @@ export const ManageTeams = () => {
               <div className="space-y-4">
                 <div className="flex items-center text-sm text-gray-600">
                   <Users className="mr-2 h-4 w-4" />
-                  0 members
+                  {/* Show member count from team_memberships */}
+                  {members.filter(m => m.team_memberships?.some(tm => tm.team_id === team.id)).length} members
                 </div>
                 
                 <div className="flex gap-2">
@@ -155,14 +175,14 @@ export const ManageTeams = () => {
         ))}
       </div>
 
-      {teams.length === 0 && (
+      {filteredTeams.length === 0 && (
         <Card className="animate-fade-in">
           <CardContent className="text-center py-8">
             <Users className="mx-auto h-12 w-12 text-gray-400 mb-4 animate-pulse" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No teams found</h3>
             <p className="text-gray-600 mb-4">
               {user?.role === 'member' 
-                ? 'You are not leading any teams yet.' 
+                ? 'You are not part of any teams yet.' 
                 : 'Get started by creating your first outreach team.'
               }
             </p>
