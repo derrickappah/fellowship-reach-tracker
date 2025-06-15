@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Team, TeamInsert } from '@/types/supabase';
@@ -23,12 +24,37 @@ export const useTeams = () => {
         .order('created_at', { ascending: false });
 
       // Filter teams based on user role
-      if (user?.role === 'fellowship_leader') {
+      if (user?.role === 'fellowship_leader' && user.fellowship_id) {
         // Fellowship leaders see teams in their fellowship
         query = query.eq('fellowship_id', user.fellowship_id);
-      } else if (user?.role === 'member') {
-        // Members see only teams they lead
-        query = query.eq('leader_id', user.id);
+      } else if (['member', 'team_leader', 'team_member'].includes(user?.role || '')) {
+        // Members, team leaders, and team members see teams they are a part of (leader or member)
+        const { data: teamMemberships, error: membershipError } = await supabase
+          .from('team_members')
+          .select('team_id')
+          .eq('user_id', user.id);
+        
+        if (membershipError) throw membershipError;
+
+        const teamIds = (teamMemberships || []).map(tm => tm.team_id).filter(id => id) as string[];
+
+        // Combine teams they are a member of with teams they lead
+        const filterParts = [];
+        if (user.id) {
+          filterParts.push(`leader_id.eq.${user.id}`);
+        }
+        if (teamIds.length > 0) {
+          filterParts.push(`id.in.(${teamIds.join(',')})`);
+        }
+
+        if (filterParts.length > 0) {
+          query = query.or(filterParts.join(','));
+        } else {
+          // If user is not a member or leader of any team, return no teams.
+          setTeams([]);
+          setLoading(false);
+          return;
+        }
       }
       // Admins see all teams (no additional filter needed)
 
@@ -151,7 +177,9 @@ export const useTeams = () => {
   };
 
   useEffect(() => {
-    fetchTeams();
+    if (user) {
+      fetchTeams();
+    }
   }, [user]);
 
   return {

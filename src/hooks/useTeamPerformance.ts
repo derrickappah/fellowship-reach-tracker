@@ -48,7 +48,7 @@ export const useTeamPerformance = (selectedDate: Date) => {
       
       if (user?.role === 'fellowship_leader' && user.fellowship_id) {
         teamsQuery = teamsQuery.eq('fellowship_id', user.fellowship_id);
-      } else if (user?.role === 'member') {
+      } else if (['member', 'team_leader', 'team_member'].includes(user?.role || '')) {
         const { data: teamMemberships, error: membershipError } = await supabase
           .from('team_members')
           .select('team_id')
@@ -56,9 +56,19 @@ export const useTeamPerformance = (selectedDate: Date) => {
 
         if (membershipError) throw membershipError;
 
-        const teamIds = teamMemberships?.map(tm => tm.team_id).filter(id => id) as string[] || [];
+        const teamIds = (teamMemberships || []).map(tm => tm.team_id).filter(id => id) as string[] || [];
         
-        if (teamIds.length === 0) {
+        const filterParts = [];
+        if (user.id) {
+          filterParts.push(`leader_id.eq.${user.id}`);
+        }
+        if (teamIds.length > 0) {
+          filterParts.push(`id.in.(${teamIds.join(',')})`);
+        }
+        
+        if (filterParts.length > 0) {
+          teamsQuery = teamsQuery.or(filterParts.join(','));
+        } else {
           setTeamPerformance({
             totalTeams: 0,
             totalInvitees: 0,
@@ -69,8 +79,6 @@ export const useTeamPerformance = (selectedDate: Date) => {
           setLoading(false);
           return;
         }
-
-        teamsQuery = teamsQuery.in('id', teamIds);
       }
 
       const { data: teams, error: teamsError } = await teamsQuery;
@@ -84,6 +92,7 @@ export const useTeamPerformance = (selectedDate: Date) => {
           topTeam: null,
           teams: [],
         });
+        setLoading(false); // Make sure to stop loading
         return;
       }
 

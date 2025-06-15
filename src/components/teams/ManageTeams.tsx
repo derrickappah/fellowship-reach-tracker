@@ -50,14 +50,21 @@ export const ManageTeams = () => {
   const canEditTeam = (team: any) => {
     if (!user) return false;
     if (user.role === 'admin' || user.role === 'fellowship_leader') return true;
-    if (['member', 'team_leader', 'team_member'].includes(user.role) && (team.leader_id === user.id || isTeamMember(team))) return true;
+    if (user.role === 'team_leader' && team.leader_id === user.id) return true;
     return false;
   };
 
   const canDeleteTeam = (team: any) => {
     if (!user) return false;
     if (user.role === 'admin' || user.role === 'fellowship_leader') return true;
-    if (['member', 'team_leader'].includes(user.role) && team.leader_id === user.id) return true; // Only team leaders can delete
+    if (user.role === 'team_leader' && team.leader_id === user.id) return true;
+    return false;
+  };
+
+  const canManageMembers = (team: any) => {
+    if (!user) return false;
+    if (user.role === 'admin' || user.role === 'fellowship_leader') return true;
+    if (user.role === 'team_leader' && team.leader_id === user.id) return true;
     return false;
   };
 
@@ -147,27 +154,29 @@ export const ManageTeams = () => {
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      onClick={() => setEditingTeam(team)}
+                      onClick={(e) => { e.stopPropagation(); setEditingTeam(team); }}
                       className="hover:scale-105 transition-all duration-200"
                     >
                       <Edit className="mr-2 h-3 w-3" />
                       Edit
                     </Button>
                   )}
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => setMemberDialog({ open: true, team })}
-                    className="hover:scale-105 transition-all duration-200"
-                  >
-                    <UserPlus className="mr-2 h-3 w-3" />
-                    Members
-                  </Button>
+                  {canManageMembers(team) && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={(e) => { e.stopPropagation(); setMemberDialog({ open: true, team }); }}
+                      className="hover:scale-105 transition-all duration-200"
+                    >
+                      <UserPlus className="mr-2 h-3 w-3" />
+                      Members
+                    </Button>
+                  )}
                   {canDeleteTeam(team) && (
                     <Button 
                       size="sm" 
                       variant="outline"
-                      onClick={() => setDeletingTeam(team)}
+                      onClick={(e) => { e.stopPropagation(); setDeletingTeam(team); }}
                       className="text-red-600 hover:text-red-700 hover:scale-105 transition-all duration-200"
                     >
                       <Trash2 className="h-3 w-3" />
