@@ -104,7 +104,7 @@ export const LeaderboardCard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -129,15 +129,15 @@ export const LeaderboardCard = () => {
               {userLeaderboard.map((user, index) => (
                 <div 
                   key={user.id} 
-                  className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-800">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
                       {getRankIcon(index + 1)}
                     </div>
                     <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="font-medium text-foreground">{user.name}</p>
+                      <p className="text-sm text-muted-foreground">
                         {user.invitations_count} invitations sent
                       </p>
                     </div>
@@ -149,7 +149,7 @@ export const LeaderboardCard = () => {
               ))}
               
               {userLeaderboard.length === 0 && (
-                <p className="text-center text-gray-500 py-4">
+                <p className="text-center text-muted-foreground py-4">
                   No data available yet
                 </p>
               )}
@@ -171,14 +171,14 @@ export const LeaderboardCard = () => {
               {teamLeaderboard.map((team, index) => (
                 <div 
                   key={team.id} 
-                  className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center font-bold text-green-800">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
                       {getRankIcon(index + 1)}
                     </div>
                     <div>
-                      <p className="font-medium">{team.name}</p>
+                      <p className="font-medium text-foreground">{team.name}</p>
                     </div>
                   </div>
                   <Badge variant="secondary">
@@ -188,7 +188,7 @@ export const LeaderboardCard = () => {
               ))}
               
               {teamLeaderboard.length === 0 && (
-                <p className="text-center text-gray-500 py-4">
+                <p className="text-center text-muted-foreground py-4">
                   No team data available yet
                 </p>
               )}
