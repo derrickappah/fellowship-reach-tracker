@@ -1,4 +1,3 @@
-
 export interface Profile {
   id: string;
   name: string;
@@ -13,7 +12,7 @@ export interface Profile {
 export interface UserRole {
   id: string;
   user_id: string;
-  role: 'admin' | 'fellowship_leader' | 'member';
+  role: 'admin' | 'fellowship_leader' | 'team_leader' | 'team_member' | 'member';
   created_at: string;
 }
 
@@ -79,7 +78,7 @@ export interface AuthUser {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'fellowship_leader' | 'member';
+  role: 'admin' | 'fellowship_leader' | 'team_leader' | 'team_member' | 'member';
   fellowship_id?: string;
   cell_id?: string;
 }
