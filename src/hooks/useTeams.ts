@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Team, TeamInsert } from '@/types/supabase';
@@ -19,7 +20,7 @@ export const useTeams = () => {
         .select(`
           *,
           fellowship:fellowships(name),
-          leader:profiles(name)
+          leader:profiles!teams_leader_id_fkey(name)
         `)
         .order('created_at', { ascending: false });
 
