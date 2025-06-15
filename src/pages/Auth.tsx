@@ -22,6 +22,17 @@ export const Auth = () => {
   } = useToast();
   const navigate = useNavigate();
 
+  const [signInData, setSignInData] = useState({
+    email: '',
+    password: ''
+  });
+  const [signUpData, setSignUpData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+
   // Redirect to home if already logged in
   useEffect(() => {
     if (user) {
