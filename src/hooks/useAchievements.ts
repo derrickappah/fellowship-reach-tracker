@@ -312,7 +312,7 @@ export const useAchievements = () => {
       ];
       
       const filteredAchievementsData = (achievementsData || []).filter(
-        (a: Achievement) => !achievementsToFilterOut.includes(a.name)
+        (a) => !achievementsToFilterOut.includes(a.name)
       );
 
       // Fetch user achievements
