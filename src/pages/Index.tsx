@@ -18,7 +18,8 @@ import {
   X,
   UserPlus,
   UserCheck,
-  Settings
+  Settings,
+  Trophy
 } from 'lucide-react';
 import { Reports } from '@/components/reports/Reports';
 import { ManageTeams } from '@/components/teams/ManageTeams';
@@ -26,6 +27,7 @@ import { ManageMembers } from '@/components/members/ManageMembers';
 import { ManageFellowships } from '@/components/fellowships/ManageFellowships';
 import { ManageCells } from '@/components/cells/ManageCells';
 import { ProfileSettings } from '@/components/profile/ProfileSettings';
+import { Achievements } from '@/components/achievements/Achievements';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -62,6 +64,7 @@ const Index = () => {
     { name: 'Dashboard', icon: Church, id: 'dashboard', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Register Invitee', icon: UserPlus, id: 'register-invitee', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Manage Invitees', icon: UserCheck, id: 'manage-invitees', roles: ['admin', 'fellowship_leader', 'member'] },
+    { name: 'Achievements', icon: Trophy, id: 'achievements', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Reports', icon: BarChart3, id: 'reports', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Manage Teams', icon: Group, id: 'teams', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Manage Members', icon: Users, id: 'members', roles: ['admin', 'fellowship_leader'] },
@@ -100,6 +103,8 @@ const Index = () => {
         return <InviteeForm />;
       case 'manage-invitees':
         return <InviteeList />;
+      case 'achievements':
+        return <Achievements />;
       case 'reports':
         return <Reports />;
       case 'teams':
