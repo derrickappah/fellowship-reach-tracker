@@ -47,9 +47,10 @@ export const useAchievements = () => {
 
       if (teamAchievementsError) throw teamAchievementsError;
 
-      setAchievements(achievementsData || []);
-      setUserAchievements(userAchievementsData || []);
-      setTeamAchievements(teamAchievementsData || []);
+      // Type cast the data to ensure proper typing
+      setAchievements((achievementsData || []) as Achievement[]);
+      setUserAchievements((userAchievementsData || []) as UserAchievement[]);
+      setTeamAchievements((teamAchievementsData || []) as TeamAchievement[]);
     } catch (error: any) {
       console.log('Error fetching achievements:', error);
       toast({

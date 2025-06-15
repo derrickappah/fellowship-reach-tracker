@@ -23,7 +23,8 @@ export const useGoals = () => {
 
       if (error) throw error;
       
-      setGoals(data || []);
+      // Type cast the data to ensure proper typing
+      setGoals((data || []) as Goal[]);
     } catch (error: any) {
       console.log('Error fetching goals:', error);
       toast({
