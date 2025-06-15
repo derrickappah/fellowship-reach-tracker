@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Achievement, UserAchievement, TeamAchievement } from '@/types/achievements';
@@ -60,7 +61,15 @@ export const useAchievements = () => {
         icon: 'Trophy',
         badge_color: 'purple'
       },
-      // New Team Achievements
+      {
+        name: 'Invitation Gladiator',
+        description: 'Invite 20 people in a month',
+        type: 'invitation_milestone',
+        threshold: 20,
+        icon: 'Trophy',
+        badge_color: 'gold'
+      },
+      // Team Achievements
       {
         name: 'Team Starter',
         description: 'Your team invites 10 people in a month',
@@ -85,7 +94,15 @@ export const useAchievements = () => {
         icon: 'Trophy',
         badge_color: 'gold'
       },
-      // New Individual Lifetime Achievements
+      {
+        name: 'Team Juggernaut',
+        description: 'Your team invites 100 people in a month',
+        type: 'team_performance',
+        threshold: 100,
+        icon: 'Trophy',
+        badge_color: 'purple'
+      },
+      // Individual Lifetime Achievements
       {
         name: 'Consistent Contributor',
         description: 'Invite a total of 25 people',
@@ -102,7 +119,23 @@ export const useAchievements = () => {
         icon: 'Trophy',
         badge_color: 'purple'
       },
-      // New Attendance-based Achievements
+      {
+        name: 'Community Pillar',
+        description: 'Invite a total of 100 people',
+        type: 'individual_performance',
+        threshold: 100,
+        icon: 'Award',
+        badge_color: 'gold'
+      },
+      {
+        name: 'Church Influencer',
+        description: 'Invite a total of 250 people',
+        type: 'individual_performance',
+        threshold: 250,
+        icon: 'Trophy',
+        badge_color: 'purple'
+      },
+      // Attendance-based Achievements
       {
         name: 'First Follow-Up',
         description: 'Your first invitee attended a service',
@@ -127,7 +160,23 @@ export const useAchievements = () => {
         icon: 'Heart',
         badge_color: 'purple'
       },
-      // New Goal-based Achievements
+      {
+        name: 'Faithful Shepherd',
+        description: 'A total of 25 invitees attended a service',
+        type: 'attendance_milestone',
+        threshold: 25,
+        icon: 'Heart',
+        badge_color: 'gold'
+      },
+      {
+        name: 'Master Shepherd',
+        description: 'A total of 50 invitees attended a service',
+        type: 'attendance_milestone',
+        threshold: 50,
+        icon: 'Trophy',
+        badge_color: 'purple'
+      },
+      // Goal-based Achievements
       {
         name: 'Goal Getter',
         description: 'Complete your first goal',
@@ -144,7 +193,15 @@ export const useAchievements = () => {
         icon: 'Target',
         badge_color: 'gold'
       },
-      // New Leadership Achievements
+      {
+        name: 'Goal Master',
+        description: 'Complete 10 goals',
+        type: 'goal_milestone',
+        threshold: 10,
+        icon: 'Target',
+        badge_color: 'purple'
+      },
+      // Leadership Achievements
       {
         name: 'Team Leader',
         description: 'Become a leader of a team',
