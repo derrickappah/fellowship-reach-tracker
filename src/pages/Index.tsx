@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dashboard } from '@/components/dashboard/Dashboard';
@@ -62,7 +63,7 @@ const Index = () => {
     { name: 'Register Invitee', icon: UserPlus, id: 'register-invitee', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Manage Invitees', icon: UserCheck, id: 'manage-invitees', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Reports', icon: BarChart3, id: 'reports', roles: ['admin', 'fellowship_leader', 'member'] },
-    { name: 'Manage Teams', icon: Group, id: 'teams', roles: ['admin', 'fellowship_leader'] },
+    { name: 'Manage Teams', icon: Group, id: 'teams', roles: ['admin', 'fellowship_leader', 'member'] },
     { name: 'Manage Members', icon: Users, id: 'members', roles: ['admin', 'fellowship_leader'] },
     { name: 'Manage Fellowships', icon: Church, id: 'fellowships', roles: ['admin'] },
     { name: 'Manage Cells', icon: Group, id: 'cells', roles: ['admin'] },
