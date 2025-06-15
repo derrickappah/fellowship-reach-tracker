@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -6,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useInvitees } from '@/hooks/useInvitees';
 import { format } from 'date-fns';
-import { Trash2, Search, Export } from 'lucide-react';
+import { Trash2, Search, Download } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { InviteeListItemMobile } from './InviteeListItemMobile';
@@ -173,7 +174,7 @@ export const InviteeList = () => {
                   </SelectContent>
                 </Select>
                 <Button variant="outline" onClick={handleExport}>
-                  <Export />
+                  <Download />
                   Export List
                 </Button>
               </div>
