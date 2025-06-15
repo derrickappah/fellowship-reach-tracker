@@ -102,6 +102,31 @@ export const useAchievements = () => {
         icon: 'Trophy',
         badge_color: 'purple'
       },
+      // New Attendance-based Achievements
+      {
+        name: 'First Follow-Up',
+        description: 'Your first invitee attended a service',
+        type: 'attendance_milestone',
+        threshold: 1,
+        icon: 'UserCheck',
+        badge_color: 'blue'
+      },
+      {
+        name: 'Effective Host',
+        description: 'A total of 5 invitees attended a service',
+        type: 'attendance_milestone',
+        threshold: 5,
+        icon: 'Users',
+        badge_color: 'green'
+      },
+      {
+        name: 'Shepherd',
+        description: 'A total of 10 invitees attended a service',
+        type: 'attendance_milestone',
+        threshold: 10,
+        icon: 'Heart',
+        badge_color: 'purple'
+      },
     ];
 
     try {
@@ -229,6 +254,20 @@ export const useAchievements = () => {
     return count || 0;
   };
 
+  const getAttendanceCount = async (userId: string) => {
+    const { count, error } = await supabase
+      .from('invitees')
+      .select('id', { count: 'exact', head: true })
+      .eq('invited_by', userId)
+      .eq('status', 'attended');
+
+    if (error) {
+      console.log('Error getting attendance count:', error);
+      return 0;
+    }
+    return count || 0;
+  };
+
   const checkAndAwardAchievements = async (userId?: string, teamId?: string) => {
     try {
       console.log('Checking achievements for user:', userId, 'team:', teamId);
@@ -328,6 +367,34 @@ export const useAchievements = () => {
           }
         }
       };
+
+      const checkAttendanceAchievements = async () => {
+        if (userId) {
+          const attendanceCount = await getAttendanceCount(userId);
+          const eligibleAttendanceAchievements = achievements.filter(
+            a => a.type === 'attendance_milestone' && a.threshold <= attendanceCount
+          );
+
+          for (const achievement of eligibleAttendanceAchievements) {
+            const { data: existingAchievement } = await supabase
+              .from('user_achievements')
+              .select('id')
+              .eq('user_id', userId)
+              .eq('achievement_id', achievement.id)
+              .single();
+
+            if (!existingAchievement) {
+              console.log('Awarding attendance achievement:', achievement.name);
+              const { error } = await supabase
+                .from('user_achievements')
+                .insert({ user_id: userId, achievement_id: achievement.id });
+              
+              if (error) console.log('Error awarding attendance achievement:', error);
+              else toast({ title: "Achievement Unlocked! 🏆", description: `You earned: ${achievement.name}` });
+            }
+          }
+        }
+      };
       
       const now = new Date();
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -335,6 +402,7 @@ export const useAchievements = () => {
       await checkMonthlyAchievements(now);
       await checkMonthlyAchievements(lastMonth);
       await checkLifetimeAchievements();
+      await checkAttendanceAchievements();
       
       fetchAchievements();
     } catch (error: any) {
