@@ -55,12 +55,28 @@ export const useAchievements = () => {
         badge_color: 'gold'
       },
       {
+        name: 'Power Inviter',
+        description: 'Invite 7 people in a month',
+        type: 'invitation_milestone',
+        threshold: 7,
+        icon: 'Award',
+        badge_color: 'purple'
+      },
+      {
         name: 'Invitation Champion',
         description: 'Invite 10 people in a month',
         type: 'invitation_milestone',
         threshold: 10,
         icon: 'Trophy',
         badge_color: 'purple'
+      },
+      {
+        name: 'Invitation Master',
+        description: 'Invite 15 people in a month',
+        type: 'invitation_milestone',
+        threshold: 15,
+        icon: 'Trophy',
+        badge_color: 'gold'
       },
       {
         name: 'Invitation Gladiator',
@@ -80,6 +96,14 @@ export const useAchievements = () => {
         badge_color: 'blue'
       },
       {
+        name: 'Team Momentum',
+        description: 'Your team invites 15 people in a month',
+        type: 'team_performance',
+        threshold: 15,
+        icon: 'Users',
+        badge_color: 'green'
+      },
+      {
         name: 'Team Growth',
         description: 'Your team invites 25 people in a month',
         type: 'team_performance',
@@ -96,6 +120,14 @@ export const useAchievements = () => {
         badge_color: 'gold'
       },
       {
+        name: 'Team Dominance',
+        description: 'Your team invites 75 people in a month',
+        type: 'team_performance',
+        threshold: 75,
+        icon: 'Trophy',
+        badge_color: 'purple'
+      },
+      {
         name: 'Team Juggernaut',
         description: 'Your team invites 100 people in a month',
         type: 'team_performance',
@@ -104,6 +136,14 @@ export const useAchievements = () => {
         badge_color: 'purple'
       },
       // Individual Lifetime Achievements
+      {
+        name: 'Dedicated Inviter',
+        description: 'Invite a total of 10 people',
+        type: 'individual_performance',
+        threshold: 10,
+        icon: 'Award',
+        badge_color: 'blue'
+      },
       {
         name: 'Consistent Contributor',
         description: 'Invite a total of 25 people',
@@ -121,12 +161,28 @@ export const useAchievements = () => {
         badge_color: 'purple'
       },
       {
+        name: 'Community Champion',
+        description: 'Invite a total of 75 people',
+        type: 'individual_performance',
+        threshold: 75,
+        icon: 'Trophy',
+        badge_color: 'gold'
+      },
+      {
         name: 'Community Pillar',
         description: 'Invite a total of 100 people',
         type: 'individual_performance',
         threshold: 100,
         icon: 'Award',
         badge_color: 'gold'
+      },
+      {
+        name: 'Church Leader',
+        description: 'Invite a total of 150 people',
+        type: 'individual_performance',
+        threshold: 150,
+        icon: 'Trophy',
+        badge_color: 'purple'
       },
       {
         name: 'Church Influencer',
@@ -136,6 +192,14 @@ export const useAchievements = () => {
         icon: 'Trophy',
         badge_color: 'purple'
       },
+      {
+        name: 'Legendary Influencer',
+        description: 'Invite a total of 500 people',
+        type: 'individual_performance',
+        threshold: 500,
+        icon: 'Trophy',
+        badge_color: 'gold'
+      },
       // Attendance-based Achievements
       {
         name: 'First Follow-Up',
@@ -143,6 +207,14 @@ export const useAchievements = () => {
         type: 'attendance_milestone',
         threshold: 1,
         icon: 'UserCheck',
+        badge_color: 'blue'
+      },
+      {
+        name: 'Warm Welcome',
+        description: 'A total of 3 invitees attended a service',
+        type: 'attendance_milestone',
+        threshold: 3,
+        icon: 'Users',
         badge_color: 'blue'
       },
       {
@@ -162,12 +234,28 @@ export const useAchievements = () => {
         badge_color: 'purple'
       },
       {
+        name: 'Spiritual Guide',
+        description: 'A total of 15 invitees attended a service',
+        type: 'attendance_milestone',
+        threshold: 15,
+        icon: 'Heart',
+        badge_color: 'gold'
+      },
+      {
         name: 'Faithful Shepherd',
         description: 'A total of 25 invitees attended a service',
         type: 'attendance_milestone',
         threshold: 25,
         icon: 'Heart',
         badge_color: 'gold'
+      },
+      {
+        name: 'Guiding Light',
+        description: 'A total of 35 invitees attended a service',
+        type: 'attendance_milestone',
+        threshold: 35,
+        icon: 'Trophy',
+        badge_color: 'purple'
       },
       {
         name: 'Master Shepherd',
@@ -187,6 +275,14 @@ export const useAchievements = () => {
         badge_color: 'blue'
       },
       {
+        name: 'Focused Achiever',
+        description: 'Complete 3 goals',
+        type: 'goal_milestone',
+        threshold: 3,
+        icon: 'Target',
+        badge_color: 'green'
+      },
+      {
         name: 'High Achiever',
         description: 'Complete 5 goals',
         type: 'goal_milestone',
@@ -201,6 +297,14 @@ export const useAchievements = () => {
         threshold: 10,
         icon: 'Target',
         badge_color: 'purple'
+      },
+      {
+        name: 'Goal Dominator',
+        description: 'Complete 15 goals',
+        type: 'goal_milestone',
+        threshold: 15,
+        icon: 'Target',
+        badge_color: 'gold'
       },
       // Leadership Achievements
       {
