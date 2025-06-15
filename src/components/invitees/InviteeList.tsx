@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useInvitees } from '@/hooks/useInvitees';
-import { format } from 'date-fns';
 import { Trash2, Search, Download } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { InviteeListItemMobile } from './InviteeListItemMobile';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { formatDateSafe } from '@/lib/utils';
 
 const statusColors = {
   invited: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
@@ -48,18 +48,24 @@ export const InviteeList = () => {
       return statusMatch && searchMatch;
     });
 
+    const safeGetTime = (date: string | null | undefined) => {
+      if (!date) return 0;
+      const d = new Date(date);
+      return isNaN(d.getTime()) ? 0 : d.getTime();
+    };
+
     return [...filtered].sort((a, b) => {
       switch (sortBy) {
         case 'invite_date_asc':
-          return new Date(a.invite_date || 0).getTime() - new Date(b.invite_date || 0).getTime();
+          return safeGetTime(a.invite_date) - safeGetTime(b.invite_date);
         case 'invite_date_desc':
-          return new Date(b.invite_date || 0).getTime() - new Date(a.invite_date || 0).getTime();
+          return safeGetTime(b.invite_date) - safeGetTime(a.invite_date);
         case 'team_name_asc':
           return (a.team?.name || '').localeCompare(b.team?.name || '');
         case 'team_name_desc':
           return (b.team?.name || '').localeCompare(a.team?.name || '');
         default:
-          return new Date(b.invite_date || 0).getTime() - new Date(a.invite_date || 0).getTime();
+          return safeGetTime(b.invite_date) - safeGetTime(a.invite_date);
       }
     });
 
@@ -97,8 +103,8 @@ export const InviteeList = () => {
         invitee.email || '',
         invitee.phone || '',
         invitee.status || 'invited',
-        invitee.invite_date ? format(new Date(invitee.invite_date), 'yyyy-MM-dd') : '',
-        invitee.service_date ? format(new Date(invitee.service_date), 'yyyy-MM-dd') : '',
+        formatDateSafe(invitee.invite_date, 'yyyy-MM-dd', ''),
+        formatDateSafe(invitee.service_date, 'yyyy-MM-dd', ''),
         invitee.inviter?.name || 'Unknown',
         invitee.team?.name || '',
         invitee.cell?.name || '',
@@ -257,13 +263,10 @@ export const InviteeList = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {invitee.invite_date ? format(new Date(invitee.invite_date), 'MMM dd, yyyy') : '-'}
+                          {formatDateSafe(invitee.invite_date)}
                         </TableCell>
                         <TableCell>
-                          {invitee.service_date 
-                            ? format(new Date(invitee.service_date), 'MMM dd, yyyy')
-                            : '-'
-                          }
+                          {formatDateSafe(invitee.service_date)}
                         </TableCell>
                         <TableCell>
                           <Badge className={statusColors[invitee.status as keyof typeof statusColors] || statusColors.invited}>

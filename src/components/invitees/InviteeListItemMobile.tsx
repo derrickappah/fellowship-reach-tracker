@@ -5,9 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Mail, Phone, User, Users, Calendar, HelpingHand } from 'lucide-react';
-import { format } from 'date-fns';
 import { InviteeWithInviter } from '@/hooks/useInvitees';
-import { cn } from '@/lib/utils';
+import { cn, formatDateSafe } from '@/lib/utils';
 
 interface InviteeListItemMobileProps {
   invitee: InviteeWithInviter;
@@ -62,12 +61,12 @@ export const InviteeListItemMobile = ({ invitee, onStatusChange, onDelete, canEd
             )}
             <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                <span>Invited: {invitee.invite_date ? format(new Date(invitee.invite_date), 'MMM dd, yyyy') : '-'}</span>
+                <span>Invited: {formatDateSafe(invitee.invite_date)}</span>
             </div>
             {invitee.service_date && (
                 <div className="flex items-center gap-2 text-sm">
                     <HelpingHand className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                    <span>Service: {format(new Date(invitee.service_date), 'MMM dd, yyyy')}</span>
+                    <span>Service: {formatDateSafe(invitee.service_date)}</span>
                 </div>
             )}
         </div>
