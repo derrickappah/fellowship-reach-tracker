@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, Target, Users, Award } from 'lucide-react';
+import { Trophy, Target, Users, Award, Plus } from 'lucide-react';
 import { useAchievements } from '@/hooks/useAchievements';
 import { useGoals } from '@/hooks/useGoals';
 import { AchievementCard } from './AchievementCard';
@@ -11,14 +9,24 @@ import { LeaderboardCard } from './LeaderboardCard';
 import { GoalCard } from './GoalCard';
 import { CreateGoalDialog } from './CreateGoalDialog';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const Achievements = () => {
   const { achievements, userAchievements, teamAchievements, loading: achievementsLoading } = useAchievements();
   const { goals, loading: goalsLoading } = useGoals();
   const [showCreateGoalDialog, setShowCreateGoalDialog] = useState(false);
   const { user } = useAuth();
+  const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const tabs = [
+    { value: 'overview', label: 'Overview' },
+    { value: 'achievements', label: 'Achievements' },
+    { value: 'leaderboard', label: 'Leaderboard' },
+    { value: 'goals', label: 'Goals' },
+  ];
 
   const myAchievements = userAchievements.filter(ua => ua.user_id === user?.id);
   const myGoals = goals.filter(goal => 
@@ -36,24 +44,40 @@ export const Achievements = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between animate-fade-in">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between animate-fade-in gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Achievements & Goals</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Achievements & Goals</h1>
           <p className="text-gray-600">Track your progress, earn badges, and compete with others</p>
         </div>
-        <Button onClick={() => setShowCreateGoalDialog(true)} className="hover:scale-105 transition-transform duration-200">
+        <Button onClick={() => setShowCreateGoalDialog(true)} className="hover:scale-105 transition-transform duration-200 w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Create Goal
         </Button>
       </div>
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
-          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-          <TabsTrigger value="goals">Goals</TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        {isMobile ? (
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a view" />
+            </SelectTrigger>
+            <SelectContent>
+              {tabs.map((tab) => (
+                <SelectItem key={tab.value} value={tab.value}>
+                  {tab.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <TabsList className="grid w-full grid-cols-4">
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        )}
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Achievement } from '@/types/achievements';
 import { Trophy, Star, Award, Users, UserCheck, Heart, Target, UserCog } from 'lucide-react';
@@ -87,45 +86,43 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
       }`}
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
     >
-      <CardHeader className="text-center pb-2">
-        <div className="mx-auto mb-2">
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors duration-300 ${
-            earned ? colorScheme.iconWrapper : 'bg-gray-200 dark:bg-gray-700'
-          }`}>
-            <IconComponent className={`h-8 w-8 transition-colors duration-300 ${
-              earned ? 'text-current' : 'text-gray-400 dark:text-gray-500'
-            }`} />
+      <div className="flex items-start p-4 space-x-4">
+        <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300 ${
+          earned ? colorScheme.iconWrapper : 'bg-gray-200 dark:bg-gray-700'
+        }`}>
+          <IconComponent className={`h-6 w-6 transition-colors duration-300 ${
+            earned ? 'text-current' : 'text-gray-400 dark:text-gray-500'
+          }`} />
+        </div>
+        <div className="flex-grow space-y-1">
+          <CardTitle className={`text-md transition-colors duration-300 ${earned ? colorScheme.title : 'text-gray-800 dark:text-gray-200'}`}>
+            {achievement.name}
+          </CardTitle>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{achievement.description}</p>
+          
+          <div className="flex flex-wrap items-center gap-2 pt-2">
+            <Badge 
+              className={`text-xs ${
+                earned ? colorScheme.badge : 'bg-gray-100 text-gray-700 border-transparent dark:bg-gray-700 dark:text-gray-300'
+              }`}
+            >
+              {achievement.threshold} {achievement.type.replace(/_/g, ' ')}
+            </Badge>
+            
+            {earned && earnedAt && (
+              <p className="text-xs text-green-600 font-medium dark:text-green-400">
+                Earned {format(new Date(earnedAt), 'MMM d, yyyy')}
+              </p>
+            )}
+            
+            {!earned && (
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Not earned yet
+              </p>
+            )}
           </div>
         </div>
-        <CardTitle className={`text-lg transition-colors duration-300 ${earned ? colorScheme.title : 'text-gray-800 dark:text-gray-200'}`}>
-          {achievement.name}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="text-center space-y-2">
-        <p className="text-sm text-gray-600 dark:text-gray-400">{achievement.description}</p>
-        
-        <div className="flex flex-col items-center gap-2">
-          <Badge 
-            className={`text-xs ${
-              earned ? colorScheme.badge : 'bg-gray-100 text-gray-700 border-transparent dark:bg-gray-700 dark:text-gray-300'
-            }`}
-          >
-            {achievement.threshold} {achievement.type.replace(/_/g, ' ')}
-          </Badge>
-          
-          {earned && earnedAt && (
-            <p className="text-xs text-green-600 font-medium dark:text-green-400">
-              Earned {format(new Date(earnedAt), 'MMM d, yyyy')}
-            </p>
-          )}
-          
-          {!earned && (
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Not earned yet
-            </p>
-          )}
-        </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };
