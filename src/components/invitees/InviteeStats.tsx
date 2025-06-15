@@ -49,6 +49,9 @@ export const InviteeStats: React.FC<InviteeStatsProps> = ({ data }) => {
       }
     });
 
+    // "Invited" count will now represent the total number of invitees in the filtered data.
+    statusCounts.invited = (data || []).length;
+
     return Object.entries(statusCounts).map(([status, count]) => ({
       name: statusLabels[status] || 'Unknown',
       status: status,
