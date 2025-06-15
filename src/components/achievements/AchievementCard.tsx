@@ -48,32 +48,32 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
     switch (color) {
       case 'gold':
         return {
-          card: 'bg-yellow-50/60 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800/50 hover:border-yellow-300 dark:hover:border-yellow-700',
-          iconWrapper: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-500/10 dark:text-yellow-400',
-          title: 'text-yellow-900 dark:text-yellow-300',
-          badge: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/70 dark:text-yellow-200 dark:border-yellow-700'
+          card: 'bg-yellow-100 border-yellow-300 dark:bg-yellow-500/20 dark:border-yellow-500/30 hover:border-yellow-400 dark:hover:border-yellow-500/50',
+          iconWrapper: 'bg-yellow-200 text-yellow-700 dark:bg-yellow-500/30 dark:text-yellow-300',
+          title: 'text-yellow-900 dark:text-yellow-200',
+          badge: 'bg-yellow-200 text-yellow-800 border-transparent dark:bg-yellow-800/50 dark:text-yellow-100'
         };
       case 'purple':
         return {
-          card: 'bg-purple-50/60 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800/50 hover:border-purple-300 dark:hover:border-purple-700',
-          iconWrapper: 'bg-purple-100 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400',
-          title: 'text-purple-900 dark:text-purple-300',
-          badge: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/70 dark:text-purple-200 dark:border-purple-700'
+          card: 'bg-purple-100 border-purple-300 dark:bg-purple-500/20 dark:border-purple-500/30 hover:border-purple-400 dark:hover:border-purple-500/50',
+          iconWrapper: 'bg-purple-200 text-purple-700 dark:bg-purple-500/30 dark:text-purple-300',
+          title: 'text-purple-900 dark:text-purple-200',
+          badge: 'bg-purple-200 text-purple-800 border-transparent dark:bg-purple-800/50 dark:text-purple-100'
         };
       case 'green':
         return {
-          card: 'bg-green-50/60 border-green-200 dark:bg-green-900/20 dark:border-green-800/50 hover:border-green-300 dark:hover:border-green-700',
-          iconWrapper: 'bg-green-100 text-green-600 dark:bg-green-500/10 dark:text-green-400',
-          title: 'text-green-900 dark:text-green-300',
-          badge: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/70 dark:text-green-200 dark:border-green-700'
+          card: 'bg-green-100 border-green-300 dark:bg-green-500/20 dark:border-green-500/30 hover:border-green-400 dark:hover:border-green-500/50',
+          iconWrapper: 'bg-green-200 text-green-700 dark:bg-green-500/30 dark:text-green-300',
+          title: 'text-green-900 dark:text-green-200',
+          badge: 'bg-green-200 text-green-800 border-transparent dark:bg-green-800/50 dark:text-green-100'
         };
       case 'blue':
       default:
         return {
-          card: 'bg-blue-50/60 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800/50 hover:border-blue-300 dark:hover:border-blue-700',
-          iconWrapper: 'bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400',
-          title: 'text-blue-900 dark:text-blue-300',
-          badge: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/70 dark:text-blue-200 dark:border-blue-700'
+          card: 'bg-blue-100 border-blue-300 dark:bg-blue-500/20 dark:border-blue-500/30 hover:border-blue-400 dark:hover:border-blue-500/50',
+          iconWrapper: 'bg-blue-200 text-blue-700 dark:bg-blue-500/30 dark:text-blue-300',
+          title: 'text-blue-900 dark:text-blue-200',
+          badge: 'bg-blue-200 text-blue-800 border-transparent dark:bg-blue-800/50 dark:text-blue-100'
         };
     }
   };
@@ -83,7 +83,7 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
   return (
     <Card 
       className={`transition-all duration-300 hover:shadow-lg animate-fade-in ${
-        earned ? colorScheme.card : 'opacity-70 bg-gray-50 dark:bg-gray-800/50'
+        earned ? colorScheme.card : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 opacity-60'
       }`}
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
     >
