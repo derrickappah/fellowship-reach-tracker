@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Achievement, UserAchievement, TeamAchievement } from '@/types/achievements';
@@ -78,14 +77,6 @@ export const useAchievements = () => {
         icon: 'Trophy',
         badge_color: 'gold'
       },
-      {
-        name: 'Invitation Gladiator',
-        description: 'Invite 20 people in a month',
-        type: 'invitation_milestone',
-        threshold: 20,
-        icon: 'Trophy',
-        badge_color: 'gold'
-      },
       // Team Achievements
       {
         name: 'Team Starter',
@@ -118,14 +109,6 @@ export const useAchievements = () => {
         threshold: 50,
         icon: 'Trophy',
         badge_color: 'gold'
-      },
-      {
-        name: 'Team Dominance',
-        description: 'Your team invites 75 people in a month',
-        type: 'team_performance',
-        threshold: 75,
-        icon: 'Trophy',
-        badge_color: 'purple'
       },
       {
         name: 'Team Juggernaut',
@@ -184,22 +167,6 @@ export const useAchievements = () => {
         icon: 'Trophy',
         badge_color: 'purple'
       },
-      {
-        name: 'Church Influencer',
-        description: 'Invite a total of 250 people',
-        type: 'individual_performance',
-        threshold: 250,
-        icon: 'Trophy',
-        badge_color: 'purple'
-      },
-      {
-        name: 'Legendary Influencer',
-        description: 'Invite a total of 500 people',
-        type: 'individual_performance',
-        threshold: 500,
-        icon: 'Trophy',
-        badge_color: 'gold'
-      },
       // Attendance-based Achievements
       {
         name: 'First Follow-Up',
@@ -242,26 +209,10 @@ export const useAchievements = () => {
         badge_color: 'gold'
       },
       {
-        name: 'Faithful Shepherd',
-        description: 'A total of 25 invitees attended a service',
-        type: 'attendance_milestone',
-        threshold: 25,
-        icon: 'Heart',
-        badge_color: 'gold'
-      },
-      {
         name: 'Guiding Light',
         description: 'A total of 35 invitees attended a service',
         type: 'attendance_milestone',
         threshold: 35,
-        icon: 'Trophy',
-        badge_color: 'purple'
-      },
-      {
-        name: 'Master Shepherd',
-        description: 'A total of 50 invitees attended a service',
-        type: 'attendance_milestone',
-        threshold: 50,
         icon: 'Trophy',
         badge_color: 'purple'
       },
@@ -297,14 +248,6 @@ export const useAchievements = () => {
         threshold: 10,
         icon: 'Target',
         badge_color: 'purple'
-      },
-      {
-        name: 'Goal Dominator',
-        description: 'Complete 15 goals',
-        type: 'goal_milestone',
-        threshold: 15,
-        icon: 'Target',
-        badge_color: 'gold'
       },
       // Leadership Achievements
       {
@@ -358,6 +301,20 @@ export const useAchievements = () => {
 
       if (achievementsError) throw achievementsError;
 
+      const achievementsToFilterOut = [
+        'Invitation Gladiator',
+        'Team Dominance',
+        'Church Influencer',
+        'Legendary Influencer',
+        'Faithful Shepherd',
+        'Master Shepherd',
+        'Goal Dominator'
+      ];
+      
+      const filteredAchievementsData = (achievementsData || []).filter(
+        (a: Achievement) => !achievementsToFilterOut.includes(a.name)
+      );
+
       // Fetch user achievements
       const { data: userAchievementsData, error: userAchievementsError } = await supabase
         .from('user_achievements')
@@ -381,7 +338,7 @@ export const useAchievements = () => {
       if (teamAchievementsError) throw teamAchievementsError;
 
       // Type cast the data to ensure proper typing
-      setAchievements((achievementsData || []) as Achievement[]);
+      setAchievements((filteredAchievementsData || []) as Achievement[]);
       setUserAchievements((userAchievementsData || []) as UserAchievement[]);
       setTeamAchievements((teamAchievementsData || []) as TeamAchievement[]);
     } catch (error: any) {
