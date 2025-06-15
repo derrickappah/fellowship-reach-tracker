@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -86,21 +87,21 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
       }`}
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
     >
-      <div className="flex items-start p-4 space-x-4">
-        <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300 ${
+      <div className="flex items-start p-3 sm:p-4 space-x-3 sm:space-x-4">
+        <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-colors duration-300 ${
           earned ? colorScheme.iconWrapper : 'bg-gray-200 dark:bg-gray-700'
         }`}>
-          <IconComponent className={`h-6 w-6 transition-colors duration-300 ${
+          <IconComponent className={`h-5 w-5 sm:h-6 sm:h-6 transition-colors duration-300 ${
             earned ? 'text-current' : 'text-gray-400 dark:text-gray-500'
           }`} />
         </div>
-        <div className="flex-grow space-y-1">
-          <CardTitle className={`text-md transition-colors duration-300 ${earned ? colorScheme.title : 'text-gray-800 dark:text-gray-200'}`}>
+        <div className="flex-grow space-y-0.5">
+          <CardTitle className={`text-sm sm:text-base font-semibold leading-tight transition-colors duration-300 ${earned ? colorScheme.title : 'text-gray-800 dark:text-gray-200'}`}>
             {achievement.name}
           </CardTitle>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{achievement.description}</p>
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{achievement.description}</p>
           
-          <div className="flex flex-wrap items-center gap-2 pt-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-1">
             <Badge 
               className={`text-xs ${
                 earned ? colorScheme.badge : 'bg-gray-100 text-gray-700 border-transparent dark:bg-gray-700 dark:text-gray-300'
