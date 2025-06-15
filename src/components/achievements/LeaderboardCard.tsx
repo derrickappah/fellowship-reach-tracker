@@ -52,7 +52,14 @@ export const LeaderboardCard = () => {
 
         setUserLeaderboard(
           userScores
-            .sort((a, b) => b.score - a.score)
+            .sort((a, b) => {
+              // Sort by achievements count first
+              if (b.achievements_count !== a.achievements_count) {
+                return b.achievements_count - a.achievements_count;
+              }
+              // Then by invitations count as tiebreaker
+              return b.invitations_count - a.invitations_count;
+            })
             .slice(0, 10)
         );
       }
