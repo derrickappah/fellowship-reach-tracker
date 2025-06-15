@@ -127,6 +127,32 @@ export const useAchievements = () => {
         icon: 'Heart',
         badge_color: 'purple'
       },
+      // New Goal-based Achievements
+      {
+        name: 'Goal Getter',
+        description: 'Complete your first goal',
+        type: 'goal_milestone',
+        threshold: 1,
+        icon: 'Target',
+        badge_color: 'blue'
+      },
+      {
+        name: 'High Achiever',
+        description: 'Complete 5 goals',
+        type: 'goal_milestone',
+        threshold: 5,
+        icon: 'Target',
+        badge_color: 'gold'
+      },
+      // New Leadership Achievements
+      {
+        name: 'Team Leader',
+        description: 'Become a leader of a team',
+        type: 'leadership_milestone',
+        threshold: 1,
+        icon: 'UserCog',
+        badge_color: 'purple'
+      },
     ];
 
     try {
@@ -268,6 +294,38 @@ export const useAchievements = () => {
     return count || 0;
   };
 
+  const getCompletedGoalsCount = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('goals')
+      .select('current_value, target_value')
+      .eq('entity_id', userId)
+      .eq('goal_type', 'individual');
+
+    if (error) {
+      console.log('Error getting goals for count:', error);
+      return 0;
+    }
+
+    const completedGoals = data.filter(
+      (goal) => goal.current_value !== null && goal.current_value >= goal.target_value
+    );
+
+    return completedGoals.length;
+  };
+
+  const checkIsTeamLeader = async (userId: string) => {
+    const { count, error } = await supabase
+      .from('teams')
+      .select('id', { count: 'exact', head: true })
+      .eq('leader_id', userId);
+
+    if (error) {
+      console.log('Error checking team leader status:', error);
+      return false;
+    }
+    return (count || 0) > 0;
+  };
+
   const checkAndAwardAchievements = async (userId?: string, teamId?: string) => {
     try {
       console.log('Checking achievements for user:', userId, 'team:', teamId);
@@ -395,6 +453,64 @@ export const useAchievements = () => {
           }
         }
       };
+
+      const checkGoalAchievements = async () => {
+        if (userId) {
+          const completedGoalsCount = await getCompletedGoalsCount(userId);
+          const eligibleGoalAchievements = achievements.filter(
+            a => a.type === 'goal_milestone' && a.threshold <= completedGoalsCount
+          );
+
+          for (const achievement of eligibleGoalAchievements) {
+            const { data: existingAchievement } = await supabase
+              .from('user_achievements')
+              .select('id')
+              .eq('user_id', userId)
+              .eq('achievement_id', achievement.id)
+              .single();
+
+            if (!existingAchievement) {
+              console.log('Awarding goal achievement:', achievement.name);
+              const { error } = await supabase
+                .from('user_achievements')
+                .insert({ user_id: userId, achievement_id: achievement.id });
+              
+              if (error) console.log('Error awarding goal achievement:', error);
+              else toast({ title: "Achievement Unlocked! 🏆", description: `You earned: ${achievement.name}` });
+            }
+          }
+        }
+      };
+
+      const checkLeadershipAchievements = async () => {
+        if (userId) {
+          const isLeader = await checkIsTeamLeader(userId);
+          if (isLeader) {
+            const eligibleLeadershipAchievements = achievements.filter(
+              a => a.type === 'leadership_milestone' && a.threshold === 1
+            );
+
+            for (const achievement of eligibleLeadershipAchievements) {
+              const { data: existingAchievement } = await supabase
+                .from('user_achievements')
+                .select('id')
+                .eq('user_id', userId)
+                .eq('achievement_id', achievement.id)
+                .single();
+
+              if (!existingAchievement) {
+                console.log('Awarding leadership achievement:', achievement.name);
+                const { error } = await supabase
+                  .from('user_achievements')
+                  .insert({ user_id: userId, achievement_id: achievement.id });
+                
+                if (error) console.log('Error awarding leadership achievement:', error);
+                else toast({ title: "Achievement Unlocked! 🏆", description: `You earned: ${achievement.name}` });
+              }
+            }
+          }
+        }
+      };
       
       const now = new Date();
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -403,6 +519,8 @@ export const useAchievements = () => {
       await checkMonthlyAchievements(lastMonth);
       await checkLifetimeAchievements();
       await checkAttendanceAchievements();
+      await checkGoalAchievements();
+      await checkLeadershipAchievements();
       
       fetchAchievements();
     } catch (error: any) {

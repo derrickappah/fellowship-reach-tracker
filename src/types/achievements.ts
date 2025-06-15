@@ -4,7 +4,7 @@ export interface Achievement {
   name: string;
   description?: string;
   icon?: string;
-  type: 'invitation_milestone' | 'team_performance' | 'individual_performance' | 'attendance_milestone';
+  type: 'invitation_milestone' | 'team_performance' | 'individual_performance' | 'attendance_milestone' | 'goal_milestone' | 'leadership_milestone';
   threshold: number;
   badge_color?: string;
   created_at: string;

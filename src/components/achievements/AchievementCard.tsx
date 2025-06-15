@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Achievement } from '@/types/achievements';
-import { Trophy, Star, Award, Users, UserCheck, Heart } from 'lucide-react';
+import { Trophy, Star, Award, Users, UserCheck, Heart, Target, UserCog } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface AchievementCardProps {
@@ -33,6 +32,10 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
         return UserCheck;
       case 'Heart':
         return Heart;
+      case 'Target':
+        return Target;
+      case 'UserCog':
+        return UserCog;
       default:
         return Trophy;
     }
