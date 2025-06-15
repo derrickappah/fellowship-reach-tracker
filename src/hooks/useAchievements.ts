@@ -63,40 +63,144 @@ export const useAchievements = () => {
     }
   };
 
-  const checkAndAwardAchievements = async (type: string, count: number, entityId?: string) => {
-    try {
-      const eligibleAchievements = achievements.filter(
-        achievement => achievement.type === type && achievement.threshold <= count
-      );
+  const getMonthlyInviteCount = async (userId: string) => {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    
+    const endOfMonth = new Date();
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+    endOfMonth.setDate(0);
+    endOfMonth.setHours(23, 59, 59, 999);
 
-      for (const achievement of eligibleAchievements) {
-        if (type.includes('team') && entityId) {
-          // Check if team already has this achievement
-          const existing = teamAchievements.find(
-            ta => ta.team_id === entityId && ta.achievement_id === achievement.id
-          );
+    const { data, error } = await supabase
+      .from('invitees')
+      .select('id')
+      .eq('invited_by', userId)
+      .gte('invite_date', startOfMonth.toISOString())
+      .lte('invite_date', endOfMonth.toISOString());
+
+    if (error) {
+      console.log('Error getting monthly invite count:', error);
+      return 0;
+    }
+
+    return data?.length || 0;
+  };
+
+  const getTeamMonthlyInviteCount = async (teamId: string) => {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    
+    const endOfMonth = new Date();
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+    endOfMonth.setDate(0);
+    endOfMonth.setHours(23, 59, 59, 999);
+
+    const { data, error } = await supabase
+      .from('invitees')
+      .select('id')
+      .eq('team_id', teamId)
+      .gte('invite_date', startOfMonth.toISOString())
+      .lte('invite_date', endOfMonth.toISOString());
+
+    if (error) {
+      console.log('Error getting team monthly invite count:', error);
+      return 0;
+    }
+
+    return data?.length || 0;
+  };
+
+  const checkAndAwardAchievements = async (userId?: string, teamId?: string) => {
+    try {
+      console.log('Checking achievements for user:', userId, 'team:', teamId);
+      
+      // Check individual achievements
+      if (userId) {
+        const monthlyInviteCount = await getMonthlyInviteCount(userId);
+        console.log('Monthly invite count for user:', monthlyInviteCount);
+        
+        const eligibleAchievements = achievements.filter(
+          achievement => achievement.type === 'invitation_milestone' && achievement.threshold <= monthlyInviteCount
+        );
+
+        for (const achievement of eligibleAchievements) {
+          // Check if user already has this achievement for this month
+          const startOfMonth = new Date();
+          startOfMonth.setDate(1);
+          startOfMonth.setHours(0, 0, 0, 0);
+
+          const { data: existingAchievement } = await supabase
+            .from('user_achievements')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('achievement_id', achievement.id)
+            .gte('earned_at', startOfMonth.toISOString())
+            .single();
           
-          if (!existing) {
-            await supabase
-              .from('team_achievements')
-              .insert({
-                team_id: entityId,
-                achievement_id: achievement.id
-              });
-          }
-        } else if (user) {
-          // Check if user already has this achievement
-          const existing = userAchievements.find(
-            ua => ua.user_id === user.id && ua.achievement_id === achievement.id
-          );
-          
-          if (!existing) {
-            await supabase
+          if (!existingAchievement) {
+            console.log('Awarding achievement:', achievement.name);
+            const { error } = await supabase
               .from('user_achievements')
               .insert({
-                user_id: user.id,
+                user_id: userId,
                 achievement_id: achievement.id
               });
+
+            if (error) {
+              console.log('Error awarding user achievement:', error);
+            } else {
+              toast({
+                title: "Achievement Unlocked! 🏆",
+                description: `You earned: ${achievement.name}`,
+              });
+            }
+          }
+        }
+      }
+
+      // Check team achievements
+      if (teamId) {
+        const teamMonthlyInviteCount = await getTeamMonthlyInviteCount(teamId);
+        console.log('Monthly invite count for team:', teamMonthlyInviteCount);
+        
+        const eligibleTeamAchievements = achievements.filter(
+          achievement => achievement.type === 'team_performance' && achievement.threshold <= teamMonthlyInviteCount
+        );
+
+        for (const achievement of eligibleTeamAchievements) {
+          // Check if team already has this achievement for this month
+          const startOfMonth = new Date();
+          startOfMonth.setDate(1);
+          startOfMonth.setHours(0, 0, 0, 0);
+
+          const { data: existingAchievement } = await supabase
+            .from('team_achievements')
+            .select('id')
+            .eq('team_id', teamId)
+            .eq('achievement_id', achievement.id)
+            .gte('earned_at', startOfMonth.toISOString())
+            .single();
+          
+          if (!existingAchievement) {
+            console.log('Awarding team achievement:', achievement.name);
+            const { error } = await supabase
+              .from('team_achievements')
+              .insert({
+                team_id: teamId,
+                achievement_id: achievement.id
+              });
+
+            if (error) {
+              console.log('Error awarding team achievement:', error);
+            } else {
+              toast({
+                title: "Team Achievement Unlocked! 🏆",
+                description: `Your team earned: ${achievement.name}`,
+              });
+            }
           }
         }
       }

@@ -8,11 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAchievements } from '@/hooks/useAchievements';
 import { supabase } from '@/integrations/supabase/client';
 
 export const InviteeForm = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { checkAndAwardAchievements } = useAchievements();
   const [teams, setTeams] = useState<any[]>([]);
   const [cells, setCells] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -83,6 +85,10 @@ export const InviteeForm = () => {
         title: "Success!",
         description: "Invitee has been registered successfully.",
       });
+
+      // Check for achievements after successful invite registration
+      console.log('Checking achievements after invite registration');
+      await checkAndAwardAchievements(user.id, formData.teamId || undefined);
 
       // Reset form
       setFormData({
