@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,11 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useInvitees } from '@/hooks/useInvitees';
 import { format } from 'date-fns';
-import { Trash2, Search } from 'lucide-react';
+import { Trash2, Search, Export } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { InviteeListItemMobile } from './InviteeListItemMobile';
 import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 const statusColors = {
   invited: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
@@ -28,6 +28,7 @@ export const InviteeList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('invite_date_desc');
   const isMobile = useIsMobile();
+  const { toast } = useToast();
 
   const sortedAndFilteredInvitees = useMemo(() => {
     const filtered = invitees.filter(invitee => {
@@ -71,6 +72,50 @@ export const InviteeList = () => {
     if (confirm('Are you sure you want to delete this invitee?')) {
       deleteInvitee(inviteeId);
     }
+  };
+
+  const handleExport = () => {
+    if (sortedAndFilteredInvitees.length === 0) {
+      toast({
+        title: 'No data to export',
+        description: 'There are no invitees matching the current filters.',
+      });
+      return;
+    }
+
+    const headers = [
+      'Name', 'Email', 'Phone', 'Status', 'Invite Date', 'Service Date',
+      'Invited By', 'Team', 'Cell', 'Notes'
+    ];
+    
+    const csvRows = [headers.join(',')];
+
+    sortedAndFilteredInvitees.forEach(invitee => {
+      const row = [
+        invitee.name,
+        invitee.email || '',
+        invitee.phone || '',
+        invitee.status || 'invited',
+        format(new Date(invitee.invite_date), 'yyyy-MM-dd'),
+        invitee.service_date ? format(new Date(invitee.service_date), 'yyyy-MM-dd') : '',
+        invitee.inviter?.name || 'Unknown',
+        invitee.team?.name || '',
+        invitee.cell?.name || '',
+        invitee.notes || ''
+      ].map(value => `"${String(value).replace(/"/g, '""')}"`);
+      
+      csvRows.push(row.join(','));
+    });
+
+    const blob = new Blob([csvRows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `invitees-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -127,6 +172,10 @@ export const InviteeList = () => {
                     <SelectItem value="team_name_desc">Team (Z-A)</SelectItem>
                   </SelectContent>
                 </Select>
+                <Button variant="outline" onClick={handleExport}>
+                  <Export />
+                  Export List
+                </Button>
               </div>
             </div>
             <div className="text-sm text-muted-foreground self-end sm:self-auto">
