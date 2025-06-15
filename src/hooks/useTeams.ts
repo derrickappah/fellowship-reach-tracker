@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Team, TeamInsert } from '@/types/supabase';
@@ -21,7 +19,7 @@ export const useTeams = () => {
         .select(`
           *,
           fellowship:fellowships(name),
-          leader:profiles(name)
+          leader_profile:profiles!leader_id(name)
         `)
         .order('created_at', { ascending: false });
 
@@ -43,7 +41,7 @@ export const useTeams = () => {
       const transformedTeams = (data || []).map(team => ({
         ...team,
         fellowship: team.fellowship || null,
-        leader: team.leader || null
+        leader: team.leader_profile || null
       }));
       
       setTeams(transformedTeams);
