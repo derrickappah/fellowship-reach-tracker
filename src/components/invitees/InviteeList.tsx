@@ -379,19 +379,19 @@ export const InviteeList = () => {
             <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
               <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
                 <div>
-                  <span className="font-medium">Invited:</span> {invitees.filter(i => i.status === 'invited').length}
+                  <span className="font-medium">Invited:</span> {sortedAndFilteredInvitees.length}
                 </div>
                 <div>
-                  <span className="font-medium">Confirmed:</span> {invitees.filter(i => i.status === 'confirmed').length}
+                  <span className="font-medium">Confirmed:</span> {sortedAndFilteredInvitees.filter(i => i.status === 'confirmed').length}
                 </div>
                 <div>
-                  <span className="font-medium">Attended:</span> {invitees.filter(i => i.status === 'attended').length}
+                  <span className="font-medium">Attended:</span> {sortedAndFilteredInvitees.filter(i => i.status === 'attended').length}
                 </div>
                 <div>
-                  <span className="font-medium">Joined Cell:</span> {invitees.filter(i => i.status === 'joined_cell').length}
+                  <span className="font-medium">Joined Cell:</span> {sortedAndFilteredInvitees.filter(i => i.status === 'joined_cell').length}
                 </div>
                 <div>
-                  <span className="font-medium">No Show:</span> {invitees.filter(i => i.status === 'no_show').length}
+                  <span className="font-medium">No Show:</span> {sortedAndFilteredInvitees.filter(i => i.status === 'no_show').length}
                 </div>
               </div>
             </div>
