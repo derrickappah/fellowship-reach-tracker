@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAchievements } from '@/hooks/useAchievements';
 import { supabase } from '@/integrations/supabase/client';
+import { formatDateSafe } from '@/lib/utils';
 
 export const InviteeForm = () => {
   const { user } = useAuth();
@@ -61,7 +62,7 @@ export const InviteeForm = () => {
     }
 
     try {
-      // Prevent duplicate invitees
+      // Prevent duplicate invitees within 3 days
       const duplicateFilters = [];
       if (formData.email && formData.email.trim() !== '') {
         duplicateFilters.push(`email.eq.${formData.email.trim()}`);
@@ -73,18 +74,26 @@ export const InviteeForm = () => {
       if (duplicateFilters.length > 0) {
         const { data: existing, error: checkError } = await supabase
           .from('invitees')
-          .select('name')
-          .or(duplicateFilters.join(','));
+          .select('name, invite_date')
+          .or(duplicateFilters.join(','))
+          .order('invite_date', { ascending: false });
 
         if (checkError) throw checkError;
         
         if (existing && existing.length > 0) {
-          toast({
-            title: "Possible Duplicate Invitee",
-            description: `An invitee named "${existing[0].name}" with the same email or phone may already exist.`,
-            variant: "destructive",
-          });
-          return;
+          const mostRecentInvite = existing[0];
+          const lastInviteDate = new Date(mostRecentInvite.invite_date);
+          const threeDaysAgo = new Date();
+          threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+          if (lastInviteDate > threeDaysAgo) {
+            toast({
+              title: "Invitee Already Invited Recently",
+              description: `"${mostRecentInvite.name}" was already invited on ${formatDateSafe(lastInviteDate)}. You can invite them again after 3 days.`,
+              variant: "destructive",
+            });
+            return;
+          }
         }
       }
 
