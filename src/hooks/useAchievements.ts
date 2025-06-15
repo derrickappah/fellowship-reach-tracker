@@ -311,9 +311,19 @@ export const useAchievements = () => {
         'Goal Dominator'
       ];
       
-      const filteredAchievementsData = (achievementsData || []).filter(
+      const filteredAchievements = (achievementsData || []).filter(
         (a) => !achievementsToFilterOut.includes(a.name)
       );
+
+      // Remove duplicates by name, keeping the first one
+      const uniqueAchievements: Achievement[] = [];
+      const seenNames = new Set();
+      for (const achievement of filteredAchievements) {
+        if (!seenNames.has(achievement.name)) {
+          uniqueAchievements.push(achievement as Achievement);
+          seenNames.add(achievement.name);
+        }
+      }
 
       // Fetch user achievements
       const { data: userAchievementsData, error: userAchievementsError } = await supabase
@@ -338,7 +348,7 @@ export const useAchievements = () => {
       if (teamAchievementsError) throw teamAchievementsError;
 
       // Type cast the data to ensure proper typing
-      setAchievements((filteredAchievementsData || []) as Achievement[]);
+      setAchievements(uniqueAchievements);
       setUserAchievements((userAchievementsData || []) as UserAchievement[]);
       setTeamAchievements((teamAchievementsData || []) as TeamAchievement[]);
     } catch (error: any) {
