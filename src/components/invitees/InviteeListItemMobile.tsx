@@ -62,7 +62,7 @@ export const InviteeListItemMobile = ({ invitee, onStatusChange, onDelete, canEd
             )}
             <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                <span>Invited: {format(new Date(invitee.invite_date), 'MMM dd, yyyy')}</span>
+                <span>Invited: {invitee.invite_date ? format(new Date(invitee.invite_date), 'MMM dd, yyyy') : '-'}</span>
             </div>
             {invitee.service_date && (
                 <div className="flex items-center gap-2 text-sm">

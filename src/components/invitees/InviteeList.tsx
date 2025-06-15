@@ -51,15 +51,15 @@ export const InviteeList = () => {
     return [...filtered].sort((a, b) => {
       switch (sortBy) {
         case 'invite_date_asc':
-          return new Date(a.invite_date).getTime() - new Date(b.invite_date).getTime();
+          return new Date(a.invite_date || 0).getTime() - new Date(b.invite_date || 0).getTime();
         case 'invite_date_desc':
-          return new Date(b.invite_date).getTime() - new Date(a.invite_date).getTime();
+          return new Date(b.invite_date || 0).getTime() - new Date(a.invite_date || 0).getTime();
         case 'team_name_asc':
           return (a.team?.name || '').localeCompare(b.team?.name || '');
         case 'team_name_desc':
           return (b.team?.name || '').localeCompare(a.team?.name || '');
         default:
-          return new Date(b.invite_date).getTime() - new Date(a.invite_date).getTime();
+          return new Date(b.invite_date || 0).getTime() - new Date(a.invite_date || 0).getTime();
       }
     });
 
@@ -97,7 +97,7 @@ export const InviteeList = () => {
         invitee.email || '',
         invitee.phone || '',
         invitee.status || 'invited',
-        format(new Date(invitee.invite_date), 'yyyy-MM-dd'),
+        invitee.invite_date ? format(new Date(invitee.invite_date), 'yyyy-MM-dd') : '',
         invitee.service_date ? format(new Date(invitee.service_date), 'yyyy-MM-dd') : '',
         invitee.inviter?.name || 'Unknown',
         invitee.team?.name || '',
@@ -257,7 +257,7 @@ export const InviteeList = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {format(new Date(invitee.invite_date), 'MMM dd, yyyy')}
+                          {invitee.invite_date ? format(new Date(invitee.invite_date), 'MMM dd, yyyy') : '-'}
                         </TableCell>
                         <TableCell>
                           {invitee.service_date 
