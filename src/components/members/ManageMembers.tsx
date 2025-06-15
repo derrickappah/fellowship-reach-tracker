@@ -35,6 +35,8 @@ export const ManageMembers = () => {
     switch (role) {
       case 'admin': return 'destructive';
       case 'fellowship_leader': return 'default';
+      case 'team_leader': return 'default';
+      case 'team_member': return 'secondary';
       case 'member': return 'secondary';
       default: return 'secondary';
     }

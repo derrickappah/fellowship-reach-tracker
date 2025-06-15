@@ -29,6 +29,10 @@ export const ManageTeams = () => {
         return 'Manage all outreach teams';
       case 'fellowship_leader':
         return 'Manage your fellowship teams';
+      case 'team_leader':
+        return 'Manage your team';
+      case 'team_member':
+        return 'View team you are part of';
       case 'member':
         return 'Manage teams you are part of';
       default:
@@ -44,16 +48,16 @@ export const ManageTeams = () => {
   };
 
   const canEditTeam = (team: any) => {
-    if (user?.role === 'admin') return true;
-    if (user?.role === 'fellowship_leader') return true;
-    if (user?.role === 'member' && (team.leader_id === user.id || isTeamMember(team))) return true;
+    if (!user) return false;
+    if (user.role === 'admin' || user.role === 'fellowship_leader') return true;
+    if (['member', 'team_leader', 'team_member'].includes(user.role) && (team.leader_id === user.id || isTeamMember(team))) return true;
     return false;
   };
 
   const canDeleteTeam = (team: any) => {
-    if (user?.role === 'admin') return true;
-    if (user?.role === 'fellowship_leader') return true;
-    if (user?.role === 'member' && team.leader_id === user.id) return true; // Only team leaders can delete
+    if (!user) return false;
+    if (user.role === 'admin' || user.role === 'fellowship_leader') return true;
+    if (['member', 'team_leader'].includes(user.role) && team.leader_id === user.id) return true; // Only team leaders can delete
     return false;
   };
 
@@ -63,9 +67,10 @@ export const ManageTeams = () => {
 
   // Filter teams based on user permissions
   const filteredTeams = teams.filter(team => {
-    if (user?.role === 'admin') return true;
-    if (user?.role === 'fellowship_leader') return team.fellowship_id === user.fellowship_id;
-    if (user?.role === 'member') {
+    if (!user) return false;
+    if (user.role === 'admin') return true;
+    if (user.role === 'fellowship_leader') return team.fellowship_id === user.fellowship_id;
+    if (['member', 'team_leader', 'team_member'].includes(user.role)) {
       return team.leader_id === user.id || isTeamMember(team);
     }
     return false;
