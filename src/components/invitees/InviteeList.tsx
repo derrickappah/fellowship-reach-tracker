@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -160,18 +161,19 @@ export const InviteeList = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-            <div className="flex flex-col sm:flex-row w-full sm:w-auto items-start sm:items-center gap-4">
-              <div className="relative w-full sm:w-auto">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search invitees..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full sm:w-64 pl-10"
-                />
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:justify-between sm:items-start">
+            <div className="relative w-full sm:w-auto sm:max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search invitees..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2 items-stretch sm:items-end">
+              <div className="flex flex-col sm:flex-row flex-wrap justify-end items-center gap-2">
                 <Select value={filter} onValueChange={setFilter}>
                   <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by status" />
@@ -196,6 +198,11 @@ export const InviteeList = () => {
                     <SelectItem value="team_name_desc">Team (Z-A)</SelectItem>
                   </SelectContent>
                 </Select>
+                <div className="text-sm text-muted-foreground text-left sm:text-right w-full sm:w-auto">
+                  Total: {sortedAndFilteredInvitees.length} invitees
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row flex-wrap justify-end items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -233,13 +240,10 @@ export const InviteeList = () => {
                   </PopoverContent>
                 </Popover>
                 <Button variant="outline" onClick={handleExport}>
-                  <Download />
+                  <Download className="mr-2 h-4 w-4" />
                   Export List
                 </Button>
               </div>
-            </div>
-            <div className="text-sm text-muted-foreground self-end sm:self-auto">
-              Total: {sortedAndFilteredInvitees.length} invitees
             </div>
           </div>
 
@@ -291,7 +295,7 @@ export const InviteeList = () => {
 
                     return (
                       <TableRow key={invitee.id}>
-                        <TableCell className="font-medium">{invitee.name}</TableCell>
+                        <TableCell className="font-medium max-w-[200px] whitespace-normal">{invitee.name}</TableCell>
                         <TableCell>
                           <div className="space-y-1">
                             {invitee.email && (
@@ -371,8 +375,8 @@ export const InviteeList = () => {
           )}
           
           {sortedAndFilteredInvitees.length > 0 && (
-            <div className="mt-4 text-sm text-muted-foreground">
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
                 <div>
                   <span className="font-medium">Invited:</span> {invitees.filter(i => i.status === 'invited').length}
                 </div>
