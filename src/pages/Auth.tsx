@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,8 @@ export const Auth = () => {
   const {
     signIn,
     signUp,
-    user
+    user,
+    loading
   } = useAuth();
   const {
     toast
@@ -26,16 +28,15 @@ export const Auth = () => {
       navigate('/');
     }
   }, [user, navigate]);
-  const [signInData, setSignInData] = useState({
-    email: '',
-    password: ''
-  });
-  const [signUpData, setSignUpData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
