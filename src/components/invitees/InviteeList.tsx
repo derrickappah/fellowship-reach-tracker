@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -6,13 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useInvitees } from '@/hooks/useInvitees';
-import { Trash2, Search, Download } from 'lucide-react';
+import { Trash2, Search, Download, CalendarDays } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { InviteeListItemMobile } from './InviteeListItemMobile';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { formatDateSafe } from '@/lib/utils';
+import { cn, formatDateSafe } from '@/lib/utils';
+import { DateRange } from 'react-day-picker';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
 
 const statusColors = {
   invited: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
@@ -28,6 +31,7 @@ export const InviteeList = () => {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('invite_date_desc');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
@@ -36,16 +40,29 @@ export const InviteeList = () => {
       const statusMatch = filter === 'all' || invitee.status === filter;
   
       const searchTrimmed = searchTerm.trim().toLowerCase();
-      if (!searchTrimmed) {
-        return statusMatch;
-      }
-  
-      const searchMatch =
+      const searchMatch = !searchTrimmed ||
         invitee.name.toLowerCase().includes(searchTrimmed) ||
         (invitee.email || '').toLowerCase().includes(searchTrimmed) ||
         (invitee.phone || '').toLowerCase().includes(searchTrimmed);
   
-      return statusMatch && searchMatch;
+      const dateMatch = (() => {
+        if (!dateRange?.from) return true;
+        if (!invitee.invite_date) return false;
+        
+        const inviteDate = new Date(invitee.invite_date);
+        if (isNaN(inviteDate.getTime())) return false;
+
+        const fromDate = new Date(dateRange.from);
+        fromDate.setHours(0, 0, 0, 0);
+
+        const to = dateRange.to || dateRange.from;
+        const toDate = new Date(to);
+        toDate.setHours(23, 59, 59, 999);
+
+        return inviteDate >= fromDate && inviteDate <= toDate;
+      })();
+
+      return statusMatch && searchMatch && dateMatch;
     });
 
     const safeGetTime = (date: string | null | undefined) => {
@@ -69,7 +86,7 @@ export const InviteeList = () => {
       }
     });
 
-  }, [invitees, filter, searchTerm, sortBy]);
+  }, [invitees, filter, searchTerm, sortBy, dateRange]);
 
   const handleStatusChange = (inviteeId: string, newStatus: string) => {
     updateInviteeStatus(inviteeId, newStatus);
@@ -179,6 +196,42 @@ export const InviteeList = () => {
                     <SelectItem value="team_name_desc">Team (Z-A)</SelectItem>
                   </SelectContent>
                 </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="date"
+                      variant={"outline"}
+                      className={cn(
+                        "w-full sm:w-[260px] justify-start text-left font-normal",
+                        !dateRange && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarDays className="mr-2 h-4 w-4" />
+                      {dateRange?.from ? (
+                        dateRange.to ? (
+                          <>
+                            {format(dateRange.from, "LLL dd, y")} -{" "}
+                            {format(dateRange.to, "LLL dd, y")}
+                          </>
+                        ) : (
+                          format(dateRange.from, "LLL dd, y")
+                        )
+                      ) : (
+                        <span>Pick invite date range</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={dateRange?.from}
+                      selected={dateRange}
+                      onSelect={setDateRange}
+                      numberOfMonths={2}
+                    />
+                  </PopoverContent>
+                </Popover>
                 <Button variant="outline" onClick={handleExport}>
                   <Download />
                   Export List
