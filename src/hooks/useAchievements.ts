@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Achievement, UserAchievement, TeamAchievement } from '@/types/achievements';
@@ -13,9 +12,77 @@ export const useAchievements = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
+  const initializeAchievements = async () => {
+    console.log('Initializing achievements...');
+    
+    // Check if achievements already exist
+    const { data: existingAchievements } = await supabase
+      .from('achievements')
+      .select('*')
+      .limit(1);
+
+    if (existingAchievements && existingAchievements.length > 0) {
+      console.log('Achievements already exist, skipping initialization');
+      return;
+    }
+
+    // Create sample achievements
+    const sampleAchievements = [
+      {
+        name: 'First Invite',
+        description: 'Invite your first person to church',
+        type: 'invitation_milestone',
+        threshold: 1,
+        icon: 'Star',
+        badge_color: 'blue'
+      },
+      {
+        name: 'Growing Network',
+        description: 'Invite 3 people in a month',
+        type: 'invitation_milestone',
+        threshold: 3,
+        icon: 'Trophy',
+        badge_color: 'green'
+      },
+      {
+        name: 'Super Inviter',
+        description: 'Invite 5 people in a month',
+        type: 'invitation_milestone',
+        threshold: 5,
+        icon: 'Award',
+        badge_color: 'gold'
+      },
+      {
+        name: 'Invitation Champion',
+        description: 'Invite 10 people in a month',
+        type: 'invitation_milestone',
+        threshold: 10,
+        icon: 'Trophy',
+        badge_color: 'purple'
+      }
+    ];
+
+    try {
+      const { error } = await supabase
+        .from('achievements')
+        .insert(sampleAchievements);
+
+      if (error) {
+        console.log('Error creating sample achievements:', error);
+      } else {
+        console.log('Sample achievements created successfully');
+      }
+    } catch (error) {
+      console.log('Error initializing achievements:', error);
+    }
+  };
+
   const fetchAchievements = async () => {
     try {
       setLoading(true);
+      
+      // Initialize achievements if none exist
+      await initializeAchievements();
       
       // Fetch all achievements
       const { data: achievementsData, error: achievementsError } = await supabase
@@ -125,6 +192,8 @@ export const useAchievements = () => {
         const eligibleAchievements = achievements.filter(
           achievement => achievement.type === 'invitation_milestone' && achievement.threshold <= monthlyInviteCount
         );
+
+        console.log('Eligible achievements:', eligibleAchievements);
 
         for (const achievement of eligibleAchievements) {
           // Check if user already has this achievement for this month
