@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Team, TeamInsert } from '@/types/supabase';
@@ -20,7 +21,7 @@ export const useTeams = () => {
         .select(`
           *,
           fellowship:fellowships(name),
-          leader:profiles!teams_leader_id_fkey(name)
+          leader:profiles(name)
         `)
         .order('created_at', { ascending: false });
 
@@ -38,8 +39,16 @@ export const useTeams = () => {
 
       if (error) throw error;
       
-      setTeams(data || []);
+      // Transform the data to ensure proper typing
+      const transformedTeams = (data || []).map(team => ({
+        ...team,
+        fellowship: team.fellowship || null,
+        leader: team.leader || null
+      }));
+      
+      setTeams(transformedTeams);
     } catch (error: any) {
+      console.log('Error fetching teams:', error);
       toast({
         title: "Error fetching teams",
         description: error.message,
